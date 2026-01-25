@@ -66,9 +66,9 @@ Please keep farms self-contained and follow the existing structure so they integ
 
 ## 📁 Folder Structure
 
-The `AscEnd` folder **must** be placed inside the `scripts` directory.
+The `AscEnd` folder **must** be placed inside the `Scripts` directory.
 
-<img src="https://ik.imagekit.io/qmaxfxfcd7/folder-contents.png" width="35%" />
+<img src="https://raw.githubusercontent.com/BaCoaxx/AscEnd/refs/heads/main/AscEnd/nudes/dirtree.png" width="25%" />
 
 ---
 
