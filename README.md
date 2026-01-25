@@ -1,4 +1,5 @@
-<h1 align="center">AscEnd - GwAu3 Pre-Searing Bot</h1>
+<h1 align="center">AscEnd</h1>
+<h2 align="center">GwAu3 Pre-Searing Bot</h2>
 
 <p align="center">
   <img src="https://img.shields.io/badge/AscEnd-LDoA-brightgreen?style=for-the-badge&label=AscEnd" />
