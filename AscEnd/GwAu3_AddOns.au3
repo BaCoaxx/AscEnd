@@ -6,6 +6,10 @@ Func ComputeDistance($aX1, $aY1, $aX2, $aY2)
 	Return Sqrt(($aX1 - $aX2) ^ 2 + ($aY1 - $aY2) ^ 2)
 EndFunc   ;==>ComputeDistance
 
+Func ATan2($y, $x)
+    Return ATan($y / $x) + (($x < 0) ? (($y < 0) ? -3.14159265358979 : 3.14159265358979) : 0)
+EndFunc   ;==>ATan2
+
 ;~ Description: Returns the distance between two agents.
 Func GetDistance($aAgent1 = -1, $aAgent2 = -2)
 	If IsDllStruct($aAgent1) = 0 Then $aAgent1 = Agent_GetAgentPtr($aAgent1)
@@ -396,6 +400,26 @@ Func EnemyFilter($aAgentPtr)
     Return True
 EndFunc	;==>EnemyFilter
 
+Func CharrFilter($aAgentPtr)
+
+	If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 3 Then Return False
+    If Agent_GetAgentInfo($aAgentPtr, 'HP') <= 0 Then Return False
+    If Agent_GetAgentInfo($aAgentPtr, 'IsDead') > 0 Then Return False
+
+    Local $ModelID = Agent_GetAgentInfo($aAgentPtr, 'PlayerNumber')
+    Local $CharrModelIDs[6] = [1640, 1643, 1648, 1652, 1658, 1662] ; Array of Charr model IDs
+    Local $IsCharr = False
+    For $i = 0 To UBound($CharrModelIDs) - 1
+        If $ModelID == $CharrModelIDs[$i] Then
+            $IsCharr = True
+            ExitLoop
+        EndIf
+    Next
+    If Not $IsCharr Then Return False
+
+    Return True
+EndFunc   ;==>CharrFilter
+
 Func MantisMenderFilter($aAgentPtr)
 
 	If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 3 Then Return False
@@ -457,6 +481,10 @@ Func GetNumberOfFoesInRangeOfAgent($aAgentID = -2, $aRange = 1320, $aType = $GC_
 	Return GetAgents($aAgentID, $aRange, $aType, $aReturnMode, $aCustomFilter)
 EndFunc	;==>GetNumberOfFoesInRangeOfAgent
 
+Func GetNumberOfCharrInRangeOfAgent($aAgentID = -2, $aRange = 1320, $aType = $GC_I_AGENT_TYPE_LIVING, $aReturnMode = 0, $aCustomFilter = "CharrFilter")
+	Return GetAgents($aAgentID, $aRange, $aType, $aReturnMode, $aCustomFilter)
+EndFunc	;==>GetNumberOfCharrInRangeOfAgent
+
 Func GetNumberOfMantisMendersInRangeOfAgent($aAgentID = -2, $aRange = 1320, $aType = $GC_I_AGENT_TYPE_LIVING, $aReturnMode = 0, $aCustomFilter = "MantisMenderFilter")
 	Return GetAgents($aAgentID, $aRange, $aType, $aReturnMode, $aCustomFilter)
 EndFunc	;==>GetNumberOfMantisMendersInRangeOfAgent
@@ -472,6 +500,36 @@ EndFunc	;==>GetNumberOfWardenSeasonsInRangeOfAgent
 Func GetNearestNPCToAgent($aAgentID = -2, $aRange = 1320, $aType = $GC_I_AGENT_TYPE_LIVING, $aReturnMode = 1, $aCustomFilter = "NPCFilter")
 	Return GetAgents($aAgentID, $aRange, $aType, $aReturnMode, $aCustomFilter)
 EndFunc	;==>GetNearestNPCToAgent
+
+Func GetFilteredAgentsInRange($aRadius, $aFilterFunc = "")
+    Local $lAgentArray = Agent_GetAgentArray($GC_I_AGENT_TYPE_LIVING)
+    If Not IsArray($lAgentArray) Or $lAgentArray[0] = 0 Then Return 0
+
+    Local $myX = Agent_GetAgentInfo(-2, "X")
+    Local $myY = Agent_GetAgentInfo(-2, "Y")
+
+    Local $result[0]
+    For $i = 1 To $lAgentArray[0]
+        Local $lAgentPtr = $lAgentArray[$i]
+
+        ; Filters the agents
+        If $aFilterFunc <> "" Then
+            If Not Call($aFilterFunc, $lAgentPtr) Then ContinueLoop
+        EndIf
+
+        ; Range check to see whether agents are outside of the radius
+        Local $tempax = Agent_GetAgentInfo($lAgentPtr, "X")
+        Local $tempay = Agent_GetAgentInfo($lAgentPtr, "Y")
+        Local $dist = Sqrt(($tempax - $myX) ^ 2 + ($tempay - $myY) ^ 2)
+        If $dist > $aRadius Then ContinueLoop
+
+        ; Append to an array
+        ReDim $result[UBound($result) + 1]
+        $result[UBound($result) - 1] = $lAgentPtr
+    Next
+
+    Return $result
+EndFunc   ;==>GetFilteredAgentsInRange
 
 Func GetMemberAgentID($aPartyMember)
     If $aPartyMember < 1 Then Return 0

@@ -21,7 +21,7 @@ Global $CharrPath[7][2] = [ _
 ]
 
 Global $CharrState
-Global $desiredDistance = 960
+Global $desiredDistance = 900
 Global $hasRun = False
 
 Func Farm_CharrAtTheGate()
@@ -108,8 +108,8 @@ Func CheckQuest()
 EndFunc
 
 Func ExitAscalon()
-    MoveTo(7402, 5599)
-    Map_Move(7310, 5500)
+    MoveTo(7630, 5544)
+    Map_Move(6985, 4939)
     Map_WaitMapLoading(146, 1)
     Sleep(1000)
 EndFunc
@@ -121,12 +121,9 @@ Func CharrAtGate()
     UseSummoningStone()
     RunToCharr($CharrPath)
     Out("Come here you furry bastards!")
-
-    Local $targetAgent, $currentDistance, $targetX, $targetY
-    Local $myX, $myY, $angle, $newX, $newY
     
-    Local $tolerance = 120
-    Local $adjustFactor = 0.6
+    Local $tolerance = 140
+    Local $adjustFactor = 0.4
 
     While 1
         If GetPartyDead() Then
@@ -141,32 +138,82 @@ Func CharrAtGate()
             Out("I regret everything that led to this fur-related emergency!")
             UpdateStats()
             ExitLoop
-        ElseIf GetNumberOfFoesInRangeOfAgent(-2, 3000) <= 1 Then
+        ElseIf GetNumberOfCharrInRangeOfAgent(-2, 3500) <= 1 Then
             Out("Run complete. Restarting...")
             UpdateStats()
             ExitLoop
         EndIf
 
-        $targetAgent = Agent_TargetNearestEnemy(2800)
-        $currentDistance = GetDistance($targetAgent, -2)
-        
-        If Abs($currentDistance - $desiredDistance) > $tolerance Then
+        Local $charrArray = GetFilteredAgentsInRange(3500, "CharrFilter")
+
+        If IsArray($charrArray) And UBound($charrArray) >= 2 Then
+            ; We have at least 2 Charr in range
+            Local $targetAgent1 = $charrArray[0] ; Closest
+            Local $targetAgent2 = $charrArray[1] ; Second closest
             
-            $targetX = Agent_GetAgentInfo($targetAgent, "X")
-            $targetY = Agent_GetAgentInfo($targetAgent, "Y")
+            Local $distance1 = GetDistance($targetAgent1, -2)
+            Local $distance2 = GetDistance($targetAgent2, -2)
             
-            $myX = Agent_GetAgentInfo(-2, "X")
-            $myY = Agent_GetAgentInfo(-2, "Y")
+            ; Determine which enemy is closest
+            Local $closestAgent = ($distance1 < $distance2) ? $targetAgent1 : $targetAgent2
+            Local $closestDistance = ($distance1 < $distance2) ? $distance1 : $distance2
             
-            $angle = ATan2($targetY - $myY, $targetX - $myX)
+            ; Only move if we're outside tolerance range of the closest enemy
+            If Abs($closestDistance - $desiredDistance) > $tolerance Then
+                ; Get positions
+                Local $target1X = Agent_GetAgentInfo($targetAgent1, "X")
+                Local $target1Y = Agent_GetAgentInfo($targetAgent1, "Y")
+                Local $target2X = Agent_GetAgentInfo($targetAgent2, "X")
+                Local $target2Y = Agent_GetAgentInfo($targetAgent2, "Y")
+                Local $myX = Agent_GetAgentInfo(-2, "X")
+                Local $myY = Agent_GetAgentInfo(-2, "Y")
+                
+                ; Calculate midpoint between the two enemies
+                Local $midX = ($target1X + $target2X) / 2
+                Local $midY = ($target1Y + $target2Y) / 2
+                
+                ; Calculate angle from closest enemy to your position
+                Local $closestX = Agent_GetAgentInfo($closestAgent, "X")
+                Local $closestY = Agent_GetAgentInfo($closestAgent, "Y")
+                Local $angle = ATan2($myY - $closestY, $myX - $closestX)
+                
+                ; Position yourself at desired distance from the closest enemy
+                Local $idealX = $closestX + ($desiredDistance * Cos($angle))
+                Local $idealY = $closestY + ($desiredDistance * Sin($angle))
+                
+                ; But bias toward the midpoint to keep both in range
+                ; 60% toward ideal position from closest, 40% toward midpoint
+                Local $newX = ($idealX * 0.8) + ($midX * 0.2)
+                Local $newY = ($idealY * 0.8) + ($midY * 0.2)
+                
+                ; Apply smooth adjustment
+                $newX = $myX + ($newX - $myX) * $adjustFactor
+                $newY = $myY + ($newY - $myY) * $adjustFactor
+                
+                Map_Move($newX, $newY)
+            EndIf
+        ElseIf IsArray($charrArray) And UBound($charrArray) >= 1 Then
+            ; Only one Charr in range, use original single-target logic
+            Local $targetAgent1 = $charrArray[0]
+            Local $currentDistance = GetDistance($targetAgent1, -2)
             
-            $newX = $targetX - ($desiredDistance * Cos($angle))
-            $newY = $targetY - ($desiredDistance * Sin($angle))
-            
-            $newX = $myX + ($newX - $myX) * $adjustFactor
-            $newY = $myY + ($newY - $myY) * $adjustFactor
-            
-            Map_Move($newX, $newY)
+            If Abs($currentDistance - $desiredDistance) > $tolerance Then
+                Local $targetX = Agent_GetAgentInfo($targetAgent1, "X")
+                Local $targetY = Agent_GetAgentInfo($targetAgent1, "Y")
+                
+                Local $myX = Agent_GetAgentInfo(-2, "X")
+                Local $myY = Agent_GetAgentInfo(-2, "Y")
+                
+                Local $angle = ATan2($targetY - $myY, $targetX - $myX)
+                
+                Local $newX = $targetX - ($desiredDistance * Cos($angle))
+                Local $newY = $targetY - ($desiredDistance * Sin($angle))
+                
+                $newX = $myX + ($newX - $myX) * $adjustFactor
+                $newY = $myY + ($newY - $myY) * $adjustFactor
+                
+                Map_Move($newX, $newY)
+            EndIf
         EndIf
         Other_RndSleep(250)
     WEnd
@@ -177,8 +224,4 @@ Func RunToCharr($g_ai2_RunPath)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
         MoveTo($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1])
     Next
-EndFunc
-
-Func ATan2($y, $x)
-    Return ATan($y / $x) + (($x < 0) ? (($y < 0) ? -3.14159265358979 : 3.14159265358979) : 0)
 EndFunc
