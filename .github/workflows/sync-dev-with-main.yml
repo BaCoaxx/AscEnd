@@ -27,20 +27,20 @@ jobs:
       - name: Sync dev branch with main
         run: |
           echo "PR #${{ github.event.pull_request.number }} was merged into main"
-          echo "Syncing dev branch with main..."
+          echo "Syncing Dev branch with main..."
           
           # Fetch all branches
           git fetch origin main
-          git fetch origin dev
+          git fetch origin Dev
           
           # Checkout dev branch
-          git checkout dev
+          git checkout Dev
           
-          # Merge main into dev
-          git merge origin/main --no-edit -m "Auto-sync dev with main after PR #${{ github.event.pull_request.number }}"
+          # Merge main into Dev
+          git merge origin/main --no-edit -m "Auto-sync Dev with main after PR #${{ github.event.pull_request.number }}"
           
           # Push changes
-          git push origin dev
+          git push origin Dev
           
           echo "✓ Dev branch synced successfully!"
       
