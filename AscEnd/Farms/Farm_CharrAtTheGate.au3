@@ -90,6 +90,7 @@ Func CheckQuest()
         Ui_Dialog(0x802E01)
         Other_RndSleep(500)
 
+        Quest_ActiveQuest(0x2E)
         $CharrState = Quest_GetQuestInfo(0x2E, "LogState")
 
         If $CharrState = 1 Then
