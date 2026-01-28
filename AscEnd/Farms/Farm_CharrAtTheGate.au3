@@ -54,6 +54,7 @@ Func CheckQuest()
     Sleep(2000)
 
     Quest_ActiveQuest(0x2E)
+    Sleep(500)
     $CharrState = Quest_GetQuestInfo(0x2E, "LogState")
 
     If $CharrState = 1 Then
@@ -89,9 +90,10 @@ Func CheckQuest()
         Agent_GoNPC(GetNearestNPCToAgent(-2))
         Other_RndSleep(500)
         Ui_Dialog(0x802E01)
-        Other_RndSleep(2000)
+        Other_RndSleep(1000)
 
         Quest_ActiveQuest(0x2E)
+        Sleep(500)
         $CharrState = Quest_GetQuestInfo(0x2E, "LogState")
 
         If $CharrState = 1 Then
