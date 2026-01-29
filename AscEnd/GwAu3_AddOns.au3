@@ -1489,6 +1489,7 @@ Func CanPreSell($aItemPtr)
 EndFunc ;==> CanPreSell
 
 Func CanSell($aItem)
+	Local $IsDye = IsDye($aItem)
 	Local $IsPurple = IsPurple($aItem)
 	Local $IsPreCollectable = IsPreCollectable($aItem)
 	Local $RareSkin = IsRareSkin($aItem)
@@ -1510,7 +1511,12 @@ Func CanSell($aItem)
 	Local $IsEotnAnniSkin = IsEotnAnniSkin($aItem)
 	Local $IsAnyCampAnniSkin = IsAnyCampAnniSkin($aItem)
   
-	Switch $IsPurple
+	Switch $IsDye
+	Case True
+	   Return False ; Is Black or White Dye
+	EndSwitch
+
+ Switch $IsPurple
 	Case True
 	   Return False ; Is purple
 	EndSwitch
@@ -1605,6 +1611,19 @@ Func CanSell($aItem)
 #EndRegion
 
 #Region Items
+Func IsDye($aItem)
+	Local $lModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
+	Local $aExtraID = Item_GetItemInfoByPtr($aItem, "ExtraID")
+	
+	If $lModelID <> $ITEM_ID_Dyes Then Return False
+	
+	If $aExtraID == $ITEM_ExtraID_BlackDye Or $aExtraID == $ITEM_ExtraID_WhiteDye Then
+		Return True
+	EndIf
+	
+	Return False
+EndFunc ;==> IsDye
+
 Func IsPurple($aItem)
 	Local $lRarity = Item_GetItemInfoByPtr($aItem, "Rarity")
 	
