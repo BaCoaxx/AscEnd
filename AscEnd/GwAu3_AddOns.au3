@@ -1516,7 +1516,7 @@ Func CanSell($aItem)
 	   Return False ; Is Black or White Dye
 	EndSwitch
 
- Switch $IsPurple
+	Switch $IsPurple
 	Case True
 	   Return False ; Is purple
 	EndSwitch
