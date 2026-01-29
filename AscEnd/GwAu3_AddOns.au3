@@ -1489,6 +1489,7 @@ Func CanPreSell($aItemPtr)
 EndFunc ;==> CanPreSell
 
 Func CanSell($aItem)
+	Local $IsDye = IsDye($aItem)
 	Local $IsPurple = IsPurple($aItem)
 	Local $IsPreCollectable = IsPreCollectable($aItem)
 	Local $RareSkin = IsRareSkin($aItem)
@@ -1510,7 +1511,12 @@ Func CanSell($aItem)
 	Local $IsEotnAnniSkin = IsEotnAnniSkin($aItem)
 	Local $IsAnyCampAnniSkin = IsAnyCampAnniSkin($aItem)
   
-	Switch $IsPurple
+	Switch $IsDye
+	Case True
+	   Return False ; Is Black or White Dye
+	EndSwitch
+
+ Switch $IsPurple
 	Case True
 	   Return False ; Is purple
 	EndSwitch
