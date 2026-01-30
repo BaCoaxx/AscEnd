@@ -688,7 +688,7 @@ Func CanPickUp($aItemPtr)
 		If (($aExtraID == $ITEM_ExtraID_BlackDye) Or ($aExtraID == $ITEM_ExtraID_WhiteDye)) Then ; only pick white and black ones
 			Return True
 		EndIf
-		Return True ; pick all dyes
+		Return False ; pick all dyes
 	ElseIf $lRarity == $RARITY_Gold Then ; gold items
 		Return True
 	ElseIf $lRarity == $RARITY_Purple Then ; purple items
