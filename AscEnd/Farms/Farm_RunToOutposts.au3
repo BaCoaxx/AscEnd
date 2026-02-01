@@ -145,21 +145,25 @@ Func Farm_RunToOutposts()
     If Not $hasBoners Then GetBoners()
     
     Sleep(2000)
-    Out("Running to outposts.")
+    LogInfo("Running to outposts.")
     RunOutpost()
-    Out("Bot will now close...")
-    Sleep(5000)
-    Exit
+    LogStatus("Bot will now pause.")
+    $BotRunning = False
+    ResetStart()
+    Return
 EndFunc
 
 Func RunOutpost()
-    Out("Let's go for a stroll.")
+    LogInfo("Let's go for a stroll.")
     
     ; Run each outpost until we get there
     Local $outposts = ["Ashford", "Barradin", "Ranik", "Foibles"]
     For $outpost In $outposts
         Local $success = False
         While Not $success
+
+            If Not $BotRunning Then ResetStart() Return
+
             Switch $outpost
                 Case "Ashford"
                     $success = UnlockAshford()
@@ -172,22 +176,22 @@ Func RunOutpost()
             EndSwitch
             
             If Not $success Then
-                Out("Failed to unlock " & $outpost & ". Retrying...")
+                LogError("Failed to unlock " & $outpost & ". Retrying...")
                 Sleep(2000)
             EndIf
         WEnd
     Next
     
-    Out("All outposts, brutally unlocked!!")
+    LogWarn("All outposts, brutally unlocked!!")
 EndFunc
 
 Func UnlockAshford()
     If Map_IsMapUnlocked(164) Then
-        Out("Ashford Abbey is already unlocked.")
+        LogError("Ashford Abbey is already unlocked.")
         Return True
     EndIf
     
-    Out("Heading to Ashford Abbey..")
+    LogInfo("Heading to Ashford Abbey..")
     If Map_GetMapID() <> 148 Then Map_RndTravel(148)
     ExitAscalon()
     $RunTime = TimerInit()
@@ -201,7 +205,7 @@ Func UnlockAshford()
     Sleep(1000)
     
     If Map_GetMapID() = 164 Then
-        Out("Ashford Abbey unlocked.")
+        LogWarn("Ashford Abbey unlocked.")
         Return True
     EndIf
     
@@ -210,11 +214,11 @@ EndFunc
 
 Func UnlockBarradin()
     If Map_IsMapUnlocked(163) Then
-        Out("Barradin Estate is already unlocked.")
+        LogError("Barradin Estate is already unlocked.")
         Return True
     EndIf
     
-    Out("Heading to Barradin Estate..")
+    LogInfo("Heading to Barradin Estate..")
     If Map_GetMapID() <> 148 Then Map_RndTravel(148)
     ExitAscalon()
     $RunTime = TimerInit()
@@ -235,7 +239,7 @@ Func UnlockBarradin()
     Sleep(1000)
     
     If Map_GetMapID() = 163 Then
-        Out("Barradin Estate unlocked.")
+        LogWarn("Barradin Estate unlocked.")
         Return True
     EndIf
     
@@ -244,11 +248,11 @@ EndFunc
 
 Func UnlockRanik()
     If Map_IsMapUnlocked(166) Then
-        Out("Fort Ranik is already unlocked.")
+        LogError("Fort Ranik is already unlocked.")
         Return True
     EndIf
     
-    Out("Heading to Fort Ranik..")
+    LogInfo("Heading to Fort Ranik..")
     If Map_GetMapID() <> 148 Then Map_RndTravel(148)
     ExitAscalon()
     $RunTime = TimerInit()
@@ -268,7 +272,7 @@ Func UnlockRanik()
     Sleep(1000)
     
     If Map_GetMapID() = 166 Then
-        Out("Fort Ranik unlocked.")
+        LogWarn("Fort Ranik unlocked.")
         Return True
     EndIf
     
@@ -277,11 +281,11 @@ EndFunc
 
 Func UnlockFoibles()
     If Map_IsMapUnlocked(167) Then
-        Out("Foibles Fair is already unlocked.")
+        LogError("Foibles Fair is already unlocked.")
         Return True
     EndIf
     
-    Out("Heading to Foibles Fair..")
+    LogInfo("Heading to Foibles Fair..")
     If Map_GetMapID() <> 164 Then Map_RndTravel(164)
     ExitAshford()
     $RunTime = TimerInit()
@@ -302,7 +306,7 @@ Func UnlockFoibles()
     Sleep(1000)
     
     If Map_GetMapID() = 167 Then
-        Out("Foibles Fair unlocked.")
+        LogWarn("Foibles Fair unlocked.")
         Return True
     EndIf
     
@@ -313,7 +317,7 @@ Func RunToMove($g_ai2_RunPath)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
         MoveTo($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1])
         If SurvivorMode() Or GetPartyDead() Then
-            Out("Party died or survivor mode triggered during run!")
+            LogError("Party died or survivor mode triggered during run!")
             Return False
         EndIf
     Next

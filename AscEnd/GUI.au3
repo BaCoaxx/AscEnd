@@ -150,56 +150,48 @@ GUISetState(@SW_SHOW)
 Func GuiButtonHandler()
     Switch @GUI_CtrlId
         Case $GUIStartButton
-            If Not $Bot_Core_Initialized Then
-                InitializeBot()
+            If Not $BotRunning Then
+                If Not $Bot_Core_Initialized Then
+                    InitializeBot()
+                    WinSetTitle($MainGui, "", player_GetCharname())
+                    GUICtrlSetState($GUINameCombo, $GUI_DISABLE)
+                    GUICtrlSetState($GUIRefreshButton, $GUI_DISABLE)
+                    $Bot_Core_Initialized = True
+                EndIf
+
+                $options = GetSelectedOptions()
+                GUICtrlSetState($GUIStartButton, $GUI_DISABLE)
+                GUICtrlSetState($FarmCombo, $GUI_DISABLE)
+                GUICtrlSetState($GUI_CBSurvivor, $GUI_DISABLE)
+                GUICtrlSetState($GUI_CBPurple, $GUI_DISABLE)
+                GUICtrlSetState($GUI_CBCollector, $GUI_DISABLE)
+                GUICtrlSetState($GUI_CB19Stop, $GUI_DISABLE)
+
+                $Survivor = BitAND($options, $OPT_SURVIVOR)
+                LogStatus($Survivor ? "Survivor mode enabled." : "Survivor mode disabled.")
+                $Purple = BitAND($options, $OPT_PURPLE)
+                LogStatus($Purple ? "Keeping Purples." : "Discarding Purples.")
+                $Collector = BitAND($options, $OPT_COLLECTOR)
+                LogStatus($Collector ? "Keeping Collectors materials." : "Discarding Collectors materials.")
+                $_19Stop = BitAND($options, $OPT_19STOP)
+                LogStatus($_19Stop ? "Stopping at level 19, only applicable to hamnet." : "Sending to level 20.")
+
+                GUICtrlSetData($GUIStartButton, "Stop")
+                GUICtrlSetState($GUIStartButton, $GUI_ENABLE)
+                $BotRunning = True
+
+            ElseIf $BotRunning Then
+                GUICtrlSetState($FarmCombo, $GUI_ENABLE)
+                GUICtrlSetState($GUI_CBSurvivor, $GUI_ENABLE)
+                GUICtrlSetState($GUI_CBPurple, $GUI_ENABLE)
+                GUICtrlSetState($GUI_CBCollector, $GUI_ENABLE)
+                GUICtrlSetState($GUI_CB19Stop, $GUI_ENABLE)
+                
+                GUICTrlSetState($GUIStartButton, $GUI_DISABLE)
+                GUICtrlSetData($GUIStartButton, "Pausing...")
+                LogStatus("Bot will pause, please wait..")
+                $BotRunning = False
             EndIf
-
-            $options = GetSelectedOptions()
-
-            GUICtrlSetState($GUIStartButton, $GUI_DISABLE)
-            GUICtrlSetState($GUIRefreshButton, $GUI_DISABLE)
-            GUICtrlSetState($GUINameCombo, $GUI_DISABLE)
-            GUICtrlSetState($FarmCombo, $GUI_DISABLE)
-            GUICtrlSetState($GUI_CBSurvivor, $GUI_DISABLE)
-            GUICtrlSetState($GUI_CBPurple, $GUI_DISABLE)
-            GUICtrlSetState($GUI_CBCollector, $GUI_DISABLE)
-            GUICtrlSetState($GUI_CB19Stop, $GUI_DISABLE)
-            
-            If BitAND($options, $OPT_SURVIVOR) Then
-                Out("Survivor mode enabled.")
-                $Survivor = True
-            Else
-                Out("Survivor mode disabled.")
-                $Survivor = False
-            EndIf
-
-            If BitAND($options, $OPT_PURPLE) Then
-                Out("Keeping Purples.")
-                $Purple = True
-            Else
-                Out("Discarding Purples.")
-                $Purple = False
-            EndIf
-
-            If BitAND($options, $OPT_COLLECTOR) Then
-                Out("Keeping Collectors materials.")
-                $Collector = True
-            Else
-                Out("Discarding Collectors materials.")
-                $Collector = False
-            EndIf
-
-            If BitAND($options, $OPT_19STOP) Then
-                Out("Stopping at level 19, only applicable to hamnet.")
-                $_19Stop = True
-            Else
-                Out("Sending to level 20.")
-                $_19Stop = False
-            EndIf
-
-            WinSetTitle($MainGui, "", player_GetCharname())
-
-            $BotRunning = True
 
         Case $GUIRefreshButton
             GUICtrlSetData($GUINameCombo, "")
@@ -249,4 +241,11 @@ EndFunc
 
 Func UpdateTotalTime()
     GUICtrlSetData($TotalTimeLbl, FormatElapsedTime($TotalTime))
+EndFunc
+
+Func ResetStart()
+    GUICtrlSetState($GUIStartButton, $GUI_ENABLE)
+    GUICtrlSetData($GUIStartButton, "Start")
+    LogStatus("Bot paused.")
+    Sleep(500)
 EndFunc

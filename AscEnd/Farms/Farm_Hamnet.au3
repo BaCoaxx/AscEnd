@@ -30,6 +30,8 @@ Func Farm_Hamnet()
         HamnetSetup()
 
         While CountSlotS() > 1
+            If Not $BotRunning Then ResetStart() Return
+
             Hamnet()
         WEnd
     WEnd
@@ -37,15 +39,15 @@ EndFunc
 
 Func HamnetSetup()
     If Map_GetMapID() = 165 Then
-        Out("We are in Foible's Fair. Starting the bandit farm...")
+        LogInfo("We are in Foible's Fair. Starting the bandit farm...")
     ElseIf Map_GetMapID() <> 165 And Map_IsMapUnlocked(165) Then
-        Out("We are not in Foible's Fair. Teleporting to Foible's Fair...")
+        LogInfo("We are not in Foible's Fair. Teleporting to Foible's Fair...")
         Map_RndTravel(165)
         Sleep(2000)
     ElseIf Not Map_IsMapUnlocked(165) Then
-        Out("Foible's Fair is not unlocked on this character, lets try to run there...")
+        LogWarn("Foible's Fair is not unlocked on this character, lets try to run there...")
         While Not UnlockFoibles()
-            Out("Failed to unlock Foible's Fair.  Retrying...")
+            LogError("Failed to unlock Foible's Fair.  Retrying...")
             Sleep(2000)
         WEnd
     EndIf
@@ -54,19 +56,19 @@ Func HamnetSetup()
     $HamnetState = Quest_GetQuestInfo(0x4A1, "LogState")
 
     If $HamnetState = 1 Then
-        Out("Lets kill some Banditos!")
+        LogInfo("Lets kill some Banditos!")
     ElseIf $HamnetState = 0 Then
-        Out("We don't have the Hamnet quest!")
-        Out("Check to see when it's next available.")
-        Out("Bot will now close...")
-        Sleep(5000)
-        Exit
+        LogInfo("We don't have the Hamnet quest!")
+        LogWarn("Check to see when it's next available.")
+        LogStatus("Bot will now pause.")
+        $BotRunning = False
+        Return
     ElseIf $HamnetState = 3 Then
-        Out("Hamnet quest is completed!")
-        Out("Cannot proceed with the farm.")
-        Out("Bot will now close...")
-        Sleep(5000)
-        Exit
+        LogInfo("Hamnet quest is completed!")
+        LogError("Cannot proceed with the farm.")
+        LogStatus("Bot will now pause.")
+        $BotRunning = False
+        Return
     EndIf
 
     Sleep(1000)
@@ -90,14 +92,14 @@ Func Hamnet()
     $currLevel = Agent_GetAgentInfo(-2, "Level")
     
     If $_19Stop And $currLevel >= 19 Then
-        Out("Reached level 19, stopping the farm.")
-        Out("Bot will now close...")
-        Sleep(5000)
-        Exit
+        LogWarn("Reached level 19, stopping the farm.")
+        LogStatus("Bot will now pause.")
+        $BotRunning = False
+        Return
     EndIf
 
     If $currLevel > $oldLevel Then
-        Out("You are now level " & $currLevel & "!")
+        LogWarn("You are now level " & $currLevel & "!")
         Sleep(750)
         $oldLevel = $currLevel
     EndIf
@@ -111,14 +113,14 @@ Func Hamnet()
 
     Local $lDeadlock = TimerInit()
 
-    While TimerDiff($lDeadlock) < 600000 ; 10 minute deadlock
-        Out("Got imps? ")
+    While TimerDiff($lDeadlock) < 300000 ; 5 minute deadlock
+        LogInfo("Got imps? ")
         Sleep(250)
         UseSummoningStone()
         Sleep(250)
         RunToHamnet($HamnetPath)
         Other_RndSleep(250)
-        Out("Run complete. Restarting...")
+        LogInfo("Run complete. Restarting...")
         UpdateStats()
         Other_RndSleep(250)
         Resign()
@@ -130,15 +132,15 @@ Func Hamnet()
         ExitLoop
     WEnd
 
-    If TimerDiff($lDeadlock) >= 600000 Then
-        Out("DEADLOCK DETECTED: Run exceeded 10 minutes!")
+    If TimerDiff($lDeadlock) >= 300000 Then
+        LogError("DEADLOCK DETECTED: Run exceeded 5 minutes!")
         Resign()
         Sleep(5000)
         Map_ReturnToOutpost()
         Sleep(1000)
         Map_WaitMapLoading(165, 0)
         Sleep(1000)
-        Out("Recovered from deadlock, restarting...")
+        LogWarn("Recovered from deadlock, restarting...")
     EndIf
     
     $memClear += 1
@@ -148,20 +150,20 @@ Func RunToHamnet($g_ai2_RunPath)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
         AggroMoveToExFilter($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 2500, "BanditFilter")
         If SurvivorMode() Then
-            Out("Survivor mode activated!")
+            LogError("Survivor mode activated!")
             Return
         EndIf
     Next
 EndFunc
 
-Func BanditFilter($aAgentPtr) ; Custom filter for bandits in the Hamnet farm.
+Func BanditFilter($aAgentPtr) ; Custom filter for bandits in pre.
 
 	If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 3 Then Return False
     If Agent_GetAgentInfo($aAgentPtr, 'HP') <= 0 Then Return False
     If Agent_GetAgentInfo($aAgentPtr, 'IsDead') > 0 Then Return False
 
     Local $ModelID = Agent_GetAgentInfo($aAgentPtr, 'PlayerNumber')
-    Local $BanditModelIDs[6] = [7824, 7825, 7839, 7840, 7857, 7858] ; Array of bandit model IDs
+    Local $BanditModelIDs[10] = [1346, 1420, 1421, 1422, 7824, 7825, 7839, 7840, 7857, 7858] ; Array of bandit model IDs
     Local $IsBandit = False
     For $i = 0 To UBound($BanditModelIDs) - 1
         If $ModelID == $BanditModelIDs[$i] Then

@@ -6,7 +6,7 @@
 	 Author:         Coaxx
 
 	 Script Function:
-		Unnatural Seed Farm
+		Unnatural Seed Farm - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
@@ -41,6 +41,8 @@ Func Farm_UnnaturalSeeds()
         UnnaturalSeedSetup()
 
         While CountSlots() > 1
+            If Not $BotRunning Then ResetStart() Return
+
             UnnaturalSeed()
         WEnd
     WEnd
@@ -48,15 +50,15 @@ EndFunc
 
 Func UnnaturalSeedSetup()
     If Map_GetMapID() = 166 Then
-        Out("We are in Fort Ranik. Starting the Unnatural Seeds farm...")
+        LogInfo("We are in Fort Ranik. Starting the Unnatural Seeds farm...")
     ElseIf Map_GetMapID() <> 166 And Map_IsMapUnlocked(166) Then
-        Out("We are not in Fort Ranik. Teleporting to Fort Ranik...")
+        LogInfo("We are not in Fort Ranik. Teleporting to Fort Ranik...")
         Map_RndTravel(166)
         Sleep(2000)
     ElseIf Not Map_IsMapUnlocked(166) Then
-        Out("Fort Ranik is not unlocked on this character, lets try to run there...")
+        LogWarn("Fort Ranik is not unlocked on this character, lets try to run there...")
         While Not UnlockRanik()
-            Out("Failed to unlock Fort Ranik.  Retrying...")
+            LogError("Failed to unlock Fort Ranik.  Retrying...")
             Sleep(2000)
         WEnd
     EndIf
@@ -67,14 +69,14 @@ Func UnnaturalSeedSetup()
         
     Select
         Case $sp1 <= 2400
-            Out("Little high, little low.")
+            LogInfo("Little high, little low.")
             MoveTo(22865, 11380)
             MoveTo(22958, 11149)
         Case $sp1 > 2400 And $sp1 <= 4200
-            Out("Anywhere the wind blows.")
+            LogInfo("Anywhere the wind blows.")
             MoveTo(23038, 11847)
         Case $sp1 > 4200
-            Out("King Adelbern, doesn't even matter.")
+            LogInfo("King Adelbern, doesn't even matter.")
             MoveTo(23186, 13527)
             MoveTo(23038, 11847)
         EndSelect
@@ -101,7 +103,7 @@ Func UnnaturalSeed()
     RunTo($SeedsPath)
     RunToSeeds($SeedsFoePath)
     Other_RndSleep(250)
-    Out("Run complete. Restarting...")
+    LogInfo("Run complete. Restarting...")
     UpdateStats()
     Other_RndSleep(250)
     Resign()
@@ -118,7 +120,7 @@ Func RunToSeeds($g_ai2_RunPath)
         Sleep(1000)
         AggroMoveToExFilter($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 1700, "UnnaturalSeeds")
         If SurvivorMode() Then
-            Out("Survivor mode activated!")
+            LogError("Survivor mode activated!")
             Return
         EndIf
     Next

@@ -176,8 +176,8 @@ EndFunc   ;==>MoveUpkeepEx
 #EndRegion
 
 #Region Fighting
-Func AggroMoveToExFilter($aX, $aY, $range = 1700, $filterFunc = "EnemyFilter")
-
+Func AggroMoveToExFilter($aX, $aY, $a_f_AggroRange = 1700, $filterFunc = "EnemyFilter")
+	
 	If GetPartyDead() Then Return
 	$TimerToKill = TimerInit()
 	Local $random = 50
@@ -197,8 +197,15 @@ Func AggroMoveToExFilter($aX, $aY, $range = 1700, $filterFunc = "EnemyFilter")
 			$enemy = GetNearestEnemyToAgent(-2, 1700, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc)
 			If GetPartyDead() Then ExitLoop
 			$distance = ComputeDistance(Agent_GetAgentInfo($enemy, 'X'), Agent_GetAgentInfo($enemy, 'Y'), Agent_GetAgentInfo(-2, 'X'), Agent_GetAgentInfo(-2, 'Y'))
-			If $distance < $range And $enemy <> 0 And Not GetPartyDead() Then
-				FightExFilter($range, $filterFunc)
+			If $distance < $a_f_AggroRange And $enemy <> 0 And Not GetPartyDead() Then
+				If $filterFunc = "EnemyFilter" Then
+					Out("Fighting with SmartCast!")
+					UAI_Fight($coords[0], $coords[1], $a_f_AggroRange)
+					PickUpLoot()
+				Else
+					Out("Filtering enemies with " & $filterFunc & ".")
+					FightExFilter($a_f_AggroRange, $filterFunc)
+				EndIf
 				If SurvivorMode() Then Return
 			EndIf
 		EndIf
@@ -219,7 +226,7 @@ Func AggroMoveToExFilter($aX, $aY, $range = 1700, $filterFunc = "EnemyFilter")
 	Until ComputeDistance($coords[0], $coords[1], $aX, $aY) < 250 Or $iBlocked > 20 Or GetPartyDead() Or TimerDiff($TimerToKill) > 180000
 EndFunc   ;==>AggroMoveToExFilter
 
-Func FightExFilter($range, $filterFunc = "EnemyFilter")
+Func FightExFilter($a_f_AggroRange, $filterFunc = "EnemyFilter")
 	If GetPartyDead() Then Return
 	If SurvivorMode() Then Return
 	Local $target
@@ -227,7 +234,6 @@ Func FightExFilter($range, $filterFunc = "EnemyFilter")
 	Local $useSkill
 	Local $energy
 	Local $lastId = 99999, $coordinate[2], $timer
-	Out("Engaging in combat...")
 		Do
 			If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
 			If TimerDiff($TimerToKill) > 180000 Then Exitloop
@@ -237,7 +243,7 @@ Func FightExFilter($range, $filterFunc = "EnemyFilter")
 			If GetPartyDead() Then Exitloop
 			If SurvivorMode() Then Return
 			$distance = ComputeDistance(Agent_GetAgentInfo($target, 'X'), Agent_GetAgentInfo($target, 'Y'), Agent_GetAgentInfo(-2, 'X'), Agent_GetAgentInfo(-2, 'Y'))
-			If $target <> 0 AND $distance < $range And Not GetPartyDead() Then
+			If $target <> 0 AND $distance < $a_f_AggroRange And Not GetPartyDead() Then
 				If TimerDiff($TimerToKill) > 180000 Then Exitloop
 				If Agent_GetAgentInfo($target, 'ID') <> $lastId Then
 					If GetPartyDead() Then Exitloop
@@ -295,7 +301,7 @@ Func FightExFilter($range, $filterFunc = "EnemyFilter")
 								If Agent_GetAgentInfo($target, 'IsDead') Then ExitLoop
 
 								$distance = GetDistance($target, -2)
-								If $distance > $range Then ExitLoop
+								If $distance > $a_f_AggroRange Then ExitLoop
 
 								$energy = GetEnergy(-2)
 
@@ -321,7 +327,7 @@ Func FightExFilter($range, $filterFunc = "EnemyFilter")
 						If SurvivorMode() Then Return
 						Agent_Attack($target)
 						$distance = GetDistance($target, -2)
-					Until Agent_GetAgentInfo($target, 'HP') < 0.005 Or $distance > $range Or TimerDiff($timer) > 20000 Or GetPartyDead() Or TimerDiff($TimerToKill) > 180000
+					Until Agent_GetAgentInfo($target, 'HP') < 0.005 Or $distance > $a_f_AggroRange Or TimerDiff($timer) > 20000 Or GetPartyDead() Or TimerDiff($TimerToKill) > 180000
 			EndIf
 			If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
 			If TimerDiff($TimerToKill) > 180000 Then Exitloop
@@ -331,7 +337,7 @@ Func FightExFilter($range, $filterFunc = "EnemyFilter")
 			If GetPartyDead() Then Exitloop
 			If SurvivorMode() Then Return
 			$distance = GetDistance($target, -2)
-		Until Agent_GetAgentInfo($target, 'ID') = 0 Or $distance > $range Or GetPartyDead() Or TimerDiff($TimerToKill) > 180000
+		Until Agent_GetAgentInfo($target, 'ID') = 0 Or $distance > $a_f_AggroRange Or GetPartyDead() Or TimerDiff($TimerToKill) > 180000
 
 		If CountSlots() <> 0 And Not GetPartyDead() Then
 			If TimerDiff($TimerToKill) > 180000 Then Return
@@ -688,7 +694,7 @@ Func CanPickUp($aItemPtr)
 		If (($aExtraID == $ITEM_ExtraID_BlackDye) Or ($aExtraID == $ITEM_ExtraID_WhiteDye)) Then ; only pick white and black ones
 			Return True
 		EndIf
-		Return True ; pick all dyes
+		Return False ; pick all dyes
 	ElseIf $lRarity == $RARITY_Gold Then ; gold items
 		Return True
 	ElseIf $lRarity == $RARITY_Purple Then ; purple items
@@ -698,7 +704,7 @@ Func CanPickUp($aItemPtr)
 	ElseIf $lModelID == $ITEM_ID_Lockpicks Then
 		Return True
 	ElseIf $lModelID == 22269 Then	; Cupcakes
-		Return False
+		Return True
 	ElseIf IsPreCollectable($aItemPtr) Then
 		Return True
 	ElseIf IsPcon($aItemPtr) Then ; ==== Pcons ==== or all event items

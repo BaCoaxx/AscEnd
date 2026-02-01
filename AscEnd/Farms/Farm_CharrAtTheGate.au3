@@ -31,6 +31,9 @@ Func Farm_CharrAtTheGate()
 
     While 1
 		CheckQuest()
+
+        If Not $BotRunning Then ResetStart() Return
+            
 		ExitAscalon()
 		CharrAtGate()
 		Sleep(250)
@@ -40,12 +43,12 @@ EndFunc
 Func CheckQuest()
     If Map_GetMapID() = 148 Then
         If Not $hasRun Then
-            Out("We are in Ascalon baby!!")
+            LogInfo("We are in Ascalon baby!!")
             $hasRun = True
         EndIf
     ElseIf Map_GetMapID() <> 148 Then
         If Not $hasRun Then
-            Out("We are not in the greatest city of all. Teleporting to Ascalon...")
+            LogInfo("We are not in the greatest city of all. Teleporting to Ascalon...")
             $hasRun = True
         EndIf
         Map_RndTravel(148)
@@ -54,11 +57,10 @@ Func CheckQuest()
     Sleep(2000)
 
     Quest_ActiveQuest(0x2E)
-    Sleep(500)
     $CharrState = Quest_GetQuestInfo(0x2E, "LogState")
 
     If $CharrState = 1 Then
-        Out("Is that a roast furry!")
+        LogInfo("Is that a roast furry!")
         Return
     ElseIf ($CharrState = 0) Or ($CharrState = 3) Then
         Quest_AbandonQuest(0x2E)
@@ -70,16 +72,16 @@ Func CheckQuest()
         
         Select
             Case $sp1 <= 5000
-                Out("Ohh no step-prince!")
+                LogInfo("Ohh no step-prince!")
                 MoveTo(8351, 10420)
                 MoveTo(5677, 10660)
             Case $sp1 > 5000 And $sp1 <= 5800
-                Out("Come here Rurik.")
+                LogInfo("Come here Rurik.")
                 MoveTo(7921, 6497)
                 MoveTo(7416, 10497)
                 MoveTo(5677, 10660)
              Case $sp1 > 5800 And $sp1 <= 7200
-                Out("I won't tell Althea, if you don't.")
+                LogInfo("I won't tell Althea, if you don't.")
                 MoveTo(8328, 5684)
                 MoveTo(7921, 6497)
                 MoveTo(7416, 10497)
@@ -90,24 +92,24 @@ Func CheckQuest()
         Agent_GoNPC(GetNearestNPCToAgent(-2))
         Other_RndSleep(500)
         Ui_Dialog(0x802E01)
-        Other_RndSleep(1000)
+        
+        Sleep(1000)
 
         Quest_ActiveQuest(0x2E)
-        Sleep(500)
         $CharrState = Quest_GetQuestInfo(0x2E, "LogState")
 
         If $CharrState = 1 Then
-            Out("Quest acquired!")
+            LogInfo("Quest acquired!")
         ElseIf ($CharrState = 0) Or ($CharrState = 3) Then
-            Out("Cannot take quest!")
-            Out("Bot will now close...")
-            Sleep(5000)
-            Exit
+            LogInfo("Cannot take quest!")
+            LogStatus("Bot will now pause.")
+            $BotRunning = False
+            Return
         EndIf
         
         MoveTo(7416, 10497)
         MoveTo(7921, 6497)
-        Out("Heading out to say furr-well to the charr!")
+        LogInfo("Heading out to say furr-well to the charr!")
     EndIf
 EndFunc
 
@@ -122,10 +124,10 @@ Func CharrAtGate()
     $RunTime = TimerInit()
 
     Sleep(3200)
-    Out("Lead the way my Prince!")
+    LogInfo("Lead the way my Prince!")
     UseSummoningStone()
     RunTo($CharrPath)
-    Out("Come here you furry bastards!")
+    LogInfo("Come here you furry bastards!")
     
     Local $targetAgent, $currentDistance, $targetX, $targetY
     Local $myX, $myY, $angle, $newX, $newY
@@ -136,19 +138,19 @@ Func CharrAtGate()
 
     While TimerDiff($maxruntime) <= 200000
         If GetPartyDead() Then
-            Out("Way to go fool, you died!")
+            LogInfo("Way to go fool, you died!")
             UpdateStats()
             ExitLoop
         ElseIf SurvivorMode() Then
-            Out("Fur-ck this for game of cat and mouse, I'm out!")
+            LogInfo("Fur-ck this for game of cat and mouse, I'm out!")
             UpdateStats()
             ExitLoop
         ElseIf Agent_GetAgentInfo(-2, "HPPercent") * 100 <= 25 Then
-            Out("I regret everything that led to this fur-related emergency!")
+            LogInfo("I regret everything that led to this fur-related emergency!")
             UpdateStats()
             ExitLoop
         ElseIf GetNumberOfCharrInRangeOfAgent(-2, 3500) <= 1 Then
-            Out("Run complete. Restarting...")
+            LogInfo("Run complete. Restarting...")
             UpdateStats()
             ExitLoop
         EndIf

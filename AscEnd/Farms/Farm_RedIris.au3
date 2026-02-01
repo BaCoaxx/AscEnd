@@ -24,6 +24,8 @@ Func Farm_RedIris()
         IrisSetup()
 
 	    While CountSlots() > 1
+            If Not $BotRunning Then ResetStart() Return
+
 		    IrisFarm()
 	    WEnd
     WEnd
@@ -31,16 +33,16 @@ EndFunc
 
 Func IrisSetup()
     If Map_GetMapID() = 164 Then
-        Out("We are in Ashford Abbey. Starting Iris farming run...")
+        LogInfo("We are in Ashford Abbey. Starting Iris farming run...")
     ElseIf Map_GetMapID() <> 164 And Map_IsMapUnlocked(164) Then
-        Out("We are not in Ashford Abbey. Teleporting to Ashford...")
+        LogInfo("We are not in Ashford Abbey. Teleporting to Ashford...")
         Map_RndTravel(164)
         Map_WaitMapLoading(164, 0)
         Sleep(2000)
     ElseIf Not Map_IsMapUnlocked(164) Then
-        Out("Ashford Abbey is not unlocked on this character, lets try to run there...")
+        LogWarn("Ashford Abbey is not unlocked on this character, lets try to run there...")
         While Not UnlockAshford()
-            Out("Failed to unlock Ashford Abbey.  Retrying...")
+            LogError("Failed to unlock Ashford Abbey.  Retrying...")
             Sleep(2000)
         WEnd
     EndIf
@@ -62,7 +64,7 @@ Func IrisFarm()
     UseSummoningStone()
     RunToIris($IrisPath)
     Other_RndSleep(250)
-    Out("Iris farming run complete. Restarting...")
+    LogInfo("Iris farming run complete. Restarting...")
     UpdateStats()
     Other_RndSleep(250)
     Resign()
@@ -99,11 +101,11 @@ Func IrisPickup()
             If TimerDiff($lDeadlock) > 5000 Then ExitLoop
         WEnd
         
-        Out("Red Iris collected!")
+        LogInfo("Red Iris collected!")
         Return True
     Next
     
-    Out("No Red Iris nearby.")
+    LogWarn("No Red Iris nearby.")
     Return False
 EndFunc
 
@@ -122,10 +124,10 @@ Func ExitAshford()
 
     Select
         Case ($sp1 <= 1200) Or ($sp1 >= 1800)
-            Out("What a lovely day to pick some flowers.")
+            LogInfo("What a lovely day to pick some flowers.")
             MoveTo(-11457.08, -6238.37)
         Case $sp1 > 1200 And $sp1 < 1800
-            Out("Mhenlo's smiling, Meerak's humming, and I'm picking red irises..")
+            LogInfo("Mhenlo's smiling, Meerak's humming, and I'm picking red irises..")
             MoveTo(-12536.56, -6758.55)
             MoveTo(-11457.08, -6238.37)
     EndSelect
