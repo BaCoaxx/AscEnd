@@ -23,6 +23,7 @@ AscEnd currently includes the following Pre-Searing farms:
 - **Run to Outposts** (excluding Piken Square)
 - **Red Iris Flower Farm**
 - **Unnatural Seeds Farm**
+- **Worn Belts Farm**
 - **More farms on the way**
 
 Each farm is modular and designed to plug directly into the AscEnd hub.
