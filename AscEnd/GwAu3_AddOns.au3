@@ -217,7 +217,12 @@ Func AggroMoveToExFilter($aX, $aY, $a_f_AggroRange = 1700, $filterFunc = "EnemyF
             EndIf
         EndIf
 
-		PickUpLoot()
+		Other_RndSleep(250)
+		
+		If $filterFunc = "EnemyFilter" Then
+			If CountSlots() <> 0 And Not GetPartyDead() Then PickupLoot()
+		EndIf
+
         Other_RndSleep(250)
 
         If GetPartyDead() Then ExitLoop
