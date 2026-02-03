@@ -27,7 +27,7 @@ Global $_19Stop = False
 Global $Collector = False
 Global $Purple = False
 Global $spawn[2] = [0, 0]
-Global $hasBoners = False
+Global $hasBonus = False
 
 $g_bAutoStart = False  ; Flag for auto-start
 $g_s_MainCharName  = ""
@@ -114,84 +114,35 @@ Func RunSelectedFarm()
     Exit
 EndFunc
 
-Func GetBoners()
+Func GetBonus()
     Map_RndTravel(148)
     Sleep(250)
 
     If FindSummoningStone() Then
         LogInfo("Summoning stone found!")
+        Sleep(1000)
         Return
     EndIf
 
-    LogError("No stone found, grabbing boners!")
+    LogError("No stone found, grabbing bonus items!")
     Chat_SendChat("bonus", "/")
-    Other_RndSleep(4500)
+    Other_RndSleep(2500)
 
     DeleteBonusItems()
 
     If FindSummoningStone() Then
-        LogInfo("Boners collected successfully.")
+        LogInfo("Bonus items collected successfully.")
     Else
-        LogError("No boners available..")
+        LogError("No bonus items available..")
     EndIf
     
-    Other_RndSleep(1500)
-    $hasBoners = True
+    Other_RndSleep(2500)
+    $hasBonus = True
 EndFunc
 
 ; =======================
-; Logging helpers
+; Crash Logging
 ; =======================
-
-Func LogInfo($sText)
-    _LogWrite("INFO", $sText)
-EndFunc
-
-Func LogWarn($sText)
-    _LogWrite("WARN", $sText)
-EndFunc
-
-Func LogStatus($sText)
-	_LogWrite("STATUS", $sText)
-EndFunc
-
-Func LogError($sText)
-    _LogWrite("ERROR", $sText)
-EndFunc
-
-Func _LogWrite($sLevel, $sText)
-    Local $sLine = _
-        @CRLF & "[" & @HOUR & ":" & @MIN & ":" & @SEC & "] [" & $sLevel & "] " & _
-        $sText
-
-    ; GUI console
-    If IsDeclared("g_h_EditText") Then
-        Local $l_x_Color
-        Switch $sLevel
-            Case "ERROR"
-                $l_x_Color = 0x322CCA ; Red
-            Case "WARN"
-                $l_x_Color = 0x790984 ; Purple
-            Case "STATUS"
-                $l_x_Color = 0xC76D09 ; Blue
-            Case "INFO"
-                $l_x_Color = 0x000000 ; Black
-        EndSwitch
-
-        ; Append text with color
-        _GUICtrlRichEdit_SetSel($g_h_EditText, -1, -1)
-        _GUICtrlRichEdit_SetCharColor($g_h_EditText, $l_x_Color)
-        _GUICtrlRichEdit_AppendText($g_h_EditText, $sLine)
-        _GUICtrlEdit_Scroll($g_h_EditText, 1)
-    EndIf
-
-    ; File log (crash safe)
-    Local $hFile = FileOpen($g_s_LogFile, $FO_APPEND)
-    If $hFile <> -1 Then
-        FileWrite($hFile, $sLine)
-        FileClose($hFile)
-    EndIf
-EndFunc
 
 Func _OnExitLog()
     Local $code = @exitCode

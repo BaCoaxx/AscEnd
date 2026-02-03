@@ -22,14 +22,18 @@ Global $SCPath[8][2] = [ _
 ]
 
 Func Farm_SmartCastTest()
+    Cache_SkillBar()
+    Sleep(2000)
 
     While 1
         If CountSlots() < 4 Then InventoryPre()
-        If Not $hasBoners Then GetBoners()
+        If Not $hasBonus Then GetBonus()
 
         SCSetup()
 
 	    While CountSlots() > 1
+            If Not $BotRunning Then ResetStart() Return
+            
 		    SCTest()
 	    WEnd
     WEnd
@@ -60,7 +64,6 @@ EndFunc
 Func SCTest()
     Map_Move(-11089, -6250) ; Leave Ashford Abbey
     Map_WaitMapLoading(146, 1)
-    Cache_SkillBar()
 
     Sleep(1000)
 
@@ -83,7 +86,7 @@ EndFunc
 
 Func RunToSC($g_a_RunPath)
     For $i = 0 To UBound($g_a_RunPath) - 1
-        AggroMoveToExFilter($g_a_RunPath[$i][0], $g_a_RunPath[$i][1], 1300)
+        AggroMoveToExFilter($g_a_RunPath[$i][0], $g_a_RunPath[$i][1])
         If SurvivorMode() Then
             LogError("Survivor mode activated!")
             Return

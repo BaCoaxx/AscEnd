@@ -25,9 +25,11 @@ Global $desiredDistance = 1000
 Global $hasRun = False
 
 Func Farm_CharrAtTheGate()
+    Cache_SkillBar()
+    Sleep(2000)
     
     If CountSlots() < 4 Then InventoryPre()
-    If Not $hasBoners Then GetBoners()
+    If Not $hasBonus Then GetBonus()
 
     While 1
 		CheckQuest()
@@ -101,7 +103,7 @@ Func CheckQuest()
         If $CharrState = 1 Then
             LogInfo("Quest acquired!")
         ElseIf ($CharrState = 0) Or ($CharrState = 3) Then
-            LogError("Cannot take quest!")
+            LogInfo("Cannot take quest!")
             LogStatus("Bot will now pause.")
             $BotRunning = False
             Return

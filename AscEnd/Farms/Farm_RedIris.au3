@@ -16,10 +16,12 @@ Global $IrisPath[2][3] = [ _
 ]
 
 Func Farm_RedIris()
+    Cache_SkillBar()
+    Sleep(2000)
 
     While 1
         If CountSlots() < 4 Then InventoryPre()
-        If Not $hasBoners Then GetBoners()
+        If Not $hasBonus Then GetBonus()
 
         IrisSetup()
 

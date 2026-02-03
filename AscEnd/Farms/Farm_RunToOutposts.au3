@@ -140,9 +140,11 @@ Global $Barradin2[27][2] = [ _
 ]
 
 Func Farm_RunToOutposts()
-    
+    Cache_SkillBar()
+    Sleep(2000)
+
     If CountSlots() < 4 Then InventoryPre()
-    If Not $hasBoners Then GetBoners()
+    If Not $hasBonus Then GetBonus()
     
     Sleep(2000)
     LogInfo("Running to outposts.")

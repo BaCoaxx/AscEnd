@@ -1,0 +1,125 @@
+
+[00:59:44] [INFO] Based on GWA2
+[00:59:44] [INFO] GWA2 - Created by: GameRevision Community
+[00:59:44] [INFO] GWA2 - Build date: approximately 2007
+
+[00:59:44] [INFO] GwAu3 - Created by: Jag-Gw Community
+[00:59:44] [INFO] GwAu3 - Build date: 2025-05-21
+[00:59:44] [INFO] GwAu3 - Version: 1.0
+[00:59:44] [INFO] GwAu3 - Last Update: 2025-06-17
+
+[01:00:03] [STATUS] Survivor mode enabled.
+[01:00:03] [STATUS] Discarding Purples.
+[01:00:03] [STATUS] Keeping Collectors materials.
+[01:00:03] [STATUS] Sending to level 20.
+[01:00:03] [INFO] Starting farm: Smart Cast Test
+[01:00:08] [INFO] Summoning stone found!
+[01:00:09] [INFO] We are not in Ashford Abbey. Teleporting to Ashford...
+[01:00:17] [INFO] Mhenlo's smiling, Meerak's humming, and I'm picking red irises..
+[01:00:48] [WARN] Fighting enemies with SmartCast!
+[01:00:59] [WARN] Fighting enemies with SmartCast!
+[01:01:05] [WARN] Fighting enemies with SmartCast!
+[01:01:06] [WARN] Fighting enemies with SmartCast!
+[01:01:07] [WARN] Fighting enemies with SmartCast!
+[01:01:08] [WARN] Fighting enemies with SmartCast!
+[01:01:08] [WARN] Fighting enemies with SmartCast!
+[01:01:09] [WARN] Fighting enemies with SmartCast!
+[01:01:10] [WARN] Fighting enemies with SmartCast!
+[01:01:10] [WARN] Fighting enemies with SmartCast!
+[01:01:11] [WARN] Fighting enemies with SmartCast!
+[01:01:12] [WARN] Fighting enemies with SmartCast!
+[01:01:12] [WARN] Fighting enemies with SmartCast!
+[01:01:13] [WARN] Fighting enemies with SmartCast!
+[01:01:14] [WARN] Fighting enemies with SmartCast!
+[01:01:15] [WARN] Fighting enemies with SmartCast!
+[01:01:15] [WARN] Fighting enemies with SmartCast!
+[01:01:16] [WARN] Fighting enemies with SmartCast!
+[01:01:17] [WARN] Fighting enemies with SmartCast!
+[01:01:17] [WARN] Fighting enemies with SmartCast!
+[01:01:18] [WARN] Fighting enemies with SmartCast!
+[01:01:19] [WARN] Fighting enemies with SmartCast!
+[01:01:19] [WARN] Fighting enemies with SmartCast!
+[01:01:20] [WARN] Fighting enemies with SmartCast!
+[01:01:21] [WARN] Fighting enemies with SmartCast!
+[01:01:21] [WARN] Fighting enemies with SmartCast!
+[01:01:22] [WARN] Fighting enemies with SmartCast!
+[01:01:23] [WARN] Fighting enemies with SmartCast!
+[01:02:27] [WARN] Fighting enemies with SmartCast!
+[01:02:35] [WARN] Fighting enemies with SmartCast!
+[01:02:37] [WARN] Fighting enemies with SmartCast!
+[01:02:37] [WARN] Fighting enemies with SmartCast!
+[01:02:38] [WARN] Fighting enemies with SmartCast!
+[01:02:39] [WARN] Fighting enemies with SmartCast!
+[01:02:40] [WARN] Fighting enemies with SmartCast!
+[01:02:40] [WARN] Fighting enemies with SmartCast!
+[01:02:41] [WARN] Fighting enemies with SmartCast!
+[01:02:57] [WARN] Fighting enemies with SmartCast!
+[01:03:17] [WARN] Fighting enemies with SmartCast!
+[01:03:19] [WARN] Fighting enemies with SmartCast!
+[01:03:19] [WARN] Fighting enemies with SmartCast!
+[01:03:20] [WARN] Fighting enemies with SmartCast!
+[01:03:21] [WARN] Fighting enemies with SmartCast!
+[01:03:27] [WARN] Fighting enemies with SmartCast!
+[01:03:28] [WARN] Fighting enemies with SmartCast!
+[01:03:28] [WARN] Fighting enemies with SmartCast!
+[01:03:29] [WARN] Fighting enemies with SmartCast!
+[01:03:30] [WARN] Fighting enemies with SmartCast!
+[01:03:31] [WARN] Fighting enemies with SmartCast!
+[01:03:31] [WARN] Fighting enemies with SmartCast!
+[01:03:37] [WARN] Fighting enemies with SmartCast!
+[01:03:39] [WARN] Fighting enemies with SmartCast!
+[01:03:45] [WARN] Fighting enemies with SmartCast!
+[01:04:10] [WARN] Fighting enemies with SmartCast!
+[01:04:14] [WARN] Fighting enemies with SmartCast!
+[01:04:16] [WARN] Fighting enemies with SmartCast!
+[01:04:16] [WARN] Fighting enemies with SmartCast!
+[01:04:17] [WARN] Fighting enemies with SmartCast!
+[01:04:18] [WARN] Fighting enemies with SmartCast!
+[01:04:19] [WARN] Fighting enemies with SmartCast!
+[01:04:20] [WARN] Fighting enemies with SmartCast!
+[01:04:21] [WARN] Fighting enemies with SmartCast!
+[01:04:23] [WARN] Fighting enemies with SmartCast!
+[01:04:24] [WARN] Fighting enemies with SmartCast!
+[01:04:25] [WARN] Fighting enemies with SmartCast!
+[01:04:26] [WARN] Fighting enemies with SmartCast!
+[01:04:26] [WARN] Fighting enemies with SmartCast!
+[01:04:27] [WARN] Fighting enemies with SmartCast!
+[01:04:28] [WARN] Fighting enemies with SmartCast!
+[01:04:29] [WARN] Fighting enemies with SmartCast!
+[01:04:30] [WARN] Fighting enemies with SmartCast!
+[01:04:30] [WARN] Fighting enemies with SmartCast!
+[01:04:31] [WARN] Fighting enemies with SmartCast!
+[01:04:32] [WARN] Fighting enemies with SmartCast!
+[01:04:33] [WARN] Fighting enemies with SmartCast!
+[01:04:33] [WARN] Fighting enemies with SmartCast!
+[01:04:34] [WARN] Fighting enemies with SmartCast!
+[01:04:35] [WARN] Fighting enemies with SmartCast!
+[01:04:36] [WARN] Fighting enemies with SmartCast!
+[01:04:36] [WARN] Fighting enemies with SmartCast!
+[01:04:37] [WARN] Fighting enemies with SmartCast!
+[01:04:38] [WARN] Fighting enemies with SmartCast!
+[01:04:39] [WARN] Fighting enemies with SmartCast!
+[01:04:39] [WARN] Fighting enemies with SmartCast!
+[01:04:40] [WARN] Fighting enemies with SmartCast!
+[01:04:41] [WARN] Fighting enemies with SmartCast!
+[01:04:42] [WARN] Fighting enemies with SmartCast!
+[01:04:42] [WARN] Fighting enemies with SmartCast!
+[01:04:43] [WARN] Fighting enemies with SmartCast!
+[01:04:44] [WARN] Fighting enemies with SmartCast!
+[01:04:45] [WARN] Fighting enemies with SmartCast!
+[01:04:45] [WARN] Fighting enemies with SmartCast!
+[01:04:46] [WARN] Fighting enemies with SmartCast!
+[01:04:47] [WARN] Fighting enemies with SmartCast!
+[01:04:48] [WARN] Fighting enemies with SmartCast!
+[01:04:48] [WARN] Fighting enemies with SmartCast!
+[01:04:49] [WARN] Fighting enemies with SmartCast!
+[01:04:50] [WARN] Fighting enemies with SmartCast!
+[01:04:51] [WARN] Fighting enemies with SmartCast!
+[01:05:00] [WARN] Fighting enemies with SmartCast!
+[01:05:02] [WARN] Fighting enemies with SmartCast!
+[01:05:03] [WARN] Fighting enemies with SmartCast!
+[01:05:03] [WARN] Fighting enemies with SmartCast!
+[01:05:04] [WARN] Fighting enemies with SmartCast!
+[01:05:05] [WARN] Fighting enemies with SmartCast!
+[01:05:06] [INFO] Smart Cast Test complete. Restarting...
+[01:05:08] [EXIT] Script terminated. ExitCode=0

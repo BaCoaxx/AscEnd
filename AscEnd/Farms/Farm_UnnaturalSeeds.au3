@@ -33,10 +33,12 @@ Global $SeedsFoePath[11][2] = [ _
 ]
 
 Func Farm_UnnaturalSeeds()
+    Cache_SkillBar()
+    Sleep(2000)
 
     While 1
         If CountSlots() < 4 Then InventoryPre()
-        If Not $hasBoners Then GetBoners()
+        If Not $hasBonus Then GetBonus()
         
         UnnaturalSeedSetup()
 

@@ -19,10 +19,12 @@ Global $BeltFarmPath[3][2] = [ _
 Global $BeltFarmState
 
 Func Farm_WornBelts()
+    Cache_SkillBar()
+    Sleep(2000)
 
     While 1
         If CountSlots() < 4 Then InventoryPre()
-        If Not $hasBoners Then GetBoners()
+        If Not $hasBonus Then GetBonus()
 
         WornBeltsSetup()
 

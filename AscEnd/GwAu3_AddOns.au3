@@ -177,53 +177,61 @@ EndFunc   ;==>MoveUpkeepEx
 
 #Region Fighting
 Func AggroMoveToExFilter($aX, $aY, $a_f_AggroRange = 1700, $filterFunc = "EnemyFilter")
-	
-	If GetPartyDead() Then Return
-	$TimerToKill = TimerInit()
-	Local $random = 50
-	Local $iBlocked = 0
-	Local $enemy
-	Local $distance
 
-	Map_Move($aX, $aY, $random)
-	$coords[0] = Agent_GetAgentInfo(-2, 'X')
-	$coords[1] = Agent_GetAgentInfo(-2, 'Y')
-	Do
-		If GetPartyDead() Then ExitLoop
-		Other_RndSleep(250)
-		$oldCoords = $coords
-		If GetNumberOfFoesInRangeOfAgent(-2, 1700, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc) > 0 Then
-			If GetPartyDead() Then ExitLoop
-			$enemy = GetNearestEnemyToAgent(-2, 1700, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc)
-			If GetPartyDead() Then ExitLoop
-			$distance = ComputeDistance(Agent_GetAgentInfo($enemy, 'X'), Agent_GetAgentInfo($enemy, 'Y'), Agent_GetAgentInfo(-2, 'X'), Agent_GetAgentInfo(-2, 'Y'))
-			If $distance < $a_f_AggroRange And $enemy <> 0 And Not GetPartyDead() Then
-				If $filterFunc = "EnemyFilter" Then
-					Out("Fighting with SmartCast!")
-					UAI_Fight($coords[0], $coords[1], $a_f_AggroRange)
-					PickUpLoot()
-				Else
-					Out("Filtering enemies with " & $filterFunc & ".")
-					FightExFilter($a_f_AggroRange, $filterFunc)
-				EndIf
-				If SurvivorMode() Then Return
-			EndIf
-		EndIf
+    If GetPartyDead() Then Return
+    $TimerToKill = TimerInit()
+    Local $random = 50
+    Local $iBlocked = 0
+    Local $enemy
+    Local $distance
 
-		Other_RndSleep(250)
+    Map_Move($aX, $aY, $random)
+    $coords[0] = Agent_GetAgentInfo(-2, 'X')
+    $coords[1] = Agent_GetAgentInfo(-2, 'Y')
+    
+	If $filterFunc = "EnemyFilter" Then LogWarn("Fighting enemies with SmartCast!")
 
-		If GetPartyDead() Then ExitLoop
-		$coords[0] = Agent_GetAgentInfo(-2, 'X')
-		$coords[1] = Agent_GetAgentInfo(-2, 'Y')
-		If $oldCoords[0] = $coords[0] And $oldCoords[1] = $coords[1] And Not GetPartyDead() Then
-			$iBlocked += 1
-			MoveTo($coords[0], $coords[1], 300)
-			Other_RndSleep(350)
-			If GetPartyDead() Then ExitLoop
-			Map_Move($aX, $aY)
-		EndIf
+    Do
+        If GetPartyDead() Then ExitLoop
+        Other_RndSleep(250)
+        $oldCoords = $coords
+        
+        ; Check filter type
+        If $filterFunc = "EnemyFilter" Then
+            ; Use standard UAI_Fight with SmartCast
+            If Map_GetInstanceInfo("Type") = $GC_I_MAP_TYPE_EXPLORABLE Then
+                UAI_Fight($coords[0], $coords[1], $a_f_AggroRange, 3500, $g_i_FightMode)
+            EndIf
+        Else
+            ; Use custom filter with FightExFilter
+            If GetNumberOfFoesInRangeOfAgent(-2, 1700, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc) > 0 Then
+                If GetPartyDead() Then ExitLoop
+                $enemy = GetNearestEnemyToAgent(-2, 1700, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc)
+                If GetPartyDead() Then ExitLoop
+                $distance = ComputeDistance(Agent_GetAgentInfo($enemy, 'X'), Agent_GetAgentInfo($enemy, 'Y'), Agent_GetAgentInfo(-2, 'X'), Agent_GetAgentInfo(-2, 'Y'))
+                If $distance < $a_f_AggroRange And $enemy <> 0 And Not GetPartyDead() Then
+                    LogWarn("Filtering enemies with " & $filterFunc & "!")
+                    FightExFilter($a_f_AggroRange, $filterFunc)
+                    If SurvivorMode() Then Return
+                EndIf
+            EndIf
+        EndIf
 
-	Until ComputeDistance($coords[0], $coords[1], $aX, $aY) < 250 Or $iBlocked > 20 Or GetPartyDead() Or TimerDiff($TimerToKill) > 180000
+		PickUpLoot()
+        Other_RndSleep(250)
+
+        If GetPartyDead() Then ExitLoop
+        $coords[0] = Agent_GetAgentInfo(-2, 'X')
+        $coords[1] = Agent_GetAgentInfo(-2, 'Y')
+        If $oldCoords[0] = $coords[0] And $oldCoords[1] = $coords[1] And Not GetPartyDead() Then
+            $iBlocked += 1
+            MoveTo($coords[0], $coords[1], 300)
+            Other_RndSleep(350)
+            If GetPartyDead() Then ExitLoop
+            Map_Move($aX, $aY)
+        EndIf
+
+    Until ComputeDistance($coords[0], $coords[1], $aX, $aY) < 250 Or $iBlocked > 20 Or GetPartyDead() Or TimerDiff($TimerToKill) > 180000
 EndFunc   ;==>AggroMoveToExFilter
 
 Func FightExFilter($a_f_AggroRange, $filterFunc = "EnemyFilter")
@@ -705,6 +713,8 @@ Func CanPickUp($aItemPtr)
 		Return True
 	ElseIf $lModelID == 22269 Then	; Cupcakes
 		Return True
+	ElseIf $lModelID == $GC_I_MODELID_LUNAR_TOKEN Then ; Lunar Tokens
+		Return True
 	ElseIf IsPreCollectable($aItemPtr) Then
 		Return True
 	ElseIf IsPcon($aItemPtr) Then ; ==== Pcons ==== or all event items
@@ -769,17 +779,17 @@ Func CheckArrayPscon($lModelID)
 EndFunc   ;==>CheckArrayPscon
 
 Func InventoryPre()
-    Out("Travelling to Ascalon City (Pre-Searing)")
+    LogInfo("Travelling to Ascalon City (Pre-Searing)")
     RndTravel($GC_I_MAP_ID_ASCALON_CITY_OUTPOST)
     
     Sleep(3000)
     
-    Out("Moving to Merchant..")
+    LogInfo("Moving to Merchant..")
     MerchantAscalonPre()
     Sleep(2000)
     
     If GetGoldCharacter() < 100 Then
-        Out("Selling common items to get 100 gold minimum, and free inventory space.")
+        LogWarn("Selling common items to get 100 gold minimum, and free inventory space.")
         For $i = 1 To 4
             PreSell($i)
             If GetGoldCharacter() >= 100 Then ExitLoop
@@ -787,86 +797,86 @@ Func InventoryPre()
     EndIf
     
     If GetGoldCharacter() >= 100 Then
-        Out("Identifying")
+        LogInfo("Identifying")
         For $i = 1 To 4
             Ident($i)
         Next
         
-        Out("Selling")
+        LogInfo("Selling")
         For $i = 1 To 4
             Sell($i)
         Next
     Else
-        Out("Not enough gold to buy ID kit, returning...")
+        LogError("Not enough gold to buy ID kit, returning...")
         Return
     EndIf
     
-    Out("Inventory management complete!")
+    LogWarn("Inventory management complete!")
 EndFunc ;==> InventoryPre
 
 Func Inventory()
 
-	Out("Travelling to Eye of the North")
+	LogInfo("Travelling to Eye of the North")
 	RndTravel($Town_ID_EyeOfTheNorth)
 
 	$inventorytrigger = 1
 
 	Sleep(1000)
 
-	Out("Move to Merchant")
+	LogInfo("Move to Merchant")
 	MerchantEotN()
 	Sleep(2000)
 
-	Out("Identifying")
+	LogInfo("Identifying")
 	For $i = 1 To 4
 		Ident($i)
 	Next
 
-	Out("Selling")
+	LogInfo("Selling")
 	For $i = 1 To 4
 		Sell($i)
 	Next
 
 	If GetGoldCharacter() > 90000 Then
-		Out("Depositing Gold")
+		LogInfo("Depositing Gold")
 		Item_DepositGold()
 	EndIf
 
 	If FindRareRuneOrInsignia() <> 0 Then
-		Out("Salvage all Runes")
+		LogInfo("Salvage all Runes")
 		For $i = 1 To 4
 			Salvage($i)
 		Next
-		Out("Second Round of Salvage")
+		LogInfo("Second Round of Salvage")
 		For $i = 1 To 4
 			Salvage($i)
 		Next
 
-		Out("Sell leftover items")
+		LogInfo("Sell leftover items")
 		For $i = 1 To 4
 			Sell($i)
 		Next
 	EndIf
 
 	While FindRareRuneOrInsignia() <> 0
-		Out("Move to Rune Trader")
+		LogInfo("Move to Rune Trader")
 		RuneTraderEotN()
 		Sleep(2000)
 
-		Out("Sell Runes")
+		LogInfo("Sell Runes")
 		For $i = 1 To 4
 			SellRunes($i)
 		Next
 		Sleep(2000)
 
 		If GetGoldCharacter() > 20000 Then
-			Out("Buying Rare Materials")
+			LogInfo("Buying Rare Materials")
 			RareMaterialTraderEotN()
 		EndIf
 	WEnd
 
 	If GetGoldCharacter() > 20000 And GetGoldStorage() > 900000 Then
-		Out("Buying Rare Materials")
+		LogInfo("Buying Rare Materials")
 		RareMaterialTraderEotN()
 	EndIf
 
@@ -911,7 +921,7 @@ Func Merchant()
 		EndIf
 	Next
 
-	Out("Talk to Merchant")
+	LogInfo("Talk to Merchant")
 	Local $guy = GetNearestNPCToAgent(-2, 1320, $GC_I_AGENT_TYPE_LIVING, 1, "NPCFilter")
 	MoveTo(Agent_GetAgentInfo($guy, "X")-20,Agent_GetAgentInfo($guy, "Y")-20)
     Agent_GoNPC($guy)
@@ -927,7 +937,7 @@ Func MerchantAscalonPre()
 	
     MoveTo(8450.46, 4900.70)
     
-    Out("Talking to Merchant..")
+    LogInfo("Talking to Merchant..")
     Local $guy = GetNearestNPCToAgent(-2, 1320, $GC_I_AGENT_TYPE_LIVING, 1, "NPCFilter")
     MoveTo(Agent_GetAgentInfo($guy, "X") - 20, Agent_GetAgentInfo($guy, "Y") - 20)
     Agent_GoNPC($guy)
@@ -936,10 +946,10 @@ EndFunc ;==> MerchantAscalonPre
 
 Func MerchantEotN()
 	; Run to Merchant in EotN
-	Out("Run to Merchant in EotN")
+	LogInfo("Run to Merchant in EotN")
 	MoveTo(-2660.77, 1162.44)
 
-	Out("Talk to Merchant")
+	LogInfo("Talk to Merchant")
 	Local $guy = GetNearestNPCToAgent(-2, 1320, $GC_I_AGENT_TYPE_LIVING, 1, "NPCFilter")
 	MoveTo(Agent_GetAgentInfo($guy, "X")-20,Agent_GetAgentInfo($guy, "Y")-20)
     Agent_GoNPC($guy)
@@ -990,7 +1000,7 @@ Func RareMaterialTrader()
 			MoveTo($Waypoints_by_RareMatTrader[$i][1], $Waypoints_by_RareMatTrader[$i][2])
 		EndIf
 	Next
-	Out("Talk to Rare Material Trader")
+	LogInfo("Talk to Rare Material Trader")
 	Local $guy = GetNearestNPCToAgent(-2, 1320, $GC_I_AGENT_TYPE_LIVING, 1, "NPCFilter")
 	MoveTo(Agent_GetAgentInfo($guy, "X")-20,Agent_GetAgentInfo($guy, "Y")-20)
     Agent_GoNPC($guy)
@@ -1010,10 +1020,10 @@ Func RareMaterialTrader()
 EndFunc	;==>Rare Material trader
 
 Func RareMaterialTraderEotN()
-	Out("Run to Rare Material Trader in EotN")
+	LogInfo("Run to Rare Material Trader in EotN")
 	MoveTo(-2216.90, 1083.70)
 
-	Out("Talk to Rare Material Trader")
+	LogInfo("Talk to Rare Material Trader")
 	Local $guy = GetNearestNPCToAgent(-2, 1320, $GC_I_AGENT_TYPE_LIVING, 1, "NPCFilter")
 	MoveTo(Agent_GetAgentInfo($guy, "X")-20,Agent_GetAgentInfo($guy, "Y")-20)
     Agent_GoNPC($guy)
@@ -1037,7 +1047,7 @@ EndFunc	;==> RareMaterialTraderEotN
 Func RuneTrader()
 	MoveTo(1297.07,11389.97)
 	MoveTo(905.74,11655.34)
-	Out("Talk to Rune Trader")
+	LogInfo("Talk to Rune Trader")
 	Local $guy = GetNearestNPCToAgent(-2, 1320, $GC_I_AGENT_TYPE_LIVING, 1, "NPCFilter")
 	MoveTo(Agent_GetAgentInfo($guy, "X")-20,Agent_GetAgentInfo($guy, "Y")-20)
     Agent_GoNPC($guy)
@@ -1045,10 +1055,10 @@ Func RuneTrader()
 EndFunc	;==> Rune Trader
 
 Func RuneTraderEotN()
-	Out("Run to Rune Trader in EotN")
+	LogInfo("Run to Rune Trader in EotN")
 	MoveTo(-3250.18, 2011.88)
 
-	Out("Talk to Rune Trader")
+	LogInfo("Talk to Rune Trader")
 	Local $guy = GetNearestNPCToAgent(-2, 1320, $GC_I_AGENT_TYPE_LIVING, 1, "NPCFilter")
 	MoveTo(Agent_GetAgentInfo($guy, "X")-20,Agent_GetAgentInfo($guy, "Y")-20)
     Agent_GoNPC($guy)
@@ -3040,73 +3050,73 @@ EndFunc ;==> IsMaxDagger
 Func CheckGuildHall()
 	If Map_GetMapID() == $GH_ID_Warriors_Isle Then
 		$WarriorsIsle = True
-		Out("Warrior's Isle")
+		LogInfo("Warrior's Isle")
 	EndIf
 	If Map_GetMapID() == $GH_ID_Hunters_Isle Then
 		$HuntersIsle = True
-		Out("Hunter's Isle")
+		LogInfo("Hunter's Isle")
 	EndIf
 	If Map_GetMapID() == $GH_ID_Wizards_Isle Then
 		$WizardsIsle = True
-		Out("Wizard's Isle")
+		LogInfo("Wizard's Isle")
 	EndIf
 	If Map_GetMapID() == $GH_ID_Burning_Isle Then
 		$BurningIsle = True
-		Out("Burning Isle")
+		LogInfo("Burning Isle")
 	EndIf
 	If Map_GetMapID() == $GH_ID_Frozen_Isle Then
 		$FrozenIsle = True
-		Out("Frozen Isle")
+		LogInfo("Frozen Isle")
 	EndIf
 	If Map_GetMapID() == $GH_ID_Nomads_Isle Then
 		$NomadsIsle = True
-		Out("Nomad's Isle")
+		LogInfo("Nomad's Isle")
 	EndIf
 	If Map_GetMapID() == $GH_ID_Druids_Isle Then
 		$DruidsIsle = True
-		Out("Druid's Isle")
+		LogInfo("Druid's Isle")
 	EndIf
 	If Map_GetMapID() == $GH_ID_Isle_Of_The_Dead Then
 		$IsleOfTheDead = True
-		Out("Isle of the Dead")
+		LogInfo("Isle of the Dead")
 	EndIf
 	If Map_GetMapID() == $GH_ID_Isle_Of_Weeping_Stone Then
 		$IsleOfWeepingStone = True
-		Out("Isle of Weeping Stone")
+		LogInfo("Isle of Weeping Stone")
 	EndIf
 	If Map_GetMapID() == $GH_ID_Isle_Of_Jade Then
 		$IsleOfJade = True
-		Out("Isle of Jade")
+		LogInfo("Isle of Jade")
 	EndIf
 	If Map_GetMapID() == $GH_ID_Imperial_Isle Then
 		$ImperialIsle = True
-		Out("Imperial Isle")
+		LogInfo("Imperial Isle")
 	EndIf
 	If Map_GetMapID() == $GH_ID_Isle_Of_Meditation Then
 		$IsleOfMeditation = True
-		Out("Isle of Meditation")
+		LogInfo("Isle of Meditation")
 	EndIf
 	If Map_GetMapID() == $GH_ID_Uncharted_Isle Then
 		$UnchartedIsle = True
-		Out("Uncharted Isle")
+		LogInfo("Uncharted Isle")
 	EndIf
 	If Map_GetMapID() == $GH_ID_Isle_Of_Wurms Then
 		$IsleOfWurms = True
-		Out("Isle of Wurms")
+		LogInfo("Isle of Wurms")
 		If $IsleOfWurms = True Then
 			CheckIsleOfWurms()
 		EndIf
 	EndIf
 	If Map_GetMapID() == $GH_ID_Corrupted_Isle Then
 		$CorruptedIsle = True
-		Out("Corrupted Isle")
+		LogInfo("Corrupted Isle")
 		If $CorruptedIsle = True Then
 			CheckCorruptedIsle()
 		EndIf
 	EndIf
 	If Map_GetMapID() == $GH_ID_Isle_Of_Solitude Then
 		$IsleOfSolitude = True
-		Out("Isle of Solitude")
+		LogInfo("Isle of Solitude")
 	EndIf
 EndFunc ;~ Check Guild halls
 
@@ -3455,14 +3465,54 @@ Global $TimerToKill = 0
 #EndRegion
 
 #Region Gui
-;Description: Print to console with timestamp
-Func Out($TEXT)
-    Local $TEXTLEN = StringLen($TEXT)
-    Local $CONSOLELEN = _GUICtrlEdit_GetTextLen($g_h_EditText)
-    If $TEXTLEN + $CONSOLELEN > 30000 Then GUICtrlSetData($g_h_EditText, StringRight(_GUICtrlEdit_GetText($g_h_EditText), 30000 - $TEXTLEN - 1000))
-	_GUICtrlRichEdit_SetCharColor($g_h_EditText, $COLOR_BLACK)
-    _GUICtrlEdit_AppendText($g_h_EditText, @CRLF & "[" & @HOUR & ":" & @MIN & ":" & @SEC & "] " & $TEXT)
-    _GUICtrlEdit_Scroll($g_h_EditText, 1)
+Func LogInfo($sText)
+    _LogWrite("INFO", $sText)
+EndFunc
+
+Func LogWarn($sText)
+    _LogWrite("WARN", $sText)
+EndFunc
+
+Func LogStatus($sText)
+	_LogWrite("STATUS", $sText)
+EndFunc
+
+Func LogError($sText)
+    _LogWrite("ERROR", $sText)
+EndFunc
+
+Func _LogWrite($sLevel, $sText)
+    Local $sLine = _
+        @CRLF & "[" & @HOUR & ":" & @MIN & ":" & @SEC & "] [" & $sLevel & "] " & _
+        $sText
+
+    ; GUI console
+    If IsDeclared("g_h_EditText") Then
+        Local $l_x_Color
+        Switch $sLevel
+            Case "ERROR"
+                $l_x_Color = 0x322CCA ; Red
+            Case "WARN"
+                $l_x_Color = 0x790984 ; Purple
+            Case "STATUS"
+                $l_x_Color = 0xC76D09 ; Blue
+            Case "INFO"
+                $l_x_Color = 0x000000 ; Black
+        EndSwitch
+
+        ; Append text with color
+        _GUICtrlRichEdit_SetSel($g_h_EditText, -1, -1)
+        _GUICtrlRichEdit_SetCharColor($g_h_EditText, $l_x_Color)
+        _GUICtrlRichEdit_AppendText($g_h_EditText, $sLine)
+        _GUICtrlEdit_Scroll($g_h_EditText, 1)
+    EndIf
+
+    ; File log (crash safe)
+    Local $hFile = FileOpen($g_s_LogFile, $FO_APPEND)
+    If $hFile <> -1 Then
+        FileWrite($hFile, $sLine)
+        FileClose($hFile)
+    EndIf
 EndFunc
 
 Func FormatElapsedTime($timerHandle)

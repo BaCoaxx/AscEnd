@@ -22,10 +22,12 @@ Global $memClear = 0
 Global $HamnetState
 
 Func Farm_Hamnet()
+    Cache_SkillBar()
+    Sleep(2000)
     
     While 1
         If CountSlots() < 4 Then InventoryPre()
-        If Not $hasBoners Then GetBoners()
+        If Not $hasBonus Then GetBonus()
         
         HamnetSetup()
 
