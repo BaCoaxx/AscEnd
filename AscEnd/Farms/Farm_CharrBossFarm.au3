@@ -1,8 +1,13 @@
 #include-once
+
 #cs ----------------------------------------------------------------------------
-	 AutoIt Version: 3.3.18.0
-	 Author:         Incognito
-	 Script Function: Presearing Charr Farming
+
+     AutoIt Version: 3.3.18.0
+     Author:         Incognito
+
+     Script Function:
+        Charr Boss Farm - Pre Searing
+
 #ce ----------------------------------------------------------------------------
 
 ; Pathing from (Ashford -> gate lever)

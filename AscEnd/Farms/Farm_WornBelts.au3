@@ -3,7 +3,7 @@
 #cs ----------------------------------------------------------------------------
 
      AutoIt Version: 3.3.18.0
-     Author:         Coffee
+     Author:         Incognito
 
      Script Function:
         Worn Belts Farm - Pre Searing
