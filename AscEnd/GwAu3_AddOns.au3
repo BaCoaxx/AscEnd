@@ -833,7 +833,11 @@ Func CanPickUp($aItemPtr)
 	ElseIf $lRarity == $RARITY_Purple Then ; purple items
 		Return True
 	ElseIf $lRarity == $RARITY_Blue Then ; blue items
-		Return True
+		If Not $CharrBossPickup Then
+			Return False
+		Else
+			Return True
+		EndIf
 	ElseIf $lModelID == $ITEM_ID_Lockpicks Then
 		Return True
 	ElseIf $lModelID == 22269 Then	; Cupcakes
@@ -841,11 +845,17 @@ Func CanPickUp($aItemPtr)
 	ElseIf $lModelID == $GC_I_MODELID_LUNAR_TOKEN Then ; Lunar Tokens
 		Return True
 	ElseIf IsPreCollectable($aItemPtr) Then
-		Return True
+		If Not $CharrBossPickup Then
+			Return False
+		Else
+			Return True
+		EndIf
 	ElseIf IsPcon($aItemPtr) Then ; ==== Pcons ==== or all event items
 		Return False
 	ElseIf IsRareMaterial($aItemPtr) Then	; rare Mats
 		Return False
+	ElseIf $lModelID == $CharrIDKit Then
+		Return True
 	Else
 		Return False
 	EndIf
@@ -3580,6 +3590,7 @@ Global $IsleOfSolitude = False
 Global Const $SupIDKit = 5899
 Global Const $ExpertSalvKit = 2991
 Global Const $Ectoplasm_ID = 930
+Global Const $CharrIDKit = 18721
 
 ;~ Outpost - Map
 Global Const $Town_ID_EyeOfTheNorth = 642

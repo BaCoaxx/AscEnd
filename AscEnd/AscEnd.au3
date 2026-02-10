@@ -1,6 +1,5 @@
 #RequireAdmin
 #include "../../API/_GwAu3.au3"
-#include "../../API/SmartCast/_UtilityAI.au3"
 #include "GwAu3_AddOns.au3"
 
 #Region Declarations
@@ -28,6 +27,7 @@ Global $Collector = False
 Global $Purple = False
 Global $spawn[2] = [0, 0]
 Global $hasBonus = False
+Global $CharrBossPickup = True
 
 $g_bAutoStart = False  ; Flag for auto-start
 $g_s_MainCharName  = ""
