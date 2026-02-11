@@ -115,32 +115,6 @@ Func RunSelectedFarm()
     Exit
 EndFunc
 
-Func GetBonus()
-    Map_RndTravel(148)
-    Sleep(250)
-
-    If FindSummoningStone() Then
-        LogInfo("Summoning stone found!")
-        Sleep(1000)
-        Return
-    EndIf
-
-    LogError("No stone found, grabbing bonus items!")
-    Chat_SendChat("bonus", "/")
-    Other_RndSleep(2500)
-
-    DeleteBonusItems()
-
-    If FindSummoningStone() Then
-        LogInfo("Bonus items collected successfully.")
-    Else
-        LogError("No bonus items available..")
-    EndIf
-    
-    Other_RndSleep(2500)
-    $hasBonus = True
-EndFunc
-
 ; =======================
 ; Crash Logging
 ; =======================

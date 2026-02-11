@@ -92,9 +92,9 @@ EndFunc	;==>GetEnergy
 #EndRegion
 
 #Region Movement
-Func RunTo($g_ai2_RunPath)
+Func RunTo($g_ai2_RunPath, $aFightBack = False)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
-        MoveTo($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1])
+        MoveTo($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 50, $aFightBack)
     Next
 EndFunc
 
@@ -126,8 +126,9 @@ Func MoveTo($aX, $aY, $aRandom = 50, $aFightBack = False)
 		If $aFightBack Then
 			Local $nearestEnemy = GetNearestEnemyToAgent(-2, 1500, $GC_I_AGENT_TYPE_LIVING, 1, "EnemyFilter")
 			If $nearestEnemy <> 0 Then
-				If Agent_GetAgentInfo($nearestEnemy, "IsAttacking") Then  
-					FightExFilter(400)
+				If Agent_GetAgentInfo($nearestEnemy, "IsAttacking") Then
+					LogWarn("Enemy is attacking us!")
+					AggroMoveToExFilter(Agent_GetAgentInfo($nearestEnemy, "X"), Agent_GetAgentInfo($nearestEnemy, "Y"), 1000)
 				EndIf
 			EndIf
 		EndIf
@@ -233,8 +234,8 @@ Func NeedHeal($Threshold = 70)
         Local $currentHP = Agent_GetAgentInfo(-2, 'CurrentHP')
         Local $maxHP = Agent_GetAgentInfo(-2, 'MaxHP')
         Local $hpPercent = Int(($currentHP / $maxHP) * 100)
-        If $hpPercent <= 85 Then
-			LogWarn("HP low (" & $hpPercent & "%), need healing!")
+        If $hpPercent <= 50 Then
+			LogWarn("HP low (" & $hpPercent & "%), need urgent healing!")
 		EndIf
         Return True
     EndIf
@@ -276,21 +277,12 @@ Func AggroMoveToExFilter($aX, $aY, $AggroRange = 1700, $filterFunc = "EnemyFilte
     $coords[0] = Agent_GetAgentInfo(-2, 'X')
     $coords[1] = Agent_GetAgentInfo(-2, 'Y')
     
-	; Check for healing in case some grawl lobbed a brick
-	If NeedHeal(95) Then UseHeal()
-
-	If $filterFunc = "EnemyFilter" Then
-		LogWarn("Fighting enemies!")
-	Else
-		LogWarn("Fighting enemies with the " & StringReplace($filterfunc, "Filter", "") & " filter!")
-	EndIf
-
     Do
         If GetPartyDead() Then ExitLoop
         Other_RndSleep(250)
         $oldCoords = $coords
         
-		; More healing checks
+		; Check for healing in case some grawl lobbed a brick
 		If NeedHeal(95) Then UseHeal()
 
 		; Use custom filter with FightExFilter
@@ -300,7 +292,17 @@ Func AggroMoveToExFilter($aX, $aY, $AggroRange = 1700, $filterFunc = "EnemyFilte
 			If GetPartyDead() Then ExitLoop
 			$distance = ComputeDistance(Agent_GetAgentInfo($enemy, 'X'), Agent_GetAgentInfo($enemy, 'Y'), Agent_GetAgentInfo(-2, 'X'), Agent_GetAgentInfo(-2, 'Y'))
 			If $distance < $AggroRange And $enemy <> 0 And Not GetPartyDead() Then
+
+				If NeedHeal(95) Then UseHeal()
+				
+				If $filterFunc = "EnemyFilter" Then
+					LogWarn("Fighting enemies!")
+				Else
+					LogWarn("Fighting enemies with the " & StringReplace($filterfunc, "Filter", "") & " filter!")
+				EndIf
+
 				FightExFilter($AggroRange, $filterFunc)
+
 				If SurvivorMode() Then Return
 			EndIf
 		EndIf
@@ -308,7 +310,7 @@ Func AggroMoveToExFilter($aX, $aY, $AggroRange = 1700, $filterFunc = "EnemyFilte
 		Other_RndSleep(250)
 		
 		; Check for healing after combat
-		If NeedHeal(95) Then UseHeal()
+		If NeedHeal(70) Then UseHeal()
 
         Other_RndSleep(250)
 
@@ -343,7 +345,7 @@ Func FightExFilter($AggroRange, $filterFunc = "EnemyFilter")
 			If SurvivorMode() Then Return
 
 			; Check for healing before engaging target
-			If NeedHeal(95) Then UseHeal()
+			If NeedHeal(70) Then UseHeal()
 
 			$target = GetNearestEnemyToAgent(-2, 1700, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc)
 			If GetPartyDead() Then Exitloop
@@ -362,6 +364,9 @@ Func FightExFilter($AggroRange, $filterFunc = "EnemyFilter")
 					Agent_CallTarget($target)
 					Other_RndSleep(150)
 					
+					; Check for healing after we've called them stupid
+					If NeedHeal(80) Then UseHeal()
+
 					If GetPartyDead() Then Exitloop
 					If SurvivorMode() Then Return
 					Agent_Attack($target)
@@ -379,6 +384,10 @@ Func FightExFilter($AggroRange, $filterFunc = "EnemyFilter")
 							If TimerDiff($TimerToKill) > 180000 Then Exitloop
 							If GetPartyDead() Then Exitloop
 							If SurvivorMode() Then Return
+							
+							; I didn't mean it, I'm sorry..
+							If NeedHeal(85) Then UseHeal()
+							
 							Map_Move($coordinate[0], $coordinate[1])
 							Other_RndSleep(50)
 							If GetPartyDead() Then Exitloop
@@ -419,7 +428,9 @@ Func FightExFilter($AggroRange, $filterFunc = "EnemyFilter")
 								If GetPartyDead() Then Exitloop
 								If SurvivorMode() Then Return
 								If Agent_GetAgentInfo($target, 'IsDead') Then ExitLoop
-
+								
+								If NeedHeal(95) Then UseHeal()
+								
 								$distance = GetDistance($target, -2)
 								If $distance > $AggroRange Then ExitLoop
 
@@ -430,11 +441,17 @@ Func FightExFilter($AggroRange, $filterFunc = "EnemyFilter")
 						
 								; Skip healing skills - they're handled separately
 								If IsHealingSkill($currentSkillID) Then ContinueLoop
-
+								
+								; Deal with adrenaline skills
+								If IsAdrenal($currentSkillID) Then
+									If Skill_GetSkillbarInfo($i+1, "Adrenaline") < Skill_GetSkillInfo($currentSkillID, "Adrenaline") Then ContinueLoop
+								EndIf
+								
 								If IsRecharged($i+1) And $energy >= Skill_GetSkillInfo(Skill_GetSkillbarInfo($i+1, "SkillID"), "EnergyCost") And Not GetPartyDead() Then
 									If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
 									If TimerDiff($TimerToKill) > 180000 Then Exitloop
 									$useSkill = $i + 1
+									
 									UseSkillEx($useSkill, $target)
 									Other_RndSleep(150)
 									If GetPartyDead() Then Exitloop
@@ -442,6 +459,8 @@ Func FightExFilter($AggroRange, $filterFunc = "EnemyFilter")
 									Agent_Attack($target)
 									Other_RndSleep(150)
 								EndIf
+
+								If NeedHeal(95) Then UseHeal()
 
 								If TimerDiff($TimerToKill) > 180000 Then Exitloop
 								If $i = 7 Then $i = -1 ; change -1
@@ -715,6 +734,10 @@ Func IsRecharged($aSkill)
 	Return Skill_GetSkillbarInfo($aSkill, "IsRecharged")
 EndFunc   ;==>IsRecharged
 
+Func IsAdrenal($aSkill)
+	Return Skill_GetSkillInfo($aSkill, "Adrenaline") <> 0 ? True : False
+EndFunc   ;==>IsAdrenal
+
 Func UseSkillEx($aSkill, $aTgt = -2, $aTimeout = 3000)
 	If GetIsDead(-2) Then Return
 	If Not IsRecharged($aSkill) Then Return
@@ -923,11 +946,11 @@ Func InventoryPre()
     MerchantAscalonPre()
     Sleep(2000)
     
-    If GetGoldCharacter() < 100 Then
+    If GetGoldCharacter() < 100 Or CountSlots() < 1 Then
         LogWarn("Selling common items to get 100 gold minimum, and free inventory space.")
         For $i = 1 To 4
             PreSell($i)
-            If GetGoldCharacter() >= 100 Then ExitLoop
+            If GetGoldCharacter() >= 100 And CountSlots() >= 1 Then ExitLoop
         Next
     EndIf
     
@@ -947,6 +970,7 @@ Func InventoryPre()
     EndIf
     
     LogWarn("Inventory management complete!")
+	Sleep(500)
 EndFunc ;==> InventoryPre
 
 Func Inventory()
@@ -1527,6 +1551,34 @@ Func UseSummoningStone()
 	Next
 	Return False
 EndFunc	   ;==>UseSummoningStone
+
+Func GetBonus()
+    Map_RndTravel(148)
+    Sleep(250)
+
+    If FindSummoningStone() Then
+        LogInfo("Summoning stone found!")
+        Sleep(1000)
+        DeleteBonusItems()
+        Sleep(2500)
+        Return
+    EndIf
+
+    LogError("No stone found, grabbing bonus items!")
+    Chat_SendChat("bonus", "/")
+    Other_RndSleep(2500)
+
+    DeleteBonusItems()
+
+    If FindSummoningStone() Then
+        LogInfo("Bonus items collected successfully.")
+    Else
+        LogError("No bonus items available..")
+    EndIf
+    
+    Other_RndSleep(2500)
+    $hasBonus = True
+EndFunc   ;==>GetBonus
 
 Func DeleteBonusItems()
 	Local $lItemPtr

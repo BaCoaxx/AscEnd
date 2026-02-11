@@ -10,48 +10,70 @@
 
 #ce ----------------------------------------------------------------------------
 
+; Res Shrine Piken
+Global $ResPikenPath[10][2] = [ _
+    [-16290, 265], _
+    [-15484, -605], _
+    [-14307, -2174], _
+    [-13175, -3228], _
+    [-13356, -3970], _
+    [-14713, -5473], _
+    [-14836, -6458], _
+    [-14362, -8275], _
+    [-14357, -10104], _
+    [-13699, -11596] _
+]
+
+; Res Shrine Gate
+Global $ResGatePath[5][2] = [ _
+    [-11006, -16076], _
+    [-11913, -14798], _
+    [-12326, -13915], _
+    [-12839, -12747], _
+    [-13659, -11658] _
+]
+
+; Starting Northlands Path
+Global $NormalGatePath[4][2] = [ _
+    [-11728, -16012], _
+    [-12340, -13890], _
+    [-12809, -12802], _
+    [-13624, -11596] _
+]
+
 ; Pathing from (Ashford -> gate lever)
-Global $CharrGatePath[12][2] = [ _
+Global $CharrGatePath[10][2] = [ _
     [-10627.17, -4904.59], _
     [-11205.81, -1182.31], _ 
     [-11641.63, 3165.87], _
-    [-9960.85,  4901.69], _
-    [-8935.92,  9607.10], _
-    [-9457.02,  11908.34], _
-    [-9458.33,  12982.73], _
-    [-8495.56,  12924.29], _
+    [-9960.85, 4901.69], _
+    [-8935.92, 9607.10], _
+    [-9457.02, 11908.34], _
+    [-9458.33, 12982.73], _
+    [-8495.56, 12924.29], _
     [-7555.65, 12870], _
-    [-5508.00, 12787.00], _
-    [-5758.45, 12803.25], _
     [-5502.18, 12899.44] _
 ]
 
 ; From gate lever -> through portal
-Global $CharrPortalPath[3][2] = [ _
+Global $CharrPortalPath[4][2] = [ _
+    [-5508.00, 12787.00], _
     [-3619.77, 11411.51], _
     [-5427.94, 11994.94], _
     [-5507.54, 13734.43] _
 ]
 
 ; Full charr route checkpoints
-Global $CharrFarmPath[17][2] = [ _
-   [-11629.00, -15956.36], _ ; Shrine
-   [-12033.32, -14604.69], _ ; Away from shrine
-   [-12584.11, -12676.72], _ ; Before oaks on right wall
-   [-12048.53, -10065.56], _ ; Middle broken structure
-   [-11199.42, -8363.05], _ ; Near oakheart on left by first charr group
-   [-10901.07, -7369.80], _ ; First charr group
-   [-8526.15, -5173.89], _ ; Right side of build past first charr group
-   [-5625.61, -4524.08], _ ; Grawl
-   [-3462.93, -3957.44], _ ; Before first charr roaming group
-   [-1976.49, -3610.97], _ ; Charr roaming group middle top
-   [-382.61, -2287.24], _ ; Before left group of charr
-   [67.48, -2287.14], _ ; Left group of charr
-   [-171.74, -1022.21], _ ; Pull back from left group of charr
-   [-597.83, -1017.77], _ ; Middle between fire shrines
-   [-148.26, -4245.54], _ ; Right side of charr group
-   [-597.83, -1017.77], _ ; Middle between fire shrines
-   [872.97, -3282.22] _ ; Final charr fight
+Global $CharrFarmPath[9][2] = [ _
+    [-12469.07, -8870.34], _  ; near oakheart on left by first charr group
+    [-10939.57, -7653.62], _  ; first charr group
+    [-5008.78, -4171.82], _  ; grawl
+    [-3462.93, -3957.44], _  ; before first charr roaming group
+    [-1976.49, -3610.97], _  ; charr roaming group middle top
+    [-850.03, -3451.81], _  ; middle away from charr
+    [-388.72, -3312.43], _  ; middle reposition
+    [-377.84, -1027.94], _  ; middle reposition
+    [1101.78, -3285.21] _   ; steps
 ]
 
 Func Farm_CharrBossFarm()
@@ -59,7 +81,7 @@ Func Farm_CharrBossFarm()
         If CountSlots() < 4 Then InventoryPre()
         If Not $hasBonus Then GetBonus()
         CharrSetup()
-        
+
         $CharrBossPickup = False ; Set this to 'True' if you want to pick up collectors items/blues on charr run, if 'False' will only pick up purples and higher
         
         While CountSlots() > 1
@@ -67,7 +89,7 @@ Func Farm_CharrBossFarm()
                 ResetStart()
                 Return
             EndIf
-
+            
             CharrBossFarm()
         WEnd
     WEnd
@@ -81,7 +103,7 @@ Func CharrSetup()
     Else
         LogWarn("Charr quest is active, we will abandon it so the way is clear.")
         Quest_AbandonQuest(0x2E)
-        Sleep(1000)
+        Sleep(2000)
     EndIf
 EndFunc
 
@@ -107,15 +129,16 @@ Func CharrBossFarm()
     
     ; 1) Ashford -> Charr Gate route 
     LogInfo("Running to Charr Gate...")
-    RunTo($CharrGatePath)
-    
+    RunTo($CharrGatePath, True)
+    Sleep(1000)
+
     ; 2) Pull lever to open the door
     LogInfo("Opening the gate lever...")
     Agent_GoSignpost(GetNearestGadgetToAgent(-2))
     Sleep(250)
     
     ; 3) Through the gate portal
-    LogInfo("Moving to Charr portal...")
+    LogInfo("Moving to the Charr portal...")
     RunTo($CharrPortalPath)
     Map_Move(-5598, 14178)
     Map_WaitMapLoading(147, 1)
@@ -123,8 +146,9 @@ Func CharrBossFarm()
     $RunTime = TimerInit()
     Sleep(3000)
     UseSummoningStone()
-    LogInfo("Arrived at Charr map. Starting checkpoints...")
+    LogInfo("Arrived in the Northlands, time to burn some furr.")
 
+    RunTo($NormalGatePath)
     RunToCBF($CharrFarmPath)
 
     LogInfo("Run complete. Restarting...")
@@ -138,7 +162,36 @@ EndFunc
 
 Func RunToCBF($g_a_RunPath)
     For $i = 0 To UBound($g_a_RunPath) - 1
-        AggroMoveToExFilter($g_a_RunPath[$i][0], $g_a_RunPath[$i][1], 2500, "CharrBossFilter")
+        AggroMoveToExFilter($g_a_RunPath[$i][0], $g_a_RunPath[$i][1], 3500, "CharrBossFilter")
+        
+        If GetIsDead() Then
+
+            $deaths += 1
+            If $deaths >= 10 Then
+                LogError("We died 10 times in a row, ditching this run!")
+                Return
+            EndIf
+
+            LogError("We died, starting over...")
+            Sleep(12000) ; Time to respawn
+
+            $spawn[0] = Agent_GetAgentInfo(-2, "X")
+            $spawn[1] = Agent_GetAgentInfo(-2, "Y")
+            Local $sp1 = ComputeDistance(-16290, 265, $spawn[0], $spawn[1]) ; Use piken shrine coords as reference
+            
+            Select
+                Case $sp1 <= 1000
+                    LogWarn("Respawned near Piken, let's get back to work!")
+                    RunTo($ResPikenPath, True)
+                Case Else
+                    LogWarn("Respawned near the gate, the better of the two!")
+                    RunTo($ResGatePath, True)
+            EndSelect
+
+            $i = 0
+            Sleep(2000)
+        EndIf
+        
         If SurvivorMode() Then
             LogError("Survivor mode activated!")
             Return
