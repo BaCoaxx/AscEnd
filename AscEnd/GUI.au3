@@ -58,10 +58,10 @@ Func _NowUTC()
 EndFunc
 
 ; Main Form
-$MainGui = GUICreate($BotTitle, 496, 400, 449, 181, -1, BitOR($WS_EX_TOPMOST,$WS_EX_WINDOWEDGE))
+$MainGui = GUICreate($BotTitle, 496, 411, 449, 181, -1, BitOR($WS_EX_TOPMOST,$WS_EX_WINDOWEDGE))
 
 ; Combo Boxes For Character Selection & Farms
-$Group3 = GUICtrlCreateGroup("", 8, 7, 480, 383, -1,  $WS_EX_TRANSPARENT)
+$Group3 = GUICtrlCreateGroup("", 8, 7, 480, 395, -1,  $WS_EX_TRANSPARENT)
 $Group1 = GUICtrlCreateGroup("Select Your Character", 16, 24, 193, 49)
 
 Global $GUINameCombo
@@ -133,7 +133,7 @@ $g_h_EditText = _GUICtrlRichEdit_Create($MainGui, "", 16, 197, 341, 114, BitOR($
 _GUICtrlRichEdit_SetBkColor($g_h_EditText, $COLOR_WHITE)
 
 ; Images, Tabs and Labels
-$Pic1 = GUICtrlCreatePic("nudes\AscEnd4.jpg", 371, 31, 108, 279)
+$Pic1 = GUICtrlCreatePic("nudes\AscEnd.jpg", 371, 31, 108, 279)
 $Label3 = GUICtrlCreateLabel("Run Time:", 242, 70, 53, 17)
 $Label4 = GUICtrlCreateLabel("Total Time:", 238, 87, 57, 17)
 $RunTimeLbl = GUICtrlCreateLabel("00:00:00", 293, 70, 46, 17)
@@ -182,29 +182,44 @@ GUICtrlCreateLabel("", 13, 351, 473, 2, $SS_ETCHEDHORZ, BitOR($WS_EX_CLIENTEDGE,
 $Progress = GUICtrlCreateProgress(15, 362, 465, 17, $PBS_SMOOTH)
 GUICtrlSetColor(-1, 0x00FF00)
 
-Func GetXPBarPercent($Level)
-    Local $iXP = World_GetWorldInfo("Experience")
+Func UpdateProgressBar()
+    Static $iLastXP = -1
 
-    ; Safety for max level
-    If $Level >= UBound($g_aLevelXP) - 1 Then Return 100
+    Local $iMyXP = World_GetWorldInfo("Experience")
 
-    Local $iXPThisLevel = $g_aLevelXP[$Level]
-    Local $iXPNextLevel = $g_aLevelXP[$Level + 1]
+    If $iMyXP = $iLastXP Then Return
+    $iLastXP = $iMyXP
 
-    Local $iIntoLevel = $iXP - $iXPThisLevel
-    Local $iRange = $iXPNextLevel - $iXPThisLevel
+    Local $iMyLevel = 0
 
-    If $iRange <= 0 Then Return 100
+    For $i = UBound($g_aLevelXP) - 1 To 0 Step -1
+        If $iMyXP >= $g_aLevelXP[$i] Then
+            $iMyLevel = $i
+            ExitLoop
+        EndIf
+    Next
 
-    Return Int(($iIntoLevel / $iRange) * 100)
+    ; At max level, fill the bar to 100%
+    If $iMyLevel >= UBound($g_aLevelXP) - 1 Then
+        GUICtrlSetData($Progress, 100)
+        Return
+    EndIf
+
+    Local $iLevelStart = $g_aLevelXP[$iMyLevel]
+    Local $iLevelEnd   = $g_aLevelXP[$iMyLevel + 1]
+
+    Local $fPercent = (($iMyXP - $iLevelStart) / ($iLevelEnd - $iLevelStart)) * 100
+
+    GUICtrlSetData($explbl, ($iLevelEnd - $iMyXP) & " XP Needed")
+    GUICtrlSetData($Progress, Round($fPercent))
 EndFunc
 
-Global $Level = 0
-Global $oldLevel = 0
-$levellbl = GUICtrlCreateLabel("Level: " & $Level, 224, 364, 48, 17)
+Global $Level = "--"
+$levellbl = GUICtrlCreateLabel("Level: " & $Level, 15, 383, 48, 17)
 GUICtrlSetFont(-1, 9, 400, 0, "MS Sans Serif")
 GUICtrlSetColor(-1, 0x008000)
-GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
+$explbl = GUICtrlCreateLabel($Level & " XP Needed", 216, 383, 264, 17, $SS_RIGHT)
+GUICtrlSetColor(-1, 0x008000)
 GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 GUISetOnEvent($GUI_EVENT_CLOSE, "GuiButtonHandler")
@@ -315,11 +330,11 @@ EndFunc
 
 Func UpdateProgress()
     If Map_GetInstanceInfo("Type") <> $GC_I_MAP_TYPE_LOADING Then
-        $Level = Agent_GetAgentInfo(-2, "Level")
-        If $Level <> $oldLevel Then
+        UpdateProgressBar()
+        Local $lvl = Agent_GetAgentInfo(-2, "Level")
+        If $lvl <> $Level Then
+            $Level = $lvl
             GUICtrlSetData($levellbl, "Level: " & $Level)
-            GUICtrlSetData($Progress, GetXPBarPercent($Level))
-            $oldLevel = $Level
         EndIf
     EndIf
 EndFunc

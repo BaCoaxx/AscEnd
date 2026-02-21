@@ -374,10 +374,96 @@ Func _UAI_Fight($a_f_x, $a_f_y, $a_f_AggroRange = 1320, $a_f_MaxDistanceToXY = 3
 			$g_i_ForceTarget = UAI_FindAgentByPlayerNumber($l_v_PriorityTargets, -2, $a_f_AggroRange, "UAI_Filter_IsLivingEnemy")
 			If $g_i_ForceTarget = 0 And $a_b_KillOnly Then ExitLoop
 		EndIf
-		UAI_UseSkills($a_f_x, $a_f_y, $a_f_AggroRange, $a_f_MaxDistanceToXY)
+		_UAI_UseSkills($a_f_x, $a_f_y, $a_f_AggroRange, $a_f_MaxDistanceToXY)
 		Sleep(128)
 	Until UAI_CountEnemyInPartyAggroRange($a_f_AggroRange) = 0 Or Agent_GetAgentInfo(-2, "IsDead") Or Party_IsWiped() Or Map_GetMapID() <> $l_i_MyOldMap Or Map_GetInstanceInfo("Type") <> $l_i_MapLoadingOld
 EndFunc   ;==>_UAI_Fight
+
+Func _UAI_UseSkills($a_f_x, $a_f_y, $a_f_AggroRange = 1320, $a_f_MaxDistanceToXY = 3500)
+	Static $ls_i_LowPrioSkill = 6
+	For $i = 1 To 6
+		Local $l_i_Slot = $i
+
+		if $l_i_Slot = 6 Then
+			$l_i_Slot = $ls_i_LowPrioSkill
+			$ls_i_LowPrioSkill += 1
+			If $ls_i_LowPrioSkill > 8 Then $ls_i_LowPrioSkill = 6
+		EndIf
+
+		If UAI_GetStaticSkillInfo($l_i_Slot, $GC_UAI_STATIC_SKILL_SkillID) = 0 Then ContinueLoop
+		
+		If SurvivorMode() Then Return
+
+		UAI_UpdateCache($a_f_AggroRange)
+		If UAI_CountEnemyInPartyAggroRange($a_f_AggroRange) = 0 Then ExitLoop
+		If $g_b_CacheWeaponSet Then UAI_ShouldSwitchWeaponSet()
+
+		If UAI_GetPlayerInfo($GC_UAI_AGENT_IsDead) Or SurvivorMode() Or Party_IsWiped() = 1 Or Map_GetInstanceInfo("Type") <> $GC_I_MAP_TYPE_EXPLORABLE Or UAI_GetPlayerInfo($GC_UAI_AGENT_IsKnockedDown) Then Return
+
+		If $g_b_SkillChanged = True Then
+			If Cache_EndFormChangeBuild($l_i_Slot) Then
+				$g_b_SkillChanged = False
+			EndIf
+		EndIf
+
+		Local $l_i_PlayerRangeEnemy = UAI_GetNearestAgent(-2, $a_f_AggroRange, "UAI_Filter_IsLivingEnemy|UAI_Filter_IsNotAvoided")
+		If $l_i_PlayerRangeEnemy = 0 Then
+			Local $l_i_PartyRangeEnemy = UAI_GetNearestEnemyInPartyRange($a_f_AggroRange)
+			If $l_i_PartyRangeEnemy <> 0 Then
+				Local $l_f_EnemyX = UAI_GetAgentInfoByID($l_i_PartyRangeEnemy, $GC_UAI_AGENT_X)
+				Local $l_f_EnemyY = UAI_GetAgentInfoByID($l_i_PartyRangeEnemy, $GC_UAI_AGENT_Y)
+				Map_Move($l_f_EnemyX, $l_f_EnemyY, 0)
+				Sleep(500)
+				Return
+			EndIf
+		EndIf
+
+		If SurvivorMode() Then Return
+
+		If UAI_CanAutoAttack() Then
+			If $g_i_ForceTarget <> 0 Then
+				Agent_Attack($g_i_ForceTarget)
+			Else
+				Agent_Attack(UAI_GetNearestAgent(-2, $a_f_AggroRange, "UAI_Filter_IsLivingEnemy|UAI_Filter_IsNotAvoided"), False)
+			EndIf
+		Else
+			If UAI_GetPlayerInfo($GC_UAI_AGENT_IsAttacking) Then Core_ControlAction($GC_I_CONTROL_ACTION_CANCEL_ACTION)
+		EndIf
+
+		UAI_PrioritySkills($a_f_AggroRange)
+		If SurvivorMode() Then Return
+
+		UAI_DropBundle($a_f_AggroRange)
+		If SurvivorMode() Then Return
+
+		If UAI_CanCast($l_i_Slot) Then
+			$g_i_BestTarget = Call($g_as_BestTargetCache[$l_i_Slot], $a_f_AggroRange)
+			If $g_i_ForceTarget <> 0 And UAI_GetAgentInfoByID($g_i_BestTarget, $GC_UAI_AGENT_Allegiance) = $GC_I_ALLEGIANCE_ENEMY Then
+				$g_i_BestTarget = $g_i_ForceTarget
+			EndIf
+			If $g_i_BestTarget = 0 Then ContinueLoop
+			If Not UAI_Filter_IsNotAvoided($g_i_BestTarget) Then ContinueLoop
+
+			$g_b_CanUseSkill = Call($g_as_CanUseCache[$l_i_Slot])
+
+			If $g_b_CanUseSkill = True And Agent_GetDistance($g_i_BestTarget) < $a_f_AggroRange Then
+				UAI_UseSkillEX($l_i_Slot, $g_i_BestTarget)
+				If Cache_FormChangeBuild($l_i_Slot) Then $g_b_SkillChanged = True
+			Else
+				ContinueLoop
+			EndIf
+		EndIf
+
+		If SurvivorMode() Then Return
+
+		If $a_f_MaxDistanceToXY <> 0 Then
+			If $a_f_x <> 0 Or $a_f_y <> 0 Then
+				If Agent_GetDistanceToXY($a_f_x, $a_f_y) > $a_f_MaxDistanceToXY Then ExitLoop
+			EndIf
+		EndIf
+	Next
+	Return True
+EndFunc   ;==>_UAI_UseSkills
 
 ;~ Func FightExFilter($AggroRange, $filterFunc = "EnemyFilter")
 ;~ 	If GetPartyDead() Then Return
@@ -1090,8 +1176,10 @@ Func InventoryPre()
         LogError("Not enough gold to buy ID kit, returning...")
         Return
     EndIf
+
+    UpdateStats()
     
-    LogWarn("Inventory management complete!")
+	LogWarn("Inventory management complete!")
 	Sleep(500)
 EndFunc ;==> InventoryPre
 
@@ -1220,7 +1308,7 @@ Func MerchantAscalonPre()
     
     LogInfo("Talking to Merchant..")
     Local $guy = GetNearestNPCToAgent(-2, 1320, $GC_I_AGENT_TYPE_LIVING, 1, "NPCFilter")
-    MoveTo(Agent_GetAgentInfo($guy, "X") - 20, Agent_GetAgentInfo($guy, "Y") - 20)
+    MoveTo(Agent_GetAgentInfo($guy, "X"), Agent_GetAgentInfo($guy, "Y"), 20)
     Agent_GoNPC($guy)
     Sleep(1000)
 EndFunc ;==> MerchantAscalonPre
