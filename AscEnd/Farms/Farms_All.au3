@@ -9,8 +9,10 @@
 #include "Farm_GargoyleSkull.au3"
 #include "Farm_EnchLodes.au3"
 #include "Farm_IcyLodes.au3"
+#include "Farm_BakedHusk.au3"
+#include "Farm_Skeletons.au3"
 
-Global $g_a_Farms[11][2] = [ _
+Global $g_a_Farms[13][2] = [ _
     ["", ""], _
     ["Red Iris Run", "Farm_RedIris"], _
     ["Charr at the Gate", "Farm_CharrAtTheGate"], _
@@ -21,5 +23,7 @@ Global $g_a_Farms[11][2] = [ _
     ["Charr Boss Farm", "Farm_CharrBossFarm"], _
     ["Gargoyle Skulls", "Farm_GargoyleSkull"], _
     ["Enchanted Lodes", "Farm_EnchLodes"], _
-    ["Icy Lodes", "Farm_IcyLodes"] _
+    ["Icy Lodes", "Farm_IcyLodes"], _
+    ["Baked Husks", "Farm_BakedHusk"], _
+    ["Skeleton Limbs", "Farm_SkeletonLimbs"] _
 ]

@@ -690,6 +690,10 @@ Global $SpiderAloeFilter[6] = [1401, 1403, 1426, 1428, 1429]
 
 Global $EnchLodesFilter[2] = [1415, 1414]
 
+Global $WurmFilter[2] = [1346, 1442]
+
+Global $SkellyFilter[2] = [1518, 1520]
+
 Func EnemyFilter($aAgentPtr)
 
     If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 3 Then Return False
