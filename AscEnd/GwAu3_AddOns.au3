@@ -40,7 +40,7 @@ Func CalculateAverageTime()
     $averagetime = Round($averagetime)
     $AvgRunTimeMinutes = Int($averagetime / 60)
     $AvgRunTimeSeconds = Mod($averagetime , 60)
-EndFunc ;==> CalculateAverageTime
+EndFunc   ;==> CalculateAverageTime
 
 Func CalculateFastestTime()
     Local $fastesttime
@@ -59,7 +59,7 @@ Func CalculateFastestTime()
 
     $RunTimeMinutes = Int($fastesttime / 60)
     $RunTimeSeconds = Mod($fastesttime , 60)
-EndFunc ;==> CalculateFastestTime
+EndFunc   ;==> CalculateFastestTime
 #EndRegion Calculations
 
 #Region Travel
@@ -69,7 +69,7 @@ Func RndTravel($aMapID)
     Local $Region[11]   = [2, 2, 2, 2, 2, 2, 2, -2, 1, 3, 4]
     Local $Language[11] = [0, 2, 3, 4, 5, 9, 10, 0, 0, 0, 0]
     Local $Random = Random(0, $UseDistricts - 1, 1)
-;~ 	MoveMap($aMapID, $Region[$Random], 0, $Language[$Random])
+ 	;MoveMap($aMapID, $Region[$Random], 0, $Language[$Random])
     Map_MoveMap($aMapID, $Region[$Random], 0, $Language[5])
     Map_WaitMapLoading($aMapID, 0)
     Sleep(1000)
@@ -84,11 +84,11 @@ EndFunc   ;==>Resign
 
 Func GetIsDead($aAgent = -2)
     Return Agent_GetAgentInfo($aAgent, "IsDead")
-EndFunc	;==>GetisDead
+EndFunc	  ;==>GetIsDead
 
 Func GetEnergy($aAgent = -2)
     Return Agent_GetAgentInfo($aAgent, "CurrentEnergy")
-EndFunc	;==>GetEnergy
+EndFunc	  ;==>GetEnergy
 #EndRegion
 
 #Region Movement
@@ -666,7 +666,7 @@ EndFunc   ;==> CacheHeroesWithRez
 Func GetPartyDefeated()
     ; Party is defeated, when you die, while Malus is at 60%
     Return Party_GetPartyContextInfo("IsDefeated")
-EndFunc ;==> GetPartyDefeated
+EndFunc   ;==> GetPartyDefeated
 
 Func GetPartySize()
     Local $aParty = Party_GetMyPartyInfo("ArrayPlayerPartyMemberSize")
@@ -688,6 +688,8 @@ Global $CharrFilter[11] = [1450, 1451, 1453, 1638, 1640, 1643, 1648, 1652, 1656,
 Global $BanditFilter[10] = [1420, 1421, 1422, 1423, 7824, 7825, 7839, 7840, 7857, 7858]
 
 Global $SpiderAloeFilter[6] = [1401, 1403, 1426, 1428, 1429]
+
+Global $EnchLodesFilter[2] = [1415, 1414]
 
 Func EnemyFilter($aAgentPtr)
 
