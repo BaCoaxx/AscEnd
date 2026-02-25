@@ -60,7 +60,8 @@ Func Farm_GargoyleSkull()
             GargoyleSkull()
 
             If SurvivorMode() Then
-                Return
+                LogError("Survivor mode activated!")
+                ExitLoop
             EndIf
         WEnd
     WEnd
@@ -102,14 +103,10 @@ Func GargoyleSkull()
     GargoyleKillPhrase()
     AggroMoveSmartFilter(-6655, 15657, 2000, 2000)
 
-    If SurvivorMode() Then
-        LogError("Survivor mode activated!")
-        Return
-    EndIf
-
     LogInfo("Run complete. Restarting...")
     UpdateStats()
     Other_RndSleep(250)
+    If SurvivorMode() Then Return
 
     RunTo($GargPath3)
     Map_Move(-4000, 9560)

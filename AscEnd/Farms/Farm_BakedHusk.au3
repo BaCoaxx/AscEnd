@@ -86,7 +86,7 @@ EndFunc
 
 Func RunToWurms($g_ai2_RunPath)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
-        AggroMoveSmartFilter($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 2500, 2500, $WurmFilter, True, 2500)
+        AggroMoveSmartFilter($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 1800, 1800, $WurmFilter, True, 1800)
         If SurvivorMode() Then
             LogError("Survivor mode activated!")
             Return

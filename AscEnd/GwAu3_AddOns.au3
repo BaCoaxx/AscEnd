@@ -95,6 +95,7 @@ EndFunc   ;==>GetEnergy
 Func RunTo($g_ai2_RunPath, $aFightBack = False)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
         MoveTo($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 50, $aFightBack)
+        If SurvivorMode(40) Then Return
     Next
 EndFunc
 
@@ -693,6 +694,8 @@ Global $EnchLodesFilter[2] = [1415, 1414]
 Global $WurmFilter[2] = [1346, 1442]
 
 Global $SkellyFilter[2] = [1518, 1520]
+
+Global $SkaleFilter[4] = [1433, 1431, 1432, 1436]
 
 Func EnemyFilter($aAgentPtr)
 
