@@ -697,6 +697,8 @@ Global $SkellyFilter[2] = [1518, 1520]
 
 Global $SkaleFilter[4] = [1433, 1431, 1432, 1436]
 
+Global $CarapaceFilter[2] = [1409, 1405]
+
 Func EnemyFilter($aAgentPtr)
 
     If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 3 Then Return False
@@ -1068,7 +1070,7 @@ Func CanPickUp($aItemPtr)
     ElseIf $lRarity == $RARITY_Purple Then ; purple items
         Return True
     ElseIf $lRarity == $RARITY_Blue Then ; blue items
-        If Not $CharrBossPickup Then
+        If $CharrBossFarm Then
             Return False
         Else
             Return True
@@ -1080,7 +1082,7 @@ Func CanPickUp($aItemPtr)
     ElseIf $lModelID == $GC_I_MODELID_LUNAR_TOKEN Then ; Lunar Tokens
         Return True
     ElseIf IsPreCollectable($aItemPtr) Then
-        If Not $CharrBossPickup Then
+        If $CharrBossFarm Then
             Return False
         Else
             Return True

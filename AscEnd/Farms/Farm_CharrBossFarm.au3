@@ -82,7 +82,7 @@ Func Farm_CharrBossFarm()
         If Not $hasBonus Then GetBonus()
         CharrSetup()
 
-        $CharrBossPickup = False ; Set this to 'True' if you want to pick up collectors items/blues on charr run, if 'False' will only pick up purples and higher
+        $CharrBossFarm = True ; Set this to 'True' if you only want to farm charr bosses, if 'False' will pickup collectibles.
         
         While CountSlots() > 1
             If Not $BotRunning Then

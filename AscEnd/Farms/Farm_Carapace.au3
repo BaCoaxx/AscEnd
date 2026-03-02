@@ -6,11 +6,11 @@
      Author:         Coaxx
 
      Script Function:
-        Skale Fin Farm - Pre Searing
+        Dull Carapace Farm - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
-Global $SkaleSetup[10][2] = [ _
+Global $CarapaceSetup[10][2] = [ _
     [-8595, -6568], _
     [-6951, -6772], _
     [-6465, -7068], _
@@ -23,50 +23,50 @@ Global $SkaleSetup[10][2] = [ _
     [4143, -19758] _
 ]
 
-Global $SkalePath1[6][2] = [ _
-    [2079, -18318], _
-    [910, -16191], _
-    [-2069, -14633], _
-    [-2332, -14641], _
-    [-2528, -15227], _
-    [-3398, -15805] _
+Global $CarapacePath1[2][2] = [ _
+    [-14918, 15433], _
+    [-15188, 14815] _
 ]
 
-Global $SkaleFarm1[5][2] = [ _
-    [-3746, -15898], _
-    [-3374, -17231], _
-    [-2749, -18649], _
-    [-1568, -19209], _
-    [-380, -19433] _
+Global $CarapaceFarm[11][2] = [ _
+    [-15358, 14551], _
+    [-16805, 12898], _
+    [-17370, 10669], _
+    [-16618, 8814], _
+    [-18950, 8400], _
+    [-20347, 7509], _
+    [-19935, 5051], _
+    [-18909, 3565], _
+    [-17312, 1740], _
+    [-15768, 69], _
+    [-15382, 646] _
 ]
 
-Global $SkalePath2[6][2] = [ _
-    [-1568, -19209], _
-    [-2517, -18502], _
-    [-3619, -16209], _
-    [-3407, -15809], _
-    [-2398, -15259], _
-    [-2213, -14285] _
+Global $CarapacePath2[16][2] = [ _
+    [-16339, 671], _
+    [-16974, 1652], _
+    [-18175, 2754], _
+    [-19377, 4139], _
+    [-19882, 5180], _
+    [-20080, 6759], _
+    [-19883, 7776], _
+    [-19184, 8291], _
+    [-18626, 8446], _
+    [-17740, 9094], _
+    [-17326, 10450], _
+    [-17404, 11969], _
+    [-16488, 13237], _
+    [-15536, 14213], _
+    [-15003, 15083], _
+    [-14748, 15998] _
 ]
 
-Global $SkaleFarm2[2][2] = [ _
-    [-1764, -13115], _
-    [-1013, -11793] _
-]
-
-Global $SkalePath3[4][2] = [ _
-    [-478, -15145], _
-    [1095, -16530], _
-    [1886, -18057], _
-    [4139, -19782] _
-]
-
-Func Farm_Skale()
+Func Farm_Carapace()
     While 1
         If CountSlots() < 4 Then InventoryPre()
         If Not $hasBonus Then GetBonus()
         
-        SkaleSetup()
+        CarapaceSetup()
 
         While CountSlotS() > 1
             If Not $BotRunning Then
@@ -74,7 +74,7 @@ Func Farm_Skale()
                 Return
             EndIf
 
-            Skale()
+            Carapace()
 
             If SurvivorMode() Then
                 LogError("Survivor mode activated!")
@@ -84,9 +84,9 @@ Func Farm_Skale()
     WEnd
 EndFunc
 
-Func SkaleSetup()
+Func CarapaceSetup()
     If Map_GetMapID() = 164 Then
-        LogInfo("We are in Ashford Abbey. Starting the Skale Fin farm...")
+        LogInfo("We are in Ashford Abbey. Starting the Dull Carapace farm...")
     ElseIf Map_GetMapID() <> 164 And Map_IsMapUnlocked(164) Then
         LogInfo("We are not in Ashford Abbey. Teleporting to Ashford...")
         Map_RndTravel(164)
@@ -103,43 +103,32 @@ Func SkaleSetup()
     ExitAshford()
     Sleep(1000)
 
-    LogInfo("Did you hear what Prince Rurik got for Lady Althea?")
-    RunTo($SkaleSetup)
-    LogInfo("He went fishing and gave her a codpiece.")
+    LogInfo("Rumour has it, Sarah is out looking for Myrtle Weed again. Fifth time this week!")
+    RunTo($CarapaceSetup)
+    LogInfo("Oh Mr Twindle, if only she knew...")
     
     Sleep(500)
-
-    Map_Move(4545, -19766)
-    Map_WaitMapLoading(162, 1)
-    Sleep(1000)
 EndFunc
 
-Func Skale()
-    Map_Move(-17382, 17060)
-    Map_WaitMapLoading(146, 1)
-
+Func Carapace()
+    Map_Move(4545, -19766)
+    Map_WaitMapLoading(162, 1)
     Sleep(1000)
 
     $RunTime = TimerInit()
 
-    LogInfo("Skale hunting season never ends!")
+    LogInfo("I wish I could hold onto this moment, like a leaf clinging to a branch.")
     
     UseSummoningStone()
     
-    RunTo($SkalePath1)
-    LogInfo("These skales really weigh on me.")
+    RunTo($CarapacePath1)
+    LogInfo("Crunchy underfoot. I should probably tread lighter.")
     
-    RunToSkale($SkaleFarm1)
-    LogInfo("Searing? Never heard of her.")
+    RunToCarapace($CarapaceFarm)
+    LogInfo("They fall so easily. Guess everything does, eventually...")
     
-    RunTo($SkalePath2)
-    LogInfo("Oops! I did it again..")
-    
-    RunToSkale($SkaleFarm2)
-    LogInfo("One skale at a time before the sky turns red.")
-
-    RunTo($SkalePath3)
-    LogInfo("Nice day for fishing, aint it?")
+    RunTo($CarapacePath2)
+    LogInfo("Autumn is nature's way of reminding us that letting go can be beautiful.")
 
     Other_RndSleep(250)
     
@@ -147,14 +136,14 @@ Func Skale()
     UpdateStats()
     If SurvivorMode() Then Return
     Sleep(1000)
-    Map_Move(4545, -19766)
-    Map_WaitMapLoading(162, 1)
+    Map_Move(-17382, 17060)
+    Map_WaitMapLoading(146, 1)
     Sleep(1000)
 EndFunc
 
-Func RunToSkale($g_ai2_RunPath)
+Func RunToCarapace($g_ai2_RunPath)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
-        AggroMoveSmartFilter($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 1400, 1400, $SkaleFilter, True)
+        AggroMoveSmartFilter($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 1400, 1400, $CarapaceFilter, True, 1400)
         If SurvivorMode() Then Return
         Sleep(100)
     Next

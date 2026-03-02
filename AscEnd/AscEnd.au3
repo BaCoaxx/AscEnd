@@ -28,7 +28,7 @@ Global $Collector = False
 Global $Purple = False
 Global $spawn[2] = [0, 0]
 Global $hasBonus = False
-Global $CharrBossPickup = True
+Global $CharrBossFarm = False
 
 $g_bAutoStart = False  ; Flag for auto-start
 $g_s_MainCharName  = ""
