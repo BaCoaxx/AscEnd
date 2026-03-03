@@ -166,7 +166,7 @@ Func RunToCBF($g_a_RunPath)
         
         If GetIsDead() Then
 
-            $deaths += 1
+            Local $deaths = $deaths + 1
             If $deaths >= 10 Then
                 LogError("We died 10 times in a row, ditching this run!")
                 Return

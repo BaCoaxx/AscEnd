@@ -687,7 +687,7 @@ Global $CharrFilter[11] = [1450, 1451, 1453, 1638, 1640, 1643, 1648, 1652, 1656,
 
 Global $BanditFilter[10] = [1420, 1421, 1422, 1423, 7824, 7825, 7839, 7840, 7857, 7858]
 
-Global $SpiderAloeFilter[6] = [1401, 1403, 1426, 1428, 1429]
+Global $SpiderAloeFilter[5] = [1401, 1403, 1426, 1428, 1429]
 
 Global $EnchLodesFilter[2] = [1415, 1414]
 
@@ -698,6 +698,8 @@ Global $SkellyFilter[2] = [1518, 1520]
 Global $SkaleFilter[4] = [1433, 1431, 1432, 1436]
 
 Global $CarapaceFilter[2] = [1409, 1405]
+
+Global $GrawlNecklaceFilter[3] = [1438, 1437, 1439]
 
 Func EnemyFilter($aAgentPtr)
 
@@ -1310,11 +1312,10 @@ Func MerchantAscalonPre()
 
     If $sp1 > 3000 Then MoveTo(8339.99, 6202.35)
     
-    MoveTo(8450.46, 4900.70)
+    MoveTo(8488.07, 4870.26)
     
     LogInfo("Talking to Merchant..")
     Local $guy = GetNearestNPCToAgent(-2, 1320, $GC_I_AGENT_TYPE_LIVING, 1, "NPCFilter")
-    MoveTo(Agent_GetAgentInfo($guy, "X"), Agent_GetAgentInfo($guy, "Y"), 20)
     Agent_GoNPC($guy)
     Sleep(1000)
 EndFunc   ;==> MerchantAscalonPre
@@ -1815,16 +1816,54 @@ Func DeleteBonusItems()
 EndFunc   ;==>DeleteBonusItems
 
 Func QuestActive($questID)
-    Local $hasquest = Quest_GetQuestInfo($questID, "Location") <> 0 ? True : False
+    
+    Local $bHasQuest = InQuestLog($questID)
 
-    If $hasquest Then
+    If $bHasQuest = True Then
         LogInfo("Quest is in our quest log!")
         Ui_ActiveQuest($questID)
-    Else 
+    Else
         LogInfo("Quest is not in our quest log!")
     EndIf
+
     Sleep(250)
 EndFunc   ;==>QuestActive
+
+Func InQuestLog($questID)
+
+    Local $l_questArray = Quest_GetQuestArray()
+    If $l_questArray = 0 Then Return False
+
+    For $i = 0 To UBound($l_questArray) - 1
+        If $l_questArray[$i] = $questID Then
+            Return True
+        EndIf
+    Next
+
+    Return False
+EndFunc   ;==>InQuestLog
+
+Func Quest_GetQuestArray()
+    Local $l_i_Size = World_GetWorldInfo("QuestLogSize")
+    If $l_i_Size = 0 Then Return 0
+
+    Local $l_ai_QuestArray[$l_i_Size]
+    Local $l_i_Count = 0
+
+    For $l_i_Idx = 0 To $l_i_Size - 1
+        Local $l_ai_OffsetQuestLog[5] = [0, 0x18, 0x2C, 0x52C, 0x34 * $l_i_Idx]
+        Local $l_ap_QuestPtr = Memory_ReadPtr($g_p_BasePointer, $l_ai_OffsetQuestLog, "long")
+        Local $l_i_QuestID = $l_ap_QuestPtr[1]
+        If $l_i_QuestID <> 0 Then
+            $l_ai_QuestArray[$l_i_Count] = $l_i_QuestID
+            $l_i_Count += 1
+        EndIf
+    Next
+
+    If $l_i_Count = 0 Then Return 0
+    ReDim $l_ai_QuestArray[$l_i_Count]
+    Return $l_ai_QuestArray
+EndFunc   ;==>Quest_GetQuestArray
 
 Func PreSell($BagIndex)
     Local $aItemPtr

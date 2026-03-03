@@ -113,7 +113,7 @@ EndFunc
 
 Func RunToIris($g_a_RunPath)
     For $i = 0 To UBound($g_a_RunPath) - 1
-        MoveTo($g_a_RunPath[$i][0], $g_a_RunPath[$i][1], 50, True)
+        MoveTo($g_a_RunPath[$i][0], $g_a_RunPath[$i][1], 50)
         
         If $g_a_RunPath[$i][2] = "RedIris" Then IrisPickUp()
     Next

@@ -65,7 +65,7 @@ Func CheckQuest()
     If $CharrState = 1 Then
         LogInfo("Is that a roast furry!")
         Return
-    ElseIf ($CharrState = 0) Or ($CharrState = 3) Then
+    Else
         Quest_AbandonQuest(0x2E)
         Sleep(500)
         
