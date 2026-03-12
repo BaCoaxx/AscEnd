@@ -3,56 +3,43 @@
 #cs ----------------------------------------------------------------------------
 
      AutoIt Version: 3.3.18.0
-     Author:         Incognito
+     Author:         Incognito/Coaxx
 
      Script Function:
         Charr Boss Farm - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
-; Res Shrine Piken
-Global $ResPikenPath[10][2] = [ _
-    [-16290, 265], _
-    [-15484, -605], _
-    [-14307, -2174], _
-    [-13175, -3228], _
-    [-13356, -3970], _
-    [-14713, -5473], _
-    [-14836, -6458], _
-    [-14362, -8275], _
-    [-14357, -10104], _
-    [-13699, -11596] _
-]
-
-; Res Shrine Gate
-Global $ResGatePath[5][2] = [ _
-    [-11006, -16076], _
-    [-11913, -14798], _
-    [-12326, -13915], _
-    [-12839, -12747], _
-    [-13659, -11658] _
-]
-
 ; Starting Northlands Path
-Global $NormalGatePath[4][2] = [ _
+Global $NormalGatePath[6][2] = [ _
     [-11728, -16012], _
     [-12340, -13890], _
     [-12809, -12802], _
-    [-13624, -11596] _
+    [-13624, -11596], _
+    [-12469, -8870], _
+    [-11182, -7232] _
 ]
 
 ; Pathing from (Ashford -> gate lever)
-Global $CharrGatePath[10][2] = [ _
-    [-10627.17, -4904.59], _
-    [-11205.81, -1182.31], _ 
-    [-11641.63, 3165.87], _
-    [-9960.85, 4901.69], _
-    [-8935.92, 9607.10], _
-    [-9457.02, 11908.34], _
-    [-9458.33, 12982.73], _
-    [-8495.56, 12924.29], _
-    [-7555.65, 12870], _
-    [-5502.18, 12899.44] _
+Global $CharrGatePath[18][2] = [ _
+    [-10813, -5410], _
+    [-10630, -4006], _
+    [-11138, -884], _
+    [-11639, 1939], _
+    [-11751, 2854], _
+    [-11660, 3332], _
+    [-11294, 3735], _
+    [-10438, 4183], _
+    [-9972, 4678], _
+    [-9539, 6063], _
+    [-9122, 8956], _
+    [-9060, 10189], _
+    [-9249, 11470], _
+    [-9367, 12375], _
+    [-9333, 12484], _
+    [-9225, 12687], _
+    [-7706, 12819], _
+    [-5510, 12860] _
 ]
 
 ; From gate lever -> through portal
@@ -63,26 +50,14 @@ Global $CharrPortalPath[4][2] = [ _
     [-5507.54, 13734.43] _
 ]
 
-; Full charr route checkpoints
-Global $CharrFarmPath[9][2] = [ _
-    [-12469.07, -8870.34], _  ; near oakheart on left by first charr group
-    [-10939.57, -7653.62], _  ; first charr group
-    [-5008.78, -4171.82], _  ; grawl
-    [-3462.93, -3957.44], _  ; before first charr roaming group
-    [-1976.49, -3610.97], _  ; charr roaming group middle top
-    [-850.03, -3451.81], _  ; middle away from charr
-    [-388.72, -3312.43], _  ; middle reposition
-    [-377.84, -1027.94], _  ; middle reposition
-    [1101.78, -3285.21] _   ; steps
-]
-
 Func Farm_CharrBossFarm()
+    
+    $CharrBossFarm = True ; Set this to 'True' if you only want to farm charr bosses, if 'False' will pickup all collectibles.
+    CharrSetup()
+
     While 1
         If CountSlots() < 4 Then InventoryPre()
         If Not $hasBonus Then GetBonus()
-        CharrSetup()
-
-        $CharrBossFarm = True ; Set this to 'True' if you only want to farm charr bosses, if 'False' will pickup collectibles.
         
         While CountSlots() > 1
             If Not $BotRunning Then
@@ -105,6 +80,33 @@ Func CharrSetup()
         Quest_AbandonQuest(0x2E)
         Sleep(2000)
     EndIf
+
+    If Map_GetInstanceInfo("Type") <> 0 Then
+        Map_RndTravel(148)
+    EndIf
+
+    Sleep(1000)
+
+    Local $Pri = Agent_GetAgentInfo(-2, "Primary")
+    Local $Sec = Agent_GetAgentInfo(-2, "Secondary")
+
+    $gProf =  ($Pri * 10) + $Sec ; Identify prof combos
+
+    Switch $gProf
+        Case 63
+            LogInfo("Loading E/Mo upkeep skills and build...")
+            Sleep(500)
+            Attribute_LoadSkillTemplate("OgNEoIn99WgsihShNzVSLQC")
+            Sleep(250)
+            $gUpkeepSkills = $EmoUpkeep
+            Sleep(1500)
+        Case Else
+            LogWarn("We do not have a viable build set up for your professions.")
+            LogStatus("Bot will now pause.")
+            $BotRunning = False
+            ResetStart()
+            Return
+    EndSwitch
 EndFunc
 
 Func CharrBossFarm()
@@ -129,7 +131,7 @@ Func CharrBossFarm()
     
     ; 1) Ashford -> Charr Gate route 
     LogInfo("Running to Charr Gate...")
-    RunTo($CharrGatePath, True)
+    RunTo($CharrGatePath)
     Sleep(1000)
 
     ; 2) Pull lever to open the door
@@ -143,15 +145,33 @@ Func CharrBossFarm()
     Map_Move(-5598, 14178)
     Map_WaitMapLoading(147, 1)
 
-    $RunTime = TimerInit()
-    Sleep(3000)
-    UseSummoningStone()
-    LogInfo("Arrived in the Northlands, time to burn some furr.")
+    If Map_GetMapID() <> 147 Then
+        LogError("Failed to arrive in the Northlands. Restarting...")
+        Return
+    EndIf
 
-    RunTo($NormalGatePath)
-    RunToCBF($CharrFarmPath)
+    Sleep(3000)
+
+    LogInfo("Arrived in the Northlands, time to burn some furr.")
+    
+    $RunTime = TimerInit()
+
+    UseSummoningStone()
+    RunToUpkeep($NormalGatePath, $gUpkeepSkills)
+
+    FirstGroup()
+
+    Grawl() ; Fight Grawl if they are there?
+
+    SecondGroup()
+
+    LeftCorner()
+
+    Bosses()
 
     LogInfo("Run complete. Restarting...")
+    UpdateStats()
+    Other_RndSleep(250)
     Resign()
     Sleep(5000)
     Map_ReturnToOutpost()
@@ -160,59 +180,156 @@ Func CharrBossFarm()
     Sleep(1000)
 EndFunc
 
-Func RunToCBF($g_a_RunPath)
-    For $i = 0 To UBound($g_a_RunPath) - 1
-        AggroMoveSmartFilter($g_a_RunPath[$i][0], $g_a_RunPath[$i][1], 3500, $CharrFilter, True)
-        
-        If GetIsDead() Then
+Func FirstGroup()    
+    $timer = TimerInit()
 
-            Local $deaths = $deaths + 1
-            If $deaths >= 10 Then
-                LogError("We died 10 times in a row, ditching this run!")
-                Return
-            EndIf
+    Do
+        StayAlive()
+    Until GetNumberOfCharrInRangeOfXY(-11175, -7227, 3480) <= 5 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime
 
-            LogError("We died, starting over...")
-            Sleep(12000) ; Time to respawn
+    LogInfo("Clearing first group of charr...")
+    
+    MoveUpkeepEx(-10930.39, -6798.76, $gUpkeepSkills)
 
-            $spawn[0] = Agent_GetAgentInfo(-2, "X")
-            $spawn[1] = Agent_GetAgentInfo(-2, "Y")
-            Local $sp1 = ComputeDistance(-16290, 265, $spawn[0], $spawn[1]) ; Use piken shrine coords as reference
-            
-            Select
-                Case $sp1 <= 1000
-                    LogWarn("Respawned near Piken, let's get back to work!")
-                    RunTo($ResPikenPath, True)
-                Case Else
-                    LogWarn("Respawned near the gate, the better of the two!")
-                    RunTo($ResGatePath, True)
-            EndSelect
+    Local $target = GetNearestEnemyToAgent(-2)
+    Agent_Attack($target)
 
-            $i = 0
-            Sleep(2000)
-        EndIf
-        
-        If SurvivorMode() Then
-            LogError("Survivor mode activated!")
-            Return
-        EndIf
-    Next
+    While GetNumberOfCharrInRangeOfAgent(-2, 2500) > 0 And Not GetPartyDead()
+        StayAlive_Kill("CharrFilter")
+    WEnd
+
+    If GetPartyDead() Then Return False
+
+    LogInfo("First group of charr cleared.")
+
+    LogInfo("Preparing for second wave, moving back...")
+
+    MoveUpkeepEx(-10930.39, -6798.76, $gUpkeepSkills)
+    
+    $timer = TimerInit()
+
+    Do
+        StayAlive()
+    Until GetNumberOfCharrInRangeOfXY(-11175, -7227, 3000) > 3 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime
+
+    Local $target = GetNearestEnemyToAgent(-2)
+
+    Agent_Attack($target)
+
+    While GetNumberOfCharrInRangeOfAgent(-2, 2500) > 0 And Not GetPartyDead()
+        StayAlive_Kill("CharrFilter")
+    WEnd
+
+    If GetPartyDead() Then Return False
+
+    LogInfo("Second group of charr cleared.")
+    
+    Sleep(250)
+    LogInfo("Picking up loot...")
+    Sleep(250)
+    PickUpLoot()
 EndFunc
 
-Func CharrBossFilter($aAgentPtr) ; Custom filter for CharrBoss that applies to farm.
-	If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 3 Then Return False
-    If Agent_GetAgentInfo($aAgentPtr, 'HP') <= 0 Then Return False
-    If Agent_GetAgentInfo($aAgentPtr, 'IsDead') > 0 Then Return False
-    Local $ModelID = Agent_GetAgentInfo($aAgentPtr, 'PlayerNumber')
-    Local $CharrBossID[7] = [1453, 1656, 1450, 1656, 1451, 1656, 1638] ; Array of charr boss model IDs
-    Local $IsCharrBoss = False
-    For $i = 0 To UBound($CharrBossID) - 1
-        If $ModelID == $CharrBossID[$i] Then
-            $IsCharrBoss = True
-            ExitLoop
-        EndIf
-    Next
-    If Not $IsCharrBoss Then Return False
-    Return True
+Func Grawl()
+    MoveUpkeepEx(-5639.52, -3424.85, $gUpkeepSkills)
+    Sleep(250)
+    LogInfo("Taking out the trash...")
+
+    $timer = TimerInit()
+
+    Do 
+        StayAlive()
+    Until GetNumberOfFoesInRangeOfAgent(-2, 900) > 0 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime - 90000
+
+    StayAlive_Kill("EnemyFilter", 2000)
+
+    If GetPartyDead() Then Return False
+
+    LogInfo("Grawl will not be a problem anymore.")
+
+    Sleep(250)
+    LogInfo("Picking up loot?")
+    Sleep(250)
+    PickUpLoot()
 EndFunc
 
+Func SecondGroup()
+    Do
+        Sleep(250)
+    Until Agent_GetAgentInfo(-2, "EnergyPercent") > 0.8 Or GetPartyDead()
+
+    MoveUpkeepEx(-4128.60, -3726.73, $gUpkeepSkills)
+    MoveUpkeepEx(-3020.96, -3535.49, $gUpkeepSkills)
+    
+    If GetPartyDead() Then Return False
+    
+    LogInfo("Waiting for second group of charr...")
+    
+    $timer = TimerInit()
+
+    Do
+        StayAlive()
+    Until GetNumberOfCharrInRangeOfXY(-1283.85, -3241.65, 1000) > 2 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime
+
+    While GetNumberOfCharrInRangeOfAgent(-2, 2500) > 0 And Not GetPartyDead()
+        StayAlive_Kill("CharrFilter")
+    WEnd
+
+    If GetPartyDead() Then Return False
+
+    LogInfo("Second group of charr cleared.")
+EndFunc
+
+Func LeftCorner()
+    MoveUpkeepEx(-571.48, -1651.94, $gUpkeepSkills)
+
+    $timer = TimerInit()
+
+    LogInfo("Waiting for left corner group...")
+    Do
+        StayAlive()
+    Until GetNumberOfCharrInRangeOfAgent(-2, 1500) > 2 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime
+    
+    If GetPartyDead() Then Return False
+    
+    Local $target = GetNearestEnemyToAgent(-2)
+
+    Agent_Attack($target)
+
+    MoveUpkeepEx(-571.48, -1651.94, $gUpkeepSkills) ; Move back incase we over aggro, imp can take a hit
+
+    Agent_Attack($target)
+
+    While GetNumberOfCharrInRangeOfXY(-571.48, -1651.94, 1400) > 0 And Not GetPartyDead()
+        StayAlive_Kill("CharrFilter", 1400)
+    WEnd
+
+    If GetPartyDead() Then Return False
+
+    LogInfo("Left corner group cleared.")
+EndFunc
+
+Func Bosses()
+    Local $SmokeSkin = 1452
+
+    MoveUpkeepEx(-891.72, -3335.87, $gUpkeepSkills)
+    
+    $timer = TimerInit()
+
+    Do
+        StayAlive()
+    Until GetNumberOfCharrInRangeOfXY(-41.25, -3953.44, 1400) < 6 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime
+
+    If GetPartyDead() Then Return False
+
+    Agent_Attack($SmokeSkin)
+
+    While GetNumberOfCharrInRangeOfAgent(-2, 2500) > 0 And Not GetPartyDead()
+        StayAlive_Kill("CharrFilter")
+    WEnd
+    
+    If GetPartyDead() Then Return False
+    
+    LogInfo("Bosses cleared.")
+    PickUpLoot()
+EndFunc

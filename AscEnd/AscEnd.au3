@@ -16,6 +16,7 @@ Opt("ExpandVarStrings", 1)
 
 Global $ProcessID = ""
 Global $timer = TimerInit()
+Global $enemyKillTime = 120000
 Global $TotalTime = 0
 Global $RunTime = 0
 Global $g_b_DebugMode = False

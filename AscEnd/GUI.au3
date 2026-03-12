@@ -202,6 +202,7 @@ Func UpdateProgressBar()
     ; At max level, fill the bar to 100%
     If $iMyLevel >= UBound($g_aLevelXP) - 1 Then
         GUICtrlSetData($Progress, 100)
+        GUICtrlSetData($explbl, "LDoA!")
         Return
     EndIf
 
