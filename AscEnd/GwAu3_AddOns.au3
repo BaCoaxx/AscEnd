@@ -766,13 +766,10 @@ Func StayAlive()
         EndIf
 EndFunc   ;==>Stay Alive
 
-Func StayAlive_Kill($filterFunc = "EnemyFilter", $range = 2500)
+Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
 
     Local $timer = TimerInit()
     Local $maxKillTime = 180000
-
-    Local $refX = Agent_GetAgentInfo(-2, "X")
-    Local $refY = Agent_GetAgentInfo(-2, "Y")
     
     Local $target, $targetCaster, $currentDistance, $targetX, $targetY
     Local $myX, $myY, $angle, $newX, $newY
@@ -843,9 +840,14 @@ Func StayAlive_Kill($filterFunc = "EnemyFilter", $range = 2500)
             $newY = $myY + ($newY - $myY) * $adjustFactor
             
             Map_Move($newX, $newY)
+
+            $myX = Agent_GetAgentInfo(-2, "X")
+            $myY = Agent_GetAgentInfo(-2, "Y")
         EndIf
 
     Until GetNumberOfFoesInRangeOfAgent(-2, $range) = 0 Or ComputeDistance($refX, $refY, $myX, $myY) >= $range Or GetPartyDead() Or TimerDiff($timer) >= $maxKillTime
+
+    Return Not GetPartyDead()
 EndFunc   ;==>StayAlive_Kill
 
 Func EmoKill($targC, $targ)
@@ -1000,6 +1002,10 @@ EndFunc   ;==>GetNearestNPCToAgent
 Func GetNearestGadgetToAgent($aAgentID = -2, $aRange = 1320, $aType = $GC_I_AGENT_TYPE_GADGET, $aReturnMode = 1)
     Return GetAgents($aAgentID, $aRange, $aType, $aReturnMode)
 EndFunc   ;==>GetNearestGadgetToAgent
+
+Func GetNearestCharrToAgent($aAgentID = -2, $aRange = 1320, $aType = $GC_I_AGENT_TYPE_LIVING, $aReturnMode = 1, $aCustomFilter = "CharrFilter")
+    Return GetAgents($aAgentID, $aRange, $aType, $aReturnMode, $aCustomFilter)
+EndFunc   ;==>GetNearestCharrToAgent
 
 Func GetNumberOfFoesInRangeOfAgent($aAgentID = -2, $aRange = 1320, $aType = $GC_I_AGENT_TYPE_LIVING, $aReturnMode = 0, $aCustomFilter = "EnemyFilter")
     Return GetAgents($aAgentID, $aRange, $aType, $aReturnMode, $aCustomFilter)
@@ -1224,7 +1230,7 @@ Func CanPickUp($aItemPtr)
     ElseIf $lModelID == $ExpertSalvKit Then
         Return True
     ElseIf IsPcon($aItemPtr) Then ; ==== Pcons ==== or all event items
-        Return False
+        Return True
     ElseIf IsRareMaterial($aItemPtr) Then	; rare Mats
         Return False
     ElseIf $lModelID == $CharrSalvKit Then

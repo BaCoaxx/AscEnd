@@ -11,53 +11,39 @@
 #ce ----------------------------------------------------------------------------
 
 ; Starting Northlands Path
-Global $NormalGatePath[6][2] = [ _
-    [-11728, -16012], _
-    [-12340, -13890], _
-    [-12809, -12802], _
-    [-13624, -11596], _
-    [-12469, -8870], _
-    [-11182, -7232] _
+Global $NormalGatePath[3][2] = [ _
+    [-12398, -13343], _
+    [-12996, -11276], _
+    [-11087, -8753] _
 ]
 
-; Pathing from (Ashford -> gate lever)
-Global $CharrGatePath[18][2] = [ _
-    [-10813, -5410], _
-    [-10630, -4006], _
-    [-11138, -884], _
-    [-11639, 1939], _
-    [-11751, 2854], _
-    [-11660, 3332], _
-    [-11294, 3735], _
-    [-10438, 4183], _
-    [-9972, 4678], _
-    [-9539, 6063], _
-    [-9122, 8956], _
-    [-9060, 10189], _
-    [-9249, 11470], _
-    [-9367, 12375], _
-    [-9333, 12484], _
-    [-9225, 12687], _
-    [-7706, 12819], _
-    [-5510, 12860] _
+; Pathing from (Ascalon -> gate lever)
+Global $CharrGatePath[4][2] = [ _
+    [3118, 6530], _
+    [36, 6952], _
+    [-3215, 12159], _
+    [-5413, 12808] _
 ]
 
 ; From gate lever -> through portal
-Global $CharrPortalPath[4][2] = [ _
-    [-5508.00, 12787.00], _
-    [-3619.77, 11411.51], _
-    [-5427.94, 11994.94], _
-    [-5507.54, 13734.43] _
+Global $CharrPortalPath[5][2] = [ _
+    [-3925, 12379], _
+    [-3760, 11583], _
+    [-5409, 11872], _
+    [-5497, 13166], _
+    [-5572.39, 14130.93] _
 ]
 
 Func Farm_CharrBossFarm()
     
     $CharrBossFarm = True ; Set this to 'True' if you only want to farm charr bosses, if 'False' will pickup all collectibles.
-    CharrSetup()
+    InitialSetup()
 
     While 1
         If CountSlots() < 4 Then InventoryPre()
         If Not $hasBonus Then GetBonus()
+
+        GateTrick()
         
         While CountSlots() > 1
             If Not $BotRunning Then
@@ -70,7 +56,7 @@ Func Farm_CharrBossFarm()
     WEnd
 EndFunc
 
-Func CharrSetup()
+Func InitialSetup()
     QuestActive(0x2E)
     Local $cAgState = Quest_GetQuestInfo(0x2E, "LogState")
     If $cAgState <> 1 Then
@@ -101,7 +87,7 @@ Func CharrSetup()
             $gUpkeepSkills = $EmoUpkeep
             Sleep(1500)
         Case Else
-            LogWarn("We do not have a viable build set up for your professions.")
+            LogWarn("We do not have a viable build setup for your profession.")
             LogStatus("Bot will now pause.")
             $BotRunning = False
             ResetStart()
@@ -109,27 +95,25 @@ Func CharrSetup()
     EndSwitch
 EndFunc
 
-Func CharrBossFarm()
-    If Map_GetMapID() = 164 Then
-        LogInfo("We are in Ashford Abbey. Starting Charr Boss farming run...")
-    ElseIf Map_GetMapID() <> 164 And Map_IsMapUnlocked(164) Then
-        LogInfo("We are not in Ashford Abbey. Teleporting to Ashford...")
-        Map_RndTravel(164)
-        Map_WaitMapLoading(164, 0)
+Func GateTrick() ; Set this up outside of initial for when we come back from inventory management.
+    If Map_GetMapID() = 148 Then
+        LogInfo("We are in Ascalon. Starting Charr Boss farming run...")
+    ElseIf Map_GetMapID() <> 148 And Map_IsMapUnlocked(148) Then
+        LogInfo("We are not in Ascalon. Teleporting to Ascalon...")
+        Map_RndTravel(148)
         Sleep(2000)
-    ElseIf Not Map_IsMapUnlocked(164) Then
-        LogWarn("Ashford Abbey is not unlocked on this character, lets try to run there...")
-        While Not UnlockAshford()
-            LogError("Failed to unlock Ashford Abbey.  Retrying...")
-            Sleep(2000)
-        WEnd
     EndIf
 
-	ExitAshford()
+	ExitAscalon() ; Gate trick setup
+    Map_Move(7460.79, 5591.82)
+    Map_WaitMapLoading(148, 0)
+    Sleep(2000)
+EndFunc
 
-    Other_RndSleep(250)
+Func CharrBossFarm()
+    ExitAscalon()
     
-    ; 1) Ashford -> Charr Gate route 
+    ; 1) Ascalon -> Charr Gate route 
     LogInfo("Running to Charr Gate...")
     RunTo($CharrGatePath)
     Sleep(1000)
@@ -159,15 +143,11 @@ Func CharrBossFarm()
     UseSummoningStone()
     RunToUpkeep($NormalGatePath, $gUpkeepSkills)
 
-    FirstGroup()
-
-    Grawl() ; Fight Grawl if they are there?
-
-    SecondGroup()
-
-    LeftCorner()
-
-    Bosses()
+    If Not GetPartyDead() Then FirstGroup()
+    If Not GetPartyDead() Then Grawl() ; Fight Grawl if they are there?
+    If Not GetPartyDead() Then SecondGroup()
+    If Not GetPartyDead() Then LeftCorner()
+    If Not GetPartyDead() Then Bosses()
 
     LogInfo("Run complete. Restarting...")
     UpdateStats()
@@ -181,53 +161,23 @@ Func CharrBossFarm()
 EndFunc
 
 Func FirstGroup()    
-    $timer = TimerInit()
-
-    Do
-        StayAlive()
-    Until GetNumberOfCharrInRangeOfXY(-11175, -7227, 3480) <= 5 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime
-
     LogInfo("Clearing first group of charr...")
     
-    MoveUpkeepEx(-10930.39, -6798.76, $gUpkeepSkills)
+    MoveUpkeepEx(-10469.5, -7268.5, $gUpkeepSkills)
 
-    Local $target = GetNearestEnemyToAgent(-2)
+    Local $target = GetNearestCharrToAgent(-2)
+    
     Agent_Attack($target)
 
-    While GetNumberOfCharrInRangeOfAgent(-2, 2500) > 0 And Not GetPartyDead()
-        StayAlive_Kill("CharrFilter")
-    WEnd
+    If StayAlive_Kill(-9852, -5784,"CharrFilter", 2400) Then
+        LogInfo("First group of charr cleared.")
+        Sleep(250)
+        LogInfo("Picking up loot...")
+        Sleep(250)
+        PickUpLoot()
+    EndIf
 
     If GetPartyDead() Then Return False
-
-    LogInfo("First group of charr cleared.")
-
-    LogInfo("Preparing for second wave, moving back...")
-
-    MoveUpkeepEx(-10930.39, -6798.76, $gUpkeepSkills)
-    
-    $timer = TimerInit()
-
-    Do
-        StayAlive()
-    Until GetNumberOfCharrInRangeOfXY(-11175, -7227, 3000) > 3 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime
-
-    Local $target = GetNearestEnemyToAgent(-2)
-
-    Agent_Attack($target)
-
-    While GetNumberOfCharrInRangeOfAgent(-2, 2500) > 0 And Not GetPartyDead()
-        StayAlive_Kill("CharrFilter")
-    WEnd
-
-    If GetPartyDead() Then Return False
-
-    LogInfo("Second group of charr cleared.")
-    
-    Sleep(250)
-    LogInfo("Picking up loot...")
-    Sleep(250)
-    PickUpLoot()
 EndFunc
 
 Func Grawl()
@@ -239,18 +189,17 @@ Func Grawl()
 
     Do 
         StayAlive()
-    Until GetNumberOfFoesInRangeOfAgent(-2, 900) > 0 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime - 90000
+    Until GetNumberOfFoesInRangeOfAgent(-2, 900) > 0 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime - 140000
 
-    StayAlive_Kill("EnemyFilter", 2000)
+    If StayAlive_Kill(-5639.52, -3424.85, "EnemyFilter", 2000) Then
+        LogInfo("Grawl will not be a problem anymore.")
+        Sleep(250)
+        LogInfo("Picking up loot?")
+        Sleep(250)
+        PickUpLoot()
+    EndIf
 
     If GetPartyDead() Then Return False
-
-    LogInfo("Grawl will not be a problem anymore.")
-
-    Sleep(250)
-    LogInfo("Picking up loot?")
-    Sleep(250)
-    PickUpLoot()
 EndFunc
 
 Func SecondGroup()
@@ -271,13 +220,9 @@ Func SecondGroup()
         StayAlive()
     Until GetNumberOfCharrInRangeOfXY(-1283.85, -3241.65, 1000) > 2 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime
 
-    While GetNumberOfCharrInRangeOfAgent(-2, 2500) > 0 And Not GetPartyDead()
-        StayAlive_Kill("CharrFilter")
-    WEnd
+    If StayAlive_Kill(-3020.96, -3535.49, "CharrFilter") Then LogInfo("Second group of charr cleared.")
 
     If GetPartyDead() Then Return False
-
-    LogInfo("Second group of charr cleared.")
 EndFunc
 
 Func LeftCorner()
@@ -292,7 +237,7 @@ Func LeftCorner()
     
     If GetPartyDead() Then Return False
     
-    Local $target = GetNearestEnemyToAgent(-2)
+    Local $target = GetNearestCharrToAgent(-2)
 
     Agent_Attack($target)
 
@@ -300,13 +245,9 @@ Func LeftCorner()
 
     Agent_Attack($target)
 
-    While GetNumberOfCharrInRangeOfXY(-571.48, -1651.94, 1400) > 0 And Not GetPartyDead()
-        StayAlive_Kill("CharrFilter", 1400)
-    WEnd
+    If StayAlive_Kill(-571.48, -1651.94, "CharrFilter", 1500) Then LogInfo("Left corner group cleared.")
 
     If GetPartyDead() Then Return False
-
-    LogInfo("Left corner group cleared.")
 EndFunc
 
 Func Bosses()
@@ -324,12 +265,13 @@ Func Bosses()
 
     Agent_Attack($SmokeSkin)
 
-    While GetNumberOfCharrInRangeOfAgent(-2, 2500) > 0 And Not GetPartyDead()
-        StayAlive_Kill("CharrFilter")
-    WEnd
+    If StayAlive_Kill(1606.00, -3324.00, "CharrFilter", 3000) Then
+        LogInfo("Bosses cleared.")
+        Sleep(250)
+        LogInfo("Picking up loot...")
+        Sleep(250)
+        PickUpLoot()
+    EndIf
     
     If GetPartyDead() Then Return False
-    
-    LogInfo("Bosses cleared.")
-    PickUpLoot()
 EndFunc

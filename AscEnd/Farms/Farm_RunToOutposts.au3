@@ -312,11 +312,11 @@ Func UnlockFoibles()
     Return False
 EndFunc
 
-Func ExitAscalon()
+Func ExitAscalon() ; Gate Trick
     MoveTo(7630, 5544)
     Map_Move(6985, 4939)
     Map_WaitMapLoading(146, 1)
-    Sleep(1000)
+    Sleep(2000)
 EndFunc
 
 Func ExitAshford()
@@ -343,7 +343,7 @@ Func ExitBarradin()
     MoveTo(-7088, 1427)
     Map_Move(-7531, 1421)
     Map_WaitMapLoading(160, 1)
-    Sleep(1000)
+    Sleep(2000)
 EndFunc
 
 Func RunToMove($g_ai2_RunPath)
