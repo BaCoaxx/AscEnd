@@ -6,6 +6,13 @@ Func ComputeDistance($aX1, $aY1, $aX2, $aY2)
     Return Sqrt(($aX1 - $aX2) ^ 2 + ($aY1 - $aY2) ^ 2)
 EndFunc   ;==>ComputeDistance
 
+;~ Description: Returns the squared distance (faster, for comparisons) **Must Square the Range aswell.**
+Func ComputeDistanceSquared($aX1, $aY1, $aX2, $aY2)
+    Local $lDeltaX = $aX1 - $aX2
+    Local $lDeltaY = $aY1 - $aY2
+    Return $lDeltaX * $lDeltaX + $lDeltaY * $lDeltaY
+EndFunc   ;==>ComputeDistanceSquared
+
 Func ATan2($y, $x)
     Return ATan($y / $x) + (($x < 0) ? (($y < 0) ? -3.14159265358979 : 3.14159265358979) : 0)
 EndFunc   ;==>ATan2
@@ -158,7 +165,7 @@ Func MoveTo($aX, $aY, $aRandom = 50, $aFightBack = False)
             Map_Move($lDestX, $lDestY, 0)
             If SurvivorMode(40) Then Return
         EndIf
-    Until ComputeDistance(Agent_GetAgentInfo(-2, "X"), Agent_GetAgentInfo(-2, "Y"), $lDestX, $lDestY) < 25 Or $lBlocked > 20 Or GetPartyDead()
+    Until ComputeDistanceSquared(Agent_GetAgentInfo(-2, "X"), Agent_GetAgentInfo(-2, "Y"), $lDestX, $lDestY) < 25 * 25 Or $lBlocked > 20 Or GetPartyDead()
 EndFunc   ;==>MoveTo
 
 Func MoveUpkeepEx($aX, $aY, $aUpkeepSkills = 0, $aOrderedSkills = 0, $bCastInOrder = False, $Range = 85, $aRandom = 50)
@@ -166,8 +173,9 @@ Func MoveUpkeepEx($aX, $aY, $aUpkeepSkills = 0, $aOrderedSkills = 0, $bCastInOrd
 
     Local $lDestX = $aX + Random(-$aRandom, $aRandom)
     Local $lDestY = $aY + Random(-$aRandom, $aRandom)
+    Local $PendingSkills[0]
 
-    While ComputeDistance(Agent_GetAgentInfo(-2, "X"), Agent_GetAgentInfo(-2, "Y"), $lDestX, $lDestY) > $Range And Not GetPartyDead()
+    While ComputeDistanceSquared(Agent_GetAgentInfo(-2, "X"), Agent_GetAgentInfo(-2, "Y"), $lDestX, $lDestY) > $Range * $Range And Not GetPartyDead()
         If $bCastInOrder And IsArray($aOrderedSkills) Then
             Local $allReady = True
             For $i = 0 To UBound($aOrderedSkills) - 1
@@ -179,22 +187,49 @@ Func MoveUpkeepEx($aX, $aY, $aUpkeepSkills = 0, $aOrderedSkills = 0, $bCastInOrd
 
             If $allReady Then
                 For $i = 0 To UBound($aOrderedSkills) - 1
-                    UseSkillEx($aOrderedSkills[$i], -2)
+                    If IsRecharged($aOrderedSkills[$i]) Then UseSkillEx($aOrderedSkills[$i], -2)
                     Sleep(150)
                 Next
             EndIf
         Else
             If IsArray($aUpkeepSkills) Then
-                For $i = 0 To UBound($aUpkeepSkills) - 1
-                    Local $aSkill = Skill_GetSkillBarInfo($aUpkeepSkills[$i], "SkillID")
+                Local $IsQueued[UBound($gUpkeepSkills)]
+                
+                For $i = 0 To UBound($gUpkeepSkills) - 1
+
+                    Local $slot = $gUpkeepSkills[$i]
+                    Local $aSkill = Skill_GetSkillBarInfo($slot, "SkillID")
+
                     Local $hasEffect = Agent_GetAgentEffectInfo(-2, $aSkill, "HasEffect")
                     Local $skillDuration = Agent_GetAgentEffectInfo(-2, $aSkill, "Duration")
                     Local $timeRemaining = Agent_GetAgentEffectInfo(-2, $aSkill, "TimeRemaining")
+
                     Local $recastTime = ($skillDuration * 1000) / 8
 
-                    If Not $hasEffect Or $timeRemaining <= $recastTime Then
-                        UseSkillEx($aUpkeepSkills[$i], -2)
-                    EndIf            
+                    If Not $hasEffect Or $timeRemaining <= $recastTime Then ; If skill is not active or about to expire, use it if it's recharged
+                        If IsRecharged($slot) Then
+                            UseSkillEx($slot, -2)
+                        Else
+                            If Not $IsQueued[$i] Then ; We catch and reapply any skills that weren't recharged
+                                $IsQueued[$i] = True
+                                _ArrayAdd($PendingSkills, $i)
+                            EndIf
+                        EndIf
+                    EndIf
+
+                    If GetPartyDead() Then Return False
+
+                Next
+
+                For $j = 0 To UBound($PendingSkills) - 1 ; Reapply any missed skills here
+
+                    Local $i = $PendingSkills[$j]
+                    Local $slot = $gUpkeepSkills[$i]
+
+                    If IsRecharged($slot) Then
+                        UseSkillEx($slot, -2)
+                        $IsQueued[$i] = False
+                    EndIf
                 Next
             EndIf
         EndIf
@@ -269,6 +304,13 @@ EndFunc
 #EndRegion
 
 #Region Fighting
+; These skills don't currently work for whatever reason in pre searing when smartcast is used
+Global $g_aErrorSkills[4] = [ _
+    $GC_I_SKILL_ID_GLYPH_OF_LESSER_ENERGY, _
+    $GC_I_SKILL_ID_IGNITE_ARROWS, _
+    $GC_I_SKILL_ID_READ_THE_WIND, _
+    $GC_I_SKILL_ID_FRENZY _
+]
 Func AggroMoveSmartFilter($aX, $aY, $AggroRange = 1320, $maxdistance = 3500, $filterArray = 0, $KO = False, $LootRange = 0)
 
     If GetPartyDead() Then Return
@@ -742,9 +784,12 @@ Func StayAlive()
 
     Local $timer = TimerInit()
     Local $maxKillTime = 180000
+    Local $PendingSkills[0]
 
         ; Upkeep these skills
         If IsArray($gUpkeepSkills) Then
+            Local $IsQueued[UBound($gUpkeepSkills)]
+
             For $i = 0 To UBound($gUpkeepSkills) - 1
 
                 Local $slot = $gUpkeepSkills[$i]
@@ -756,12 +801,30 @@ Func StayAlive()
 
                 Local $recastTime = ($skillDuration * 1000) / 8
 
-                If Not $hasEffect Or $timeRemaining <= $recastTime Then
-                    UseSkillEx($slot, -2)
+                If Not $hasEffect Or $timeRemaining <= $recastTime Then ; If skill is not active or about to expire, use it if it's recharged
+                    If IsRecharged($slot) Then
+                        UseSkillEx($slot, -2)
+                    Else
+                        If Not $IsQueued[$i] Then ; We catch and reapply any skills that weren't recharged
+                            $IsQueued[$i] = True
+                            _ArrayAdd($PendingSkills, $i)
+                        EndIf
+                    EndIf
                 EndIf
 
                 If GetPartyDead() Then Return False
 
+            Next
+
+            For $j = 0 To UBound($PendingSkills) - 1 ; Reapply any missed skills here
+
+                Local $i = $PendingSkills[$j]
+                Local $slot = $gUpkeepSkills[$i]
+
+                If IsRecharged($slot) Then
+                    UseSkillEx($slot, -2)
+                    $IsQueued[$i] = False
+                EndIf
             Next
         EndIf
 EndFunc   ;==>Stay Alive
@@ -777,13 +840,20 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
     Local $tolerance = 120
     Local $adjustFactor = 0.6
     Local $desiredDistance = 900
+    Local $PendingSkills[0]
 
     If GetPartyDead() Then Return False
 
     Do
+        ; Repop Imp
+        If Not Agent_GetAgentEffectInfo(-2, 2886, "HasEffect") And Not HasImp(-2) Then
+            UseSummoningStone()
+        EndIf
 
         ; Upkeep these skills
         If IsArray($gUpkeepSkills) Then
+            Local $IsQueued[UBound($gUpkeepSkills)]
+
             For $i = 0 To UBound($gUpkeepSkills) - 1
 
                 Local $slot = $gUpkeepSkills[$i]
@@ -795,16 +865,34 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
 
                 Local $recastTime = ($skillDuration * 1000) / 8
 
-                If Not $hasEffect Or $timeRemaining <= $recastTime Then
-                    UseSkillEx($slot, -2)
+                If Not $hasEffect Or $timeRemaining <= $recastTime Then ; If skill is not active or about to expire, use it if it's recharged
+                    If IsRecharged($slot) Then
+                        UseSkillEx($slot, -2)
+                    Else
+                        If Not $IsQueued[$i] Then ; We catch and reapply any skills that weren't recharged
+                            $IsQueued[$i] = True
+                            _ArrayAdd($PendingSkills, $i)
+                        EndIf
+                    EndIf
                 EndIf
 
                 If GetPartyDead() Then Return False
 
             Next
+
+            For $j = 0 To UBound($PendingSkills) - 1 ; Reapply any missed skills here
+
+                Local $i = $PendingSkills[$j]
+                Local $slot = $gUpkeepSkills[$i]
+
+                If IsRecharged($slot) Then
+                    UseSkillEx($slot, -2)
+                    $IsQueued[$i] = False
+                EndIf
+            Next
         EndIf
 
-        If GetNumberOfFoesInRangeOfAgent(-2, $range) = 0 Then Return True
+        If GetNumberOfFoesInRangeOfAgent(-2, $range, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc) = 0 Then Return True
 
         $targetCaster = GetNearestEnemyToAgent(-2, $range, $GC_I_AGENT_TYPE_LIVING, 1, "CharrCasterFilter")
         
@@ -815,6 +903,8 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
         Switch $gProf
             Case 63
                 EmoKill($targetCaster, $target)
+            ;~ Case 42
+            ;~     NecroKill($targetCaster, $target)
             Case Else
                 Agent_Attack($target)
         EndSwitch
@@ -845,7 +935,7 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
             $myY = Agent_GetAgentInfo(-2, "Y")
         EndIf
 
-    Until GetNumberOfFoesInRangeOfAgent(-2, $range) = 0 Or ComputeDistance($refX, $refY, $myX, $myY) >= $range Or GetPartyDead() Or TimerDiff($timer) >= $maxKillTime
+    Until GetNumberOfFoesInRangeOfAgent(-2, $range) = 0 Or ComputeDistanceSquared($refX, $refY, $myX, $myY) >= $range * $range Or GetPartyDead() Or TimerDiff($timer) >= $maxKillTime
 
     Return Not GetPartyDead()
 EndFunc   ;==>StayAlive_Kill
@@ -900,6 +990,15 @@ Func EnemyFilter($aAgentPtr)
     Return True
 EndFunc   ;==>EnemyFilter
 
+Func CorpseFilter($aAgentPtr)
+
+    If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 3 Then Return False
+    If Agent_GetAgentInfo($aAgentPtr, 'HP') <= 0 Then Return True
+    If Agent_GetAgentInfo($aAgentPtr, 'IsDead') > 0 Then Return True
+
+    Return False
+EndFunc   ;==>CorpseFilter
+
 Func CharrFilter($aAgentPtr)
 
     If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 3 Then Return False
@@ -919,6 +1018,15 @@ Func CharrFilter($aAgentPtr)
 
     Return True
 EndFunc   ;==>CharrFilter
+
+Func ImpFilter($aAgentPtr)
+
+    If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 6 Then Return False
+    If Agent_GetAgentInfo($aAgentPtr, 'HP') <= 0 Then Return False
+    If Agent_GetAgentInfo($aAgentPtr, 'IsDead') > 0 Then Return False
+
+    Return Agent_GetAgentInfo($aAgentPtr, 'PlayerNumber') = 513
+EndFunc   ;==>ImpFilter
 
 Func CharrCasterFilter($aAgentPtr)
 
@@ -988,6 +1096,15 @@ Func NPCFilter($aAgentPtr)
 
     Return True
 EndFunc   ;==>NPCFilter
+
+Func MinionFilter($aAgentPtr)
+
+    If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 5 Then Return False
+    If Agent_GetAgentInfo($aAgentPtr, 'HP') <= 0 Then Return False
+    If Agent_GetAgentInfo($aAgentPtr, 'IsDead') > 0 Then Return False
+
+    Return True
+EndFunc   ;==>MinionFilter
 #EndRegion
 
 #Region Agents
@@ -1018,6 +1135,18 @@ EndFunc   ;==>GetNumberOfCharrInRangeOfAgent
 Func GetNumberOfCharrInRangeOfXY($aX, $aY, $aRange = 1320, $aType = $GC_I_AGENT_TYPE_LIVING, $aReturnMode = 0, $aCustomFilter = "CharrFilter")
     Return GetAgentsFromXY($aX, $aY, $aRange, $aType, $aReturnMode, $aCustomFilter)
 EndFunc   ;==>GetNumberOfCharrInRangeOfXY
+
+Func GetNumberOfMinionsInRangeOfAgent($aAgentID = -2, $aRange = 1320, $aType = $GC_I_AGENT_TYPE_LIVING, $aReturnMode = 0, $aCustomFilter = "MinionFilter")
+    Return GetAgents($aAgentID, $aRange, $aType, $aReturnMode, $aCustomFilter)
+EndFunc   ;==>GetNumberOfMinionsInRangeOfAgent
+
+Func GetNumberOfCorpseInRangeOfAgent($aAgentID = -2, $aRange = 1320, $aType = $GC_I_AGENT_TYPE_LIVING, $aReturnMode = 0, $aCustomFilter = "CorpseFilter")
+    Return GetAgents($aAgentID, $aRange, $aType, $aReturnMode, $aCustomFilter)
+EndFunc   ;==>GetNumberOfCorpseInRangeOfAgent
+
+Func HasImp($aAgentID = -2, $aRange = 3000, $aType = $GC_I_AGENT_TYPE_LIVING, $aReturnMode = 0, $aCustomFilter = "ImpFilter")
+    Return GetAgents($aAgentID, $aRange, $aType, $aReturnMode, $aCustomFilter) >= 1
+EndFunc   ;==>HasImp
 
 Func GetMemberAgentID($aPartyMember)
     If $aPartyMember < 1 Then Return 0
@@ -1158,21 +1287,27 @@ Func PickUpLoot()
     Next
 EndFunc   ;==>PickUpLoot
 
-Func PickUpLootInRange($range = 1500)
+Func PickUpLootInRange($range = 1500, $refx = "", $refy = "")
 
     Local $lAgentArray = Item_GetItemArray()
     Local $maxitems = IsArray($lAgentArray) ? $lAgentArray[0] : 0
-
+    
+    If $refx = "" Or $refy = "" Then
+        $refx = Agent_GetAgentInfo(-2, "X")
+        $refy = Agent_GetAgentInfo(-2, "Y")
+    EndIf
 
     If GetPartyDead() Then Return
     For $i = 1 To $maxitems
         If GetPartyDead() Then ExitLoop
         Local $aItemPtr = $lAgentArray[$i]
         Local $aItemAgentID = Item_GetItemInfoByPtr($aItemPtr, "AgentID")
+        Local $itemX = Agent_GetAgentInfo($aItemAgentID, "X")
+        Local $itemY = Agent_GetAgentInfo($aItemAgentID, "Y")
 
         If GetPartyDead() Then ExitLoop
         If $aItemAgentID = 0 Then ContinueLoop ; If Item is not on the ground
-        If GetDistance($aItemAgentID, -2) > $range Then ContinueLoop ; If Item is out of range
+        If ComputeDistanceSquared($refx, $refy, $itemX, $itemY) > $range * $range Then ContinueLoop ; If Item is out of range
 
         If CanPickUp($aItemPtr) Then
             Item_PickUpItem($aItemAgentID)
@@ -1891,6 +2026,10 @@ EndFunc   ;==>FindSummoningStone
 Func UseSummoningStone()
     Local $lItemPtr
     Local $litemID
+    Local $myLevel = Agent_GetAgentInfo(-2, "Level")
+    
+    If $myLevel > 19 Then Return False	; Summoning Stone is only available under level 20
+    
     If GetEffectTimeRemainingEx(-2, 2886) <> 0 Then Return False	; Summoning Sickness
     For $i = 1 To 4
         For $j = 1 To Item_GetBagInfo(Item_GetBagPtr($i), 'Slots')
@@ -1908,10 +2047,34 @@ Func UseSummoningStone()
     Return False
 EndFunc	   ;==>UseSummoningStone
 
+Func RemoveErrorSCSkill()
+    For $slot = 1 To 8
+        Local $skillID = Skill_GetSkillbarInfo($slot, "SkillID")
+        Local $skillName = Skill_GetSkillInfo($skillID, "SkillName")
+        If IsErrorSkill($skillID) Then
+            Skill_SetSkillbarSkill($slot, 0)
+            Sleep(250)
+            LogError("Removed " & $skillName & " from slot " & $slot)
+        EndIf
+    Next
+EndFunc
+
+Func IsErrorSkill($skillID)
+    For $i = 0 To UBound($g_aErrorSkills) - 1
+        If $skillID = $g_aErrorSkills[$i] Then Return True
+    Next
+    Return False
+EndFunc
+
 Func GetBonus()
     Map_RndTravel(148)
     Sleep(1000)
 
+    If $CharrBossFarm = False Then
+        RemoveErrorSCSkill()
+    EndIf
+    
+    Sleep(250)
     LogWarn("Caching the Skill Bar...")
     Sleep(250)
     Cache_SkillBar()
@@ -3938,6 +4101,8 @@ Global Const $GC_BonusWeapons[12] = [ _
 Global $gProf
 Global $gUpkeepSkills
 Global $EmoUpkeep[2] = [8, 7]
+Global $NecroUpKeep[1] = [1]
+Global $RangerUpKeep[2] = [1, 5]
 
 ;~ General Items
 Global $General_Items_Array[6] = [2989, 2991, 2992, 5899, 5900, 22751]
