@@ -82,7 +82,7 @@ Func UnnaturalSeedSetup()
             LogInfo("King Adelbern, doesn't even matter.")
             MoveTo(23186, 13527)
             MoveTo(23038, 11847)
-        EndSelect
+    EndSelect
 
         MoveTo(22552, 7515) ; Gate trick setup
         Map_Move(22530, 7300)

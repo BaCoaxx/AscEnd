@@ -1097,6 +1097,16 @@ Func NPCFilter($aAgentPtr)
     Return True
 EndFunc   ;==>NPCFilter
 
+Func NickFilter($aAgentPtr)
+
+    If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 6 Then Return False
+    If Agent_GetAgentInfo($aAgentPtr, 'HP') <= 0 Then Return False
+    If Agent_GetAgentInfo($aAgentPtr, 'IsDead') > 0 Then Return False
+    If Agent_GetAgentInfo($aAgentPtr, 'PlayerNumber') <> 7710 Then Return False
+
+    Return True
+EndFunc   ;==>NickFilter
+
 Func MinionFilter($aAgentPtr)
 
     If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 5 Then Return False
@@ -1147,6 +1157,10 @@ EndFunc   ;==>GetNumberOfCorpseInRangeOfAgent
 Func HasImp($aAgentID = -2, $aRange = 3000, $aType = $GC_I_AGENT_TYPE_LIVING, $aReturnMode = 0, $aCustomFilter = "ImpFilter")
     Return GetAgents($aAgentID, $aRange, $aType, $aReturnMode, $aCustomFilter) >= 1
 EndFunc   ;==>HasImp
+
+Func GetNick($aAgentID = -2, $aRange = 1320, $aType = $GC_I_AGENT_TYPE_LIVING, $aReturnMode = 1, $aCustomFilter = "NickFilter")
+    Return GetAgents($aAgentID, $aRange, $aType, $aReturnMode, $aCustomFilter)
+EndFunc   ;==>GetNick
 
 Func GetMemberAgentID($aPartyMember)
     If $aPartyMember < 1 Then Return 0
@@ -2028,9 +2042,9 @@ Func UseSummoningStone()
     Local $litemID
     Local $myLevel = Agent_GetAgentInfo(-2, "Level")
     
-    If $myLevel > 19 Then Return False	; Summoning Stone is only available under level 20
+    If $myLevel > 19 Then Return False  ; Summoning Stone is only available under level 20
     
-    If GetEffectTimeRemainingEx(-2, 2886) <> 0 Then Return False	; Summoning Sickness
+    If GetEffectTimeRemainingEx(-2, 2886) <> 0 Then Return False  ; Summoning Sickness
     For $i = 1 To 4
         For $j = 1 To Item_GetBagInfo(Item_GetBagPtr($i), 'Slots')
             $lItemPtr = Item_GetItemBySlot($i, $j)

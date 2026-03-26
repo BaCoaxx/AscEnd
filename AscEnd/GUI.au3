@@ -30,7 +30,89 @@ Global $aVanguardQuests[9][2] = [ _
     [8, "V Annihilation - Undead"] _
 ]
 
+; Based off wiki data, if it's wrong blame them lol =]
+Global $aNicholasItems[52][2] = [ _
+    [432, "Grawl Necklaces"], _      ; Day 0 
+    [433, "Baked Husks"], _          ; Day 1
+    [430, "Skeletal Limbs"], _       ; Day 2
+    [428, "Unnatural Seeds"], _      ; Day 3
+    [431, "Enchanted Lodestones"], _ ; Day 4
+    [429, "Skale Fins"], _           ; Day 5
+    [424, "Icy Lodestones"], _       ; Day 6 ANCHOR
+    [426, "Gargoyle Skulls"], _      ; Day 7 
+    [425, "Dull Carapaces"], _       ; Day 8
+    [433, "Baked Husks"], _          ; Day 9
+    [2994, "Red Iris Flowers"], _    ; Day 10
+    [422, "Spider Legs"], _          ; Day 11
+    [430, "Skeletal Limbs"], _       ; Day 12
+    [423, "Charr Carvings"], _       ; Day 13
+    [431, "Enchanted Lodestones"], _ ; Day 14
+    [432, "Grawl Necklaces"], _      ; Day 15
+    [424, "Icy Lodestones"], _       ; Day 16
+    [427, "Worn Belts"], _           ; Day 17
+    [426, "Gargoyle Skulls"], _      ; Day 18
+    [428, "Unnatural Seeds"], _      ; Day 19
+    [429, "Skale Fins"], _           ; Day 20
+    [2994, "Red Iris Flowers"], _    ; Day 21
+    [431, "Enchanted Lodestones"], _ ; Day 22
+    [430, "Skeletal Limbs"], _       ; Day 23
+    [423, "Charr Carvings"], _       ; Day 24
+    [422, "Spider Legs"], _          ; Day 25
+    [433, "Baked Husks"], _          ; Day 26
+    [426, "Gargoyle Skulls"], _      ; Day 27
+    [428, "Unnatural Seeds"], _      ; Day 28
+    [424, "Icy Lodestones"], _       ; Day 29
+    [432, "Grawl Necklaces"], _      ; Day 30
+    [431, "Enchanted Lodestones"], _ ; Day 31
+    [427, "Worn Belts"], _           ; Day 32
+    [425, "Dull Carapaces"], _       ; Day 33
+    [422, "Spider Legs"], _          ; Day 34
+    [426, "Gargoyle Skulls"], _      ; Day 35
+    [424, "Icy Lodestones"], _       ; Day 36
+    [428, "Unnatural Seeds"], _      ; Day 37
+    [427, "Worn Belts"], _           ; Day 38
+    [432, "Grawl Necklaces"], _      ; Day 39
+    [433, "Baked Husks"], _          ; Day 40
+    [430, "Skeletal Limbs"], _       ; Day 41
+    [2994, "Red Iris Flowers"], _    ; Day 42
+    [423, "Charr Carvings"], _       ; Day 43
+    [429, "Skale Fins"], _           ; Day 44
+    [425, "Dull Carapaces"], _       ; Day 45
+    [431, "Enchanted Lodestones"], _ ; Day 46
+    [423, "Charr Carvings"], _       ; Day 47
+    [422, "Spider Legs"], _          ; Day 48
+    [2994, "Red Iris Flowers"], _    ; Day 49
+    [427, "Worn Belts"], _           ; Day 50
+    [425, "Dull Carapaces"] _        ; Day 51
+]
+
+Global Const $NICHOLAS_EPOCH = "2026/03/25 07:00:00"
+Global Const $NICHOLAS_EPOCH_INDEX = 6
 Global Const $VANGUARD_EPOCH = "2026/01/14 16:01:00"
+
+Func _GetNicholasItemByOffset($iDayOffset = 0)
+    Local $iItemCount = UBound($aNicholasItems)
+    
+    ; Current UTC timestamp
+    Local $tNowUTC = _DateDiff("s", "1970/01/01 00:00:00", _NowUTC())
+    
+    ; Reference point (Icy Lodestone @ March 25, 2026 07:00:00 UTC)
+    Local $tRefUTC = _DateDiff("s", "1970/01/01 00:00:00", $NICHOLAS_EPOCH)
+    
+    ; Days since reference (changes daily at 07:00 UTC)
+    Local $iDaysPassed = Int(($tNowUTC - $tRefUTC) / 86400)
+    
+    ; Apply offset (0=today, 1=tomorrow, -1=yesterday, etc)
+    Local $iIndex = Mod($NICHOLAS_EPOCH_INDEX + $iDaysPassed + $iDayOffset, $iItemCount)
+    If $iIndex < 0 Then $iIndex += $iItemCount
+    
+    ; Return array with [ModelID, ItemName]
+    Local $aResult[2]
+    $aResult[0] = $aNicholasItems[$iIndex][0]
+    $aResult[1] = $aNicholasItems[$iIndex][1]
+    
+    Return $aResult
+EndFunc
 
 Func _GetVanguardQuestByOffset($iDayOffset)
     Local $iQuestCount = UBound($aVanguardQuests)
@@ -221,6 +303,12 @@ GUICtrlSetFont(-1, 9, 400, 0, "MS Sans Serif")
 GUICtrlSetColor(-1, 0x008000)
 $explbl = GUICtrlCreateLabel($Level & " XP Needed", 216, 383, 264, 17, $SS_RIGHT)
 GUICtrlSetColor(-1, 0x008000)
+
+; Nicholas Sandford Exchange
+Global $NickItem = "Current: " & _GetNicholasItemByOffset(0)[1] & "  |  Next: " & _GetNicholasItemByOffset(1)[1]
+$Nick_Label = GUICtrlCreateLabel($NickItem, 82, 383, 330, 17, $SS_CENTER)
+GUICtrlSetBkColor($Nick_Label, $GUI_BKCOLOR_TRANSPARENT)
+
 GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 GUISetOnEvent($GUI_EVENT_CLOSE, "GuiButtonHandler")

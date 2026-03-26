@@ -14,8 +14,9 @@
 #include "Farm_Skale.au3"
 #include "Farm_Carapace.au3"
 #include "Farm_GrawlNecklace.au3"
+#include "Farm_NickExchange.au3"
 
-Global $g_a_Farms[16][2] = [ _
+Global $g_a_Farms[17][2] = [ _
     ["", ""], _
     ["Red Iris Run", "Farm_RedIris"], _
     ["Charr at the Gate", "Farm_CharrAtTheGate"], _
@@ -31,5 +32,6 @@ Global $g_a_Farms[16][2] = [ _
     ["Skeleton Limbs", "Farm_SkeletonLimbs"], _
     ["Skale Fins", "Farm_Skale"], _
     ["Dull Carapace", "Farm_Carapace"], _
-    ["Grawl Necklace", "Farm_GrawlNecklace"] _
+    ["Grawl Necklace", "Farm_GrawlNecklace"], _
+    ["Nick Exchange", "Farm_NickExchange"] _
 ]
