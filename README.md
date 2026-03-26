@@ -21,11 +21,19 @@ AscEnd currently includes the following Pre-Searing farms:
 - **Charr at the Gate**
 - **Farmer Hamnet**
 - **Run to Outposts** (excluding Piken Square)
-- **Red Iris Flower Farm**
+- **Red Iris Run**
 - **Unnatural Seeds Farm**
 - **Worn Belts Farm**
 - **Charr Boss Farm**
-- **More farms on the way**
+- **Gargoyle Skulls Farm**
+- **Enchanted Lodes Farm**
+- **Icy Lodes Farm**
+- **Baked Husks Farm**
+- **Skeleton Limbs Farm**
+- **Skale Fins Farm**
+- **Dull Carapace Farm**
+- **Grawl Necklace Farm**
+- **Nick Exchange**
 
 Each farm is modular and designed to plug directly into the AscEnd hub.
 
