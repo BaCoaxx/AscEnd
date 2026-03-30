@@ -55,6 +55,14 @@ Func Farm_GrawlNecklace()
                 Return
             EndIf
 
+            If $NickRun Then
+                Local $currentCount = GetItemCountByModelID($NickItem[0])
+                If $currentCount >= 25 Then
+                    LogInfo("Nicholas farm goal reached! Collected " & $currentCount & " " & $NickItem[1])
+                    Return
+                EndIf
+            EndIf
+
             GrawlNecklace()
         WEnd
     WEnd

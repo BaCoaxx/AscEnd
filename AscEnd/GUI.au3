@@ -86,11 +86,27 @@ Global $aNicholasItems[52][2] = [ _
     [425, "Dull Carapaces"] _        ; Day 51
 ]
 
+Global $g_aNicholasFarmMap[13][2] = [ _
+    [432, "Farm_GrawlNecklace"], _
+    [433, "Farm_BakedHusk"], _
+    [430, "Farm_SkeletonLimbs"], _
+    [428, "Farm_UnnaturalSeeds"], _
+    [431, "Farm_EnchLodes"], _
+    [429, "Farm_Skale"], _
+    [424, "Farm_IcyLodes"], _
+    [426, "Farm_GargoyleSkull"], _
+    [425, "Farm_Carapace"], _
+    [2994, "Farm_RedIris"], _
+    [422, "Farm_SpiderLeg"], _
+    [423, "Farm_CharrBossFarm"], _
+    [427, "Farm_WornBelts"] _
+]
+
 Global Const $NICHOLAS_EPOCH = "2026/03/25 07:00:00"
 Global Const $NICHOLAS_EPOCH_INDEX = 6
 Global Const $VANGUARD_EPOCH = "2026/01/14 16:01:00"
 
-Func _GetNicholasItemByOffset($iDayOffset = 0)
+Func _GetNicholasItemByOffset($iDayOffset)
     Local $iItemCount = UBound($aNicholasItems)
     
     ; Current UTC timestamp
@@ -305,8 +321,9 @@ $explbl = GUICtrlCreateLabel($Level & " XP Needed", 216, 383, 264, 17, $SS_RIGHT
 GUICtrlSetColor(-1, 0x008000)
 
 ; Nicholas Sandford Exchange
-Global $NickItem = "Current: " & _GetNicholasItemByOffset(0)[1] & "  |  Next: " & _GetNicholasItemByOffset(1)[1]
-$Nick_Label = GUICtrlCreateLabel($NickItem, 82, 383, 330, 17, $SS_CENTER)
+Global $NickItem = _GetNicholasItemByOffset(0)
+Global $NickItemDisplay = "Current: " & $NickItem[1] & "  |  Next: " & _GetNicholasItemByOffset(1)[1]
+$Nick_Label = GUICtrlCreateLabel($NickItemDisplay, 82, 383, 330, 17, $SS_CENTER)
 GUICtrlSetBkColor($Nick_Label, $GUI_BKCOLOR_TRANSPARENT)
 
 GUICtrlCreateGroup("", -99, -99, 1, 1)
@@ -438,6 +455,7 @@ Func ResetStart()
     GUICtrlSetData($GUIStartButton, "Start")
     $CharrBossPickup = True
     $hasBonus = False
+    $NickRun = False
     LogStatus("Bot paused.")
     Sleep(500)
 EndFunc

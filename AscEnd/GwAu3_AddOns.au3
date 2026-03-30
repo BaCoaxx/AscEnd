@@ -2039,10 +2039,8 @@ EndFunc   ;==>FindSummoningStone
 
 Func UseSummoningStone()
     Local $lItemPtr
-    Local $litemID
+    Local $lItemID
     Local $myLevel = Agent_GetAgentInfo(-2, "Level")
-    
-    If $myLevel > 19 Then Return False  ; Summoning Stone is only available under level 20
     
     If GetEffectTimeRemainingEx(-2, 2886) <> 0 Then Return False  ; Summoning Sickness
     For $i = 1 To 4
@@ -2050,7 +2048,8 @@ Func UseSummoningStone()
             $lItemPtr = Item_GetItemBySlot($i, $j)
             $lItemID = Item_GetItemInfoByPtr($lItemPtr, 'ModelID')
             For $ii = 0 to UBound($SummoningStone) - 1
-                If $litemID = $SummoningStone[$ii] Then
+                If $lItemID = $SummoningStone[$ii] Then
+                    If $lItemID = 30847 And $myLevel > 19 Then Return False ; Only return false if level is above 19 when using imp
                     Item_UseItem($lItemPtr)
                     Sleep(250)
                     Return True
@@ -2236,7 +2235,6 @@ Func ScanDyes($dyeID)
     Next
     Return $dyeNumber
 EndFunc   ;==> ScanDyes
-
 
 Func SellRunes($BagIndex)
     Local $aItemPtr
@@ -3520,7 +3518,6 @@ Func IsSupVigor($aItem)
     EndIf
 EndFunc   ;==> IsSupVigor
 
-
 Func IsRareInsignia($aItem)
     Local $ModStruct = Item_GetModStruct($aItem)
     Local $Sentinel = StringInStr($ModStruct, "FB010824", 0, 1) ; Sentinel insig
@@ -3893,7 +3890,6 @@ Func CheckGuildHall()
     EndIf
 EndFunc   ;~ Check Guild halls
 
-
 #Region Luxon and Kurzick Points
 Func GetKurzickFaction()
     Local $currentKurzFaction = World_GetWorldInfo("CurrentKurzick")
@@ -3989,7 +3985,6 @@ Func GetLuxonTitle()
     EndIf
 EndFunc   ;==> GetLuxonTitle
 #EndRegion
-
 
 #Region Constants
 ; ==== Constants ====
@@ -4116,7 +4111,6 @@ Global $gProf
 Global $gUpkeepSkills
 Global $EmoUpkeep[2] = [8, 7]
 Global $NecroUpKeep[1] = [1]
-Global $RangerUpKeep[2] = [1, 5]
 
 ;~ General Items
 Global $General_Items_Array[6] = [2989, 2991, 2992, 5899, 5900, 22751]
@@ -4244,6 +4238,20 @@ Global Const $WardenSeason = 3738
 
 ;~ Timer -> For when killing takes too long or enemies are stuck
 Global $TimerToKill = 0
+
+Global $Survivor = False
+Global $_19Stop = False
+Global $Collector = False
+Global $Purple = False
+Global $spawn[2] = [0, 0]
+Global $hasBonus = False
+Global $CharrBossFarm = False
+Global $NickRun = False
+
+Global $timer = TimerInit()
+Global $enemyKillTime = 120000
+Global $TotalTime = 0
+Global $RunTime = 0
 #EndRegion
 
 #Region Gui

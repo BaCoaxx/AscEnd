@@ -15,21 +15,11 @@ Opt("GUICloseOnESC", False)
 Opt("ExpandVarStrings", 1)
 
 Global $ProcessID = ""
-Global $timer = TimerInit()
-Global $enemyKillTime = 120000
-Global $TotalTime = 0
-Global $RunTime = 0
 Global $g_b_DebugMode = False
 Global Const $BotTitle = "AscEnd"
 Global $BotRunning = False
 Global $Bot_Core_Initialized = False
-Global $Survivor = False
-Global $_19Stop = False
-Global $Collector = False
-Global $Purple = False
-Global $spawn[2] = [0, 0]
-Global $hasBonus = False
-Global $CharrBossFarm = False
+
 
 $g_bAutoStart = False  ; Flag for auto-start
 $g_s_MainCharName  = ""
