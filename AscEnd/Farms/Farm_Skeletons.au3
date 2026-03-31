@@ -66,7 +66,6 @@ Func SkeletonSetup()
     ElseIf Map_GetMapID() <> 164 And Map_IsMapUnlocked(164) Then
         LogInfo("We are not in Ashford Abbey. Teleporting to Ashford...")
         Map_RndTravel(164)
-        Map_WaitMapLoading(164, 0)
         Sleep(2000)
     ElseIf Not Map_IsMapUnlocked(164) Then
         LogWarn("Ashford Abbey is not unlocked on this character, lets try to run there...")

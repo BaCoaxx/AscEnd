@@ -20,11 +20,11 @@ AscEnd currently includes the following Pre-Searing farms:
 
 - **Charr at the Gate**
 - **Farmer Hamnet**
-- **Run to Outposts** (excluding Piken Square)
+- **Run to Outposts** *- Excluding Piken Square*
 - **Red Iris Run**
-- **Unnatural Seeds Farm**
+- **Unnatural Seeds Farm/Spider Legs Farm** *- Why not kill two Norn with the same Dwarf?*
 - **Worn Belts Farm**
-- **Charr Boss Farm**
+- **Charr Boss Farm** *- This is currently set up for an E/Mo, tested on a level 18, all skills unlocked*
 - **Gargoyle Skulls Farm**
 - **Enchanted Lodes Farm**
 - **Icy Lodes Farm**
@@ -33,7 +33,7 @@ AscEnd currently includes the following Pre-Searing farms:
 - **Skale Fins Farm**
 - **Dull Carapace Farm**
 - **Grawl Necklace Farm**
-- **Nick Exchange**
+- **Nick Exchange/Nick Farm + Exchange**
 
 Each farm is modular and designed to plug directly into the AscEnd hub.
 

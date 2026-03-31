@@ -6,7 +6,7 @@
      Author:         Coaxx
 
      Script Function:
-        Unnatural Seed Farm - Pre Searing
+        Unnatural Seed Farm (Also Spider Legs) - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 

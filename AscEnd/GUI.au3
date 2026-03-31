@@ -97,7 +97,7 @@ Global $g_aNicholasFarmMap[13][2] = [ _
     [426, "Farm_GargoyleSkull"], _
     [425, "Farm_Carapace"], _
     [2994, "Farm_RedIris"], _
-    [422, "Farm_SpiderLeg"], _
+    [422, "Farm_UnnaturalSeeds"], _
     [423, "Farm_CharrBossFarm"], _
     [427, "Farm_WornBelts"] _
 ]
