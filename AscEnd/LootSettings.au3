@@ -173,7 +173,7 @@ EndFunc
 ; UPDATE DICTIONARY BASED ON TREEVIEW
 ; =========================
 Func UpdateLootRules()
-    ConsoleWrite("=== Loot Rules Updated ===" & @CRLF)
+    LogWarn(" ***Loot Config Updated*** ")
     
     For $i = 0 To UBound($gLootTypes) - 1
         Local $type = $gLootTypes[$i]
@@ -196,9 +196,9 @@ Func UpdateLootRules()
         EndIf
         
         ; Debug output
-        ConsoleWrite($type & _
+        LogError($type & _
             " | Pickup=" & $LootRules($type & "_Pickup") & _
-            " | Action=" & $LootRules($type & "_Action") & @CRLF)
+            " | Action=" & $LootRules($type & "_Action"))
     Next
 EndFunc
 
