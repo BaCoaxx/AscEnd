@@ -218,3 +218,110 @@ Func GetLootAction($type)
     EndIf
     Return "Keep" ; Default action
 EndFunc
+
+Func GetItemLootType($aItemPtr)
+    Local $lRarity = Item_GetItemInfoByPtr($aItemPtr, "Rarity")
+    Local $lModelID = Item_GetItemInfoByPtr($aItemPtr, "ModelID")
+    Local $lExtraID = Item_GetItemInfoByPtr($aItemPtr, "ExtraID")
+    
+    ; Check for dyes first (ModelID 146)
+    If $lModelID == 146 Then
+        If $lExtraID == 10 Then Return "DyeBlack"    ; Black dye
+        If $lExtraID == 12 Then Return "DyeWhite"    ; White dye
+        Return "DyeCustom"                           ; All other dyes
+    EndIf
+    
+    ; Check rarity
+    If $lRarity == $RARITY_Blue Then Return "Blue"
+    If $lRarity == $RARITY_Purple Then Return "Purple"
+    If $lRarity == $RARITY_Gold Then Return "Gold"
+    
+    Return ""
+EndFunc
+
+Func CanPickUpEx($aItemPtr)
+    Local $lModelID = Item_GetItemInfoByPtr($aItemPtr, "ModelID")
+    Local $aExtraID = Item_GetItemInfoByPtr($aItemPtr, "ExtraID")
+    Local $lRarity = Item_GetItemInfoByPtr($aItemPtr, "Rarity")
+    
+    ; Handle special cases first
+    If (($lModelID == 2511) And (GetGoldCharacter() < 99000)) Then
+        Return True	; gold coins
+    EndIf
+    
+    If $lModelID == $ITEM_ID_Lockpicks Then
+        Return True  ; Lockpicks
+    EndIf
+    
+    If $lModelID == 22269 Then	; Cupcakes
+        Return True
+    EndIf
+    
+    If $lModelID == $GC_I_MODELID_LUNAR_TOKEN Then ; Lunar Tokens
+        Return True
+    EndIf
+    
+    If $lModelID == $ExpertSalvKit Then
+        Return True
+    EndIf
+    
+    If IsPcon($aItemPtr) Then
+        Return True
+    EndIf
+    
+    If IsRareMaterial($aItemPtr) Then
+        Return False
+    EndIf
+    
+    If $lModelID == $CharrSalvKit Then
+        Return True
+    EndIf
+    
+    If $lModelID == 16453 Then
+        Return True
+    EndIf
+    
+    ; If it's in the tree we handle it here
+    ; Use loot system for classified items
+    Local $itemType = GetItemLootType($aItemPtr)
+    If $itemType <> "" Then
+        If $LootRules.Exists($itemType) Then
+            Return $LootRules($itemType)
+        EndIf
+        Return False
+    EndIf
+    
+    Return False
+EndFunc
+
+Func CanSellEx($aItemPtr)
+    Local $lModelID = Item_GetItemInfoByPtr($aItemPtr, "ModelID")
+    
+    ; Never sell special items
+    If $lModelID == $ITEM_ID_Lockpicks Then
+        Return False
+    EndIf
+    
+    If $lModelID == 22269 Then
+        Return False  ; Never sell cupcakes
+    EndIf
+    
+    If IsPcon($aItemPtr) Then
+        Return False
+    EndIf
+    
+    If IsRareMaterial($aItemPtr) Then
+        Return False
+    EndIf
+    
+    ; Use loot system for classified items
+    Local $itemType = GetItemLootType($aItemPtr)
+    If $itemType <> "" Then
+        If $LootRules.Exists($itemType & "_Sell") Then
+            Return $LootRules($itemType & "_Sell")
+        EndIf
+        Return False
+    EndIf
+    
+    Return False
+EndFunc
