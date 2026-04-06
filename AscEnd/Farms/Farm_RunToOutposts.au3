@@ -161,7 +161,10 @@ Func RunOutpost()
         Local $success = False
         While Not $success
 
-            If Not $BotRunning Then ResetStart() Return
+            If Not $BotRunning Then
+                ResetStart()
+                Return
+            EndIf
 
             Switch $outpost
                 Case "Ashford"
