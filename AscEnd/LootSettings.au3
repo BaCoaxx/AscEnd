@@ -9,6 +9,7 @@
 Global $gLootTypes[3] = ["Purple", "Collector", "Mod"]
 Global $gTreeItems = ObjCreate("Scripting.Dictionary")
 Global $LootRules = ObjCreate("Scripting.Dictionary")
+Global $gLootIniFile = @ScriptDir & "\LootConfig.ini"
 
 Global $hLootGUI = 0
 Global $tree = 0
@@ -26,13 +27,18 @@ Func ShowLootSettings()
     EndIf
     
     ; Create the GUI
-    $hLootGUI = GUICreate("Loot Config", 320, 420)
+    $hLootGUI = GUICreate("Loot Configuration", 320, 430)
+    GUISetFont(9, 400, 0, "Segoe UI")
+    GUISetBkColor(0xF5F5F5) ; Light modern background
     
-    $tree = GUICtrlCreateTreeView(10, 10, 280, 320, _
-        BitOR($TVS_CHECKBOXES, $TVS_HASBUTTONS, $TVS_LINESATROOT))
+    GUICtrlCreateLabel("Select items to pick up and their actions:", 15, 15, 290, 20)
+    GUICtrlSetFont(-1, 9, 600, 0, "Segoe UI") ; Bold header
     
-    $btnApply = GUICtrlCreateButton("Apply", 10, 350, 80, 30)
-    $btnClose = GUICtrlCreateButton("Close", 100, 350, 80, 30)
+    $tree = GUICtrlCreateTreeView(15, 40, 290, 330, _
+        BitOR($TVS_CHECKBOXES, $TVS_HASBUTTONS, $TVS_LINESATROOT, $TVS_SHOWSELALWAYS))
+    
+    $btnApply = GUICtrlCreateButton("Save & Apply", 125, 385, 95, 30)
+    $btnClose = GUICtrlCreateButton("Close", 230, 385, 75, 30)
     
     ; Build the tree
     BuildLootTree()
@@ -65,8 +71,8 @@ Func BuildLootTree()
         $gTreeItems($type & "_Salvage") = $salvage
         
         ; Defaults
-        GUICtrlSetState($parent, $GUI_CHECKED)   ; pick up by default
-        GUICtrlSetState($keep, $GUI_CHECKED)     ; keep by default
+        GUICtrlSetState($parent, BitOR($GUI_CHECKED, $GUI_EXPAND))   ; pick up and expand by default
+        GUICtrlSetState($keep, $GUI_CHECKED)                         ; keep by default
     Next
 EndFunc
 
@@ -77,7 +83,15 @@ Func LoadLootSettings()
     For $i = 0 To UBound($gLootTypes) - 1
         Local $type = $gLootTypes[$i]
         
-        ; Check if we have saved settings
+        ; Read from INI file, default to True/Keep
+        Local $iniPickup = IniRead($gLootIniFile, "LootSettings", $type & "_Pickup", "True")
+        Local $iniAction = IniRead($gLootIniFile, "LootSettings", $type & "_Action", "Keep")
+        
+        ; Update dictionary
+        $LootRules($type & "_Pickup") = ($iniPickup = "True")
+        $LootRules($type & "_Action") = $iniAction
+        
+        ; Apply loaded settings to GUI
         If $LootRules.Exists($type & "_Pickup") Then
             Local $pickup = $LootRules($type & "_Pickup")
             Local $action = $LootRules($type & "_Action")
@@ -195,9 +209,15 @@ Func UpdateLootRules()
             $LootRules($type & "_Action") = "Keep"
         EndIf
         
+        ; Write to INI file
+        Local $strPickup = "False"
+        If $enabled Then $strPickup = "True"
+        IniWrite($gLootIniFile, "LootSettings", $type & "_Pickup", $strPickup)
+        IniWrite($gLootIniFile, "LootSettings", $type & "_Action", $LootRules($type & "_Action"))
+        
         ; Debug output
         LogError($type & _
-            " | Pickup=" & $LootRules($type & "_Pickup") & _
+            " | Pickup=" & $strPickup & _
             " | Action=" & $LootRules($type & "_Action"))
     Next
 EndFunc
