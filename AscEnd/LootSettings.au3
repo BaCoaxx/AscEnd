@@ -28,17 +28,24 @@ Func ShowLootSettings()
     
     ; Create the GUI
     $hLootGUI = GUICreate("Loot Configuration", 320, 430)
-    GUISetFont(9, 400, 0, "Segoe UI")
-    GUISetBkColor(0xF5F5F5) ; Light modern background
+    GUISetFont(9, 400, 0, "Tahoma")
+    GUISetBkColor(0xF0F0F0) ; Standard grey background
     
     GUICtrlCreateLabel("Select items to pick up and their actions:", 15, 15, 290, 20)
-    GUICtrlSetFont(-1, 9, 600, 0, "Segoe UI") ; Bold header
+    GUICtrlSetFont(-1, 9, 600, 0, "Tahoma") ; Bold header
     
+    ; TVS_NOTOOLTIPS disables tooltips, removing TVS_SHOWSELALWAYS makes selection less prominent
     $tree = GUICtrlCreateTreeView(15, 40, 290, 330, _
-        BitOR($TVS_CHECKBOXES, $TVS_HASBUTTONS, $TVS_LINESATROOT, $TVS_SHOWSELALWAYS))
+        BitOR($TVS_CHECKBOXES, $TVS_HASBUTTONS, $TVS_LINESATROOT, $TVS_DISABLEDRAGDROP, $TVS_NOTOOLTIPS))
     
     $btnApply = GUICtrlCreateButton("Save & Apply", 125, 385, 95, 30)
     $btnClose = GUICtrlCreateButton("Close", 230, 385, 75, 30)
+    
+    ; Register OnEvent mode handlers if the main GUI uses OnEvent mode
+    GUISetOnEvent($GUI_EVENT_CLOSE, "HandleLootSettingsMsg", $hLootGUI)
+    GUICtrlSetOnEvent($btnApply, "HandleLootSettingsMsg")
+    GUICtrlSetOnEvent($btnClose, "HandleLootSettingsMsg")
+    GUICtrlSetOnEvent($tree, "HandleLootSettingsMsg")
     
     ; Build the tree
     BuildLootTree()
@@ -119,18 +126,20 @@ EndFunc
 ; HANDLE LOOT SETTINGS EVENTS
 ; =========================
 Func HandleLootSettingsMsg()
-    Local $msg = GUIGetMsg()
+    Local $ctrl = @GUI_CtrlId
     
-    Switch $msg
+    Switch $ctrl
         Case $GUI_EVENT_CLOSE, $btnClose
             GUISetState(@SW_HIDE, $hLootGUI)
             
         Case $tree
             ; Determine which node was clicked
-            Local $ctrl = @GUI_CtrlId
             For $i = 0 To UBound($gLootTypes) - 1
-                HandleType($gLootTypes[$i], $ctrl)
+                HandleType($gLootTypes[$i], GUICtrlRead($tree))
             Next
+            
+            ; Clear highlighting in treeview
+            GUICtrlSetState($tree, $GUI_FOCUS)
             
         Case $btnApply
             UpdateLootRules()
@@ -141,7 +150,7 @@ EndFunc
 ; =========================
 ; HANDLE TREEVIEW LOGIC
 ; =========================
-Func HandleType($type, $clickedCtrl)
+Func HandleType($type, $clickedID)
     Local $parent  = $gTreeItems($type & "_Parent")
     Local $keepID  = $gTreeItems($type & "_Keep")
     Local $sellID  = $gTreeItems($type & "_Sell")
@@ -156,7 +165,7 @@ Func HandleType($type, $clickedCtrl)
     EndIf
     
     ; Radio behaviour: only the clicked action stays checked
-    Switch $clickedCtrl
+    Switch $clickedID
         Case $keepID
             GUICtrlSetState($sellID, $GUI_UNCHECKED)
         Case $sellID
