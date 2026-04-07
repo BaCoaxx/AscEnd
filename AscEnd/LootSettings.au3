@@ -32,7 +32,7 @@ Func ShowLootSettings()
     EndIf
     
     ; Create the GUI
-    $hLootGUI = GUICreate("AscEnd", 313, 288, 253, 250, -1, BitOR($WS_EX_TRANSPARENT,$WS_EX_WINDOWEDGE))
+    $hLootGUI = GUICreate("AscEnd", 313, 288, 253, 250, -1, BitOR($WS_EX_TRANSPARENT, $WS_EX_WINDOWEDGE, $WS_EX_TOPMOST))
     GUISetFont(9, 400, 0, "Tahoma")
     GUISetBkColor(0xF0F0F0) ; Standard grey background
     
