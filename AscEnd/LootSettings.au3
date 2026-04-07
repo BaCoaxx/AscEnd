@@ -179,7 +179,8 @@ EndFunc
 ; =========================
 Func HandleType($type, $clickedID)
     Local $parent  = $gTreeItems($type & "_Parent")
-    Local $enabled = GUICtrlRead($parent) = $GUI_CHECKED
+    Local $state = GUICtrlRead($parent)
+    Local $enabled = (BitAND($state, $GUI_CHECKED) = $GUI_CHECKED)
     
     If $type = "Pcons" Or $type = "Charr Bags" Or $type = "Charr Salvage Kit" Then Return
     
@@ -202,8 +203,11 @@ Func HandleType($type, $clickedID)
     EndSwitch
     
     ; Ensure at least one action is selected (default Keep)
-    If Not (GUICtrlRead($keepID) = $GUI_CHECKED _
-        Or GUICtrlRead($sellID) = $GUI_CHECKED) Then
+    Local $keepState = GUICtrlRead($keepID)
+    Local $sellState = GUICtrlRead($sellID)
+    
+    If Not ((BitAND($keepState, $GUI_CHECKED) = $GUI_CHECKED) _
+        Or (BitAND($sellState, $GUI_CHECKED) = $GUI_CHECKED)) Then
         GUICtrlSetState($keepID, $GUI_CHECKED)
     EndIf
 EndFunc
@@ -217,14 +221,17 @@ Func UpdateLootRules()
     For $i = 0 To UBound($gLootTypes) - 1
         Local $type = $gLootTypes[$i]
         
-        Local $enabled = GUICtrlRead($gTreeItems($type & "_Parent")) = $GUI_CHECKED
+        ; For TreeView Checkboxes, we must use BitAND with $GUI_CHECKED to properly read the state
+        Local $state = GUICtrlRead($gTreeItems($type & "_Parent"))
+        Local $enabled = (BitAND($state, $GUI_CHECKED) = $GUI_CHECKED)
         
         ; Save pickup state
         $LootRules($type & "_Pickup") = $enabled
         
         ; Save action
         If $type <> "Pcons" And $type <> "Charr Bags" And $type <> "Charr Salvage Kit" Then
-            Local $sell = GUICtrlRead($gTreeItems($type & "_Sell")) = $GUI_CHECKED
+            Local $sellState = GUICtrlRead($gTreeItems($type & "_Sell"))
+            Local $sell = (BitAND($sellState, $GUI_CHECKED) = $GUI_CHECKED)
             If $sell Then
                 $LootRules($type & "_Action") = "Sell"
             Else
