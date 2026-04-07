@@ -6,7 +6,12 @@
 ; =========================
 ; GLOBAL VARIABLES
 ; =========================
-Global $gLootTypes[3] = ["Purple", "Collector", "Mod"]
+Global $gLootTypes[24] = [ _
+    "Gold", "Purple", "Blue", _
+    "Collectors", "Baked Husks", "Charr Carvings", "Dull Carapaces", "Enchanted Lodestones", "Gargoyle Skulls", "Grawl Necklaces", "Icy Lodestones", "Red Iris", "Skale Fins", "Skeletal Limbs", "Spider Legs", "Unnatural Seeds", "Worn Belts", _
+    "Dye", "Black Dye", "White Dye", _
+    "Pcons", "Charr Bags", "Charr Salvage Kit" _
+]
 Global $gTreeItems = ObjCreate("Scripting.Dictionary")
 Global $LootRules = ObjCreate("Scripting.Dictionary")
 Global $gLootIniFile = @ScriptDir & "\LootConfig.ini"
@@ -27,19 +32,19 @@ Func ShowLootSettings()
     EndIf
     
     ; Create the GUI
-    $hLootGUI = GUICreate("Loot Configuration", 320, 430)
+    $hLootGUI = GUICreate("AscEnd", 313, 288, 253, 250, -1, BitOR($WS_EX_TRANSPARENT,$WS_EX_WINDOWEDGE))
     GUISetFont(9, 400, 0, "Tahoma")
     GUISetBkColor(0xF0F0F0) ; Standard grey background
     
-    GUICtrlCreateLabel("Select items to pick up and their actions:", 15, 15, 290, 20)
-    GUICtrlSetFont(-1, 9, 600, 0, "Tahoma") ; Bold header
+    $Group3 = GUICtrlCreateGroup("Loot Configuration", 8, 7, 296, 273, -1, $WS_EX_TRANSPARENT)
+    $btnApply = GUICtrlCreateButton("Apply", 64, 239, 89, 28)
+    $btnClose = GUICtrlCreateButton("Close", 160, 239, 89, 28)
     
-    ; TVS_NOTOOLTIPS disables tooltips, removing TVS_SHOWSELALWAYS makes selection less prominent
-    $tree = GUICtrlCreateTreeView(15, 40, 290, 330, _
-        BitOR($TVS_CHECKBOXES, $TVS_HASBUTTONS, $TVS_LINESATROOT, $TVS_DISABLEDRAGDROP, $TVS_NOTOOLTIPS))
+    $tree = GUICtrlCreateTreeView(32, 32, 249, 193, _
+        BitOR($GUI_SS_DEFAULT_TREEVIEW, $TVS_CHECKBOXES, $TVS_SINGLEEXPAND, $TVS_FULLROWSELECT, $WS_HSCROLL, $TVS_DISABLEDRAGDROP, $TVS_NOTOOLTIPS), _
+        $WS_EX_CLIENTEDGE)
     
-    $btnApply = GUICtrlCreateButton("Save & Apply", 125, 385, 95, 30)
-    $btnClose = GUICtrlCreateButton("Close", 230, 385, 75, 30)
+    GUICtrlCreateGroup("", -99, -99, 1, 1)
     
     ; Register OnEvent mode handlers if the main GUI uses OnEvent mode
     GUISetOnEvent($GUI_EVENT_CLOSE, "HandleLootSettingsMsg", $hLootGUI)
@@ -60,24 +65,44 @@ EndFunc
 ; BUILD TREE
 ; =========================
 Func BuildLootTree()
+    Local $parent = 0
+    Local $collectorsNode = 0
+    Local $dyeNode = 0
+    
     For $i = 0 To UBound($gLootTypes) - 1
         Local $type = $gLootTypes[$i]
         
-        ; Parent node = Loot type
-        Local $parent = GUICtrlCreateTreeViewItem($type, $tree)
+        ; Determine the correct parent node
+        Switch $type
+            Case "Collectors", "Dye", "Gold", "Purple", "Blue", "Pcons", "Charr Bags", "Charr Salvage Kit"
+                $parent = GUICtrlCreateTreeViewItem($type, $tree)
+                
+                ; Save references to specific category parents
+                If $type = "Collectors" Then $collectorsNode = $parent
+                If $type = "Dye" Then $dyeNode = $parent
+                
+            Case "Black Dye", "White Dye"
+                $parent = GUICtrlCreateTreeViewItem($type, $dyeNode)
+                
+            Case Else ; E.g. "Baked Husks", "Red Iris", etc.
+                $parent = GUICtrlCreateTreeViewItem($type, $collectorsNode)
+        EndSwitch
         
-        ; Children = Actions (radio style)
-        Local $keep    = GUICtrlCreateTreeViewItem("Keep", $parent)
-        Local $sell    = GUICtrlCreateTreeViewItem("Sell", $parent)
+        ; Keep/Sell options for items that support actions
+        If $type <> "Pcons" And $type <> "Charr Bags" And $type <> "Charr Salvage Kit" Then
+            Local $keep = GUICtrlCreateTreeViewItem("Keep", $parent)
+            Local $sell = GUICtrlCreateTreeViewItem("Sell", $parent)
+            
+            $gTreeItems($type & "_Keep") = $keep
+            $gTreeItems($type & "_Sell") = $sell
+            GUICtrlSetState($keep, $GUI_CHECKED) ; keep by default
+        EndIf
         
         ; Store control IDs
-        $gTreeItems($type & "_Parent")  = $parent
-        $gTreeItems($type & "_Keep")    = $keep
-        $gTreeItems($type & "_Sell")    = $sell
+        $gTreeItems($type & "_Parent") = $parent
         
         ; Defaults
-        GUICtrlSetState($parent, BitOR($GUI_CHECKED, $GUI_EXPAND))   ; pick up and expand by default
-        GUICtrlSetState($keep, $GUI_CHECKED)                         ; keep by default
+        GUICtrlSetState($parent, BitOR($GUI_CHECKED, $GUI_EXPAND)) ; pick up and expand by default
     Next
 EndFunc
 
@@ -109,15 +134,17 @@ Func LoadLootSettings()
             EndIf
             
             ; Set action
-            GUICtrlSetState($gTreeItems($type & "_Keep"), $GUI_UNCHECKED)
-            GUICtrlSetState($gTreeItems($type & "_Sell"), $GUI_UNCHECKED)
-            
-            Switch $action
-                Case "Keep"
-                    If $pickup Then GUICtrlSetState($gTreeItems($type & "_Keep"), $GUI_CHECKED)
-                Case "Sell"
-                    If $pickup Then GUICtrlSetState($gTreeItems($type & "_Sell"), $GUI_CHECKED)
-            EndSwitch
+            If $type <> "Pcons" And $type <> "Charr Bags" And $type <> "Charr Salvage Kit" Then
+                GUICtrlSetState($gTreeItems($type & "_Keep"), $GUI_UNCHECKED)
+                GUICtrlSetState($gTreeItems($type & "_Sell"), $GUI_UNCHECKED)
+                
+                Switch $action
+                    Case "Keep"
+                        If $pickup Then GUICtrlSetState($gTreeItems($type & "_Keep"), $GUI_CHECKED)
+                    Case "Sell"
+                        If $pickup Then GUICtrlSetState($gTreeItems($type & "_Sell"), $GUI_CHECKED)
+                EndSwitch
+            EndIf
         EndIf
     Next
 EndFunc
@@ -152,10 +179,12 @@ EndFunc
 ; =========================
 Func HandleType($type, $clickedID)
     Local $parent  = $gTreeItems($type & "_Parent")
+    Local $enabled = GUICtrlRead($parent) = $GUI_CHECKED
+    
+    If $type = "Pcons" Or $type = "Charr Bags" Or $type = "Charr Salvage Kit" Then Return
+    
     Local $keepID  = $gTreeItems($type & "_Keep")
     Local $sellID  = $gTreeItems($type & "_Sell")
-    
-    Local $enabled = GUICtrlRead($parent) = $GUI_CHECKED
     
     ; If type unchecked → clear children
     If Not $enabled Then
@@ -189,15 +218,18 @@ Func UpdateLootRules()
         Local $type = $gLootTypes[$i]
         
         Local $enabled = GUICtrlRead($gTreeItems($type & "_Parent")) = $GUI_CHECKED
-        Local $keep    = GUICtrlRead($gTreeItems($type & "_Keep")) = $GUI_CHECKED
-        Local $sell    = GUICtrlRead($gTreeItems($type & "_Sell")) = $GUI_CHECKED
         
         ; Save pickup state
         $LootRules($type & "_Pickup") = $enabled
         
         ; Save action
-        If $sell Then
-            $LootRules($type & "_Action") = "Sell"
+        If $type <> "Pcons" And $type <> "Charr Bags" And $type <> "Charr Salvage Kit" Then
+            Local $sell = GUICtrlRead($gTreeItems($type & "_Sell")) = $GUI_CHECKED
+            If $sell Then
+                $LootRules($type & "_Action") = "Sell"
+            Else
+                $LootRules($type & "_Action") = "Keep"
+            EndIf
         Else
             $LootRules($type & "_Action") = "Keep"
         EndIf
