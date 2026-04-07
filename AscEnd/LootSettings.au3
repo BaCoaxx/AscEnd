@@ -248,9 +248,9 @@ Func UpdateLootRules()
         IniWrite($gLootIniFile, "LootSettings", $type & "_Action", $LootRules($type & "_Action"))
         
         ; Debug output
-        LogError($type & _
-            " | Pickup=" & $strPickup & _
-            " | Action=" & $LootRules($type & "_Action"))
+        LogStatus($type & _
+            " - Pickup = " & $strPickup & _
+            " - Action = " & $LootRules($type & "_Action"))
     Next
 EndFunc
 
