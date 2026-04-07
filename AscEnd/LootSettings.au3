@@ -278,9 +278,9 @@ Func GetItemLootType($aItemPtr)
     
     ; Check for dyes first (ModelID 146)
     If $lModelID == 146 Then
-        If $lExtraID == 10 Then Return "DyeBlack"    ; Black dye
-        If $lExtraID == 12 Then Return "DyeWhite"    ; White dye
-        Return "DyeCustom"                           ; All other dyes
+        If $lExtraID == 10 Then Return "Black Dye"    ; Black dye
+        If $lExtraID == 12 Then Return "White Dye"    ; White dye
+        Return "Dye"                                  ; All other dyes
     EndIf
     
     ; Check rarity
@@ -288,49 +288,37 @@ Func GetItemLootType($aItemPtr)
     If $lRarity == $RARITY_Purple Then Return "Purple"
     If $lRarity == $RARITY_Gold Then Return "Gold"
     
+    If IsPcon($aItemPtr) Then Return "Pcons"
+
+    If IsPreCollectable($aItemPtr) Then
+        If $lModelID == 422 Then Return "Spider Legs"
+        If $lModelID == 423 Then Return "Charr Carvings"
+        If $lModelID == 424 Then Return "Icy Lodestones"
+        If $lModelID == 425 Then Return "Dull Carapaces"
+        If $lModelID == 426 Then Return "Gargoyle Skulls"
+        If $lModelID == 427 Then Return "Worn Belts"
+        If $lModelID == 428 Then Return "Unnatrual Seeds"
+        If $lModelID == 429 Then Return "Skale Fins"
+        If $lModelID == 430 Then Return "Skeletal Limbs"
+        If $lModelID == 431 Then Return "Enchanted Lodestones"
+        If $lModelID == 432 Then Return "Grawl Necklaces"
+        If $lModelID == 433 Then Return "Baked Husks"
+        If $lModelID == 2994 Then Return "Red Iris"
+        Return "Collectors"
+    EndIf
+
+    If $lModelID == 16453 Then Return "Charr Bags"
+    If $lModelID == 18721 Then Return "Charr Salvage Kit"
+        
     Return ""
 EndFunc
 
 Func CanPickUpEx($aItemPtr)
     Local $lModelID = Item_GetItemInfoByPtr($aItemPtr, "ModelID")
-    Local $aExtraID = Item_GetItemInfoByPtr($aItemPtr, "ExtraID")
-    Local $lRarity = Item_GetItemInfoByPtr($aItemPtr, "Rarity")
     
     ; Handle special cases first
-    If (($lModelID == 2511) And (GetGoldCharacter() < 99000)) Then
-        Return True	; gold coins
-    EndIf
-    
-    If $lModelID == $ITEM_ID_Lockpicks Then
-        Return True  ; Lockpicks
-    EndIf
-    
-    If $lModelID == 22269 Then	; Cupcakes
-        Return True
-    EndIf
-    
-    If $lModelID == $GC_I_MODELID_LUNAR_TOKEN Then ; Lunar Tokens
-        Return True
-    EndIf
-    
-    If $lModelID == $ExpertSalvKit Then
-        Return True
-    EndIf
-    
-    If IsPcon($aItemPtr) Then
-        Return True
-    EndIf
-    
-    If IsRareMaterial($aItemPtr) Then
-        Return False
-    EndIf
-    
-    If $lModelID == $CharrSalvKit Then
-        Return True
-    EndIf
-    
-    If $lModelID == 16453 Then
-        Return True
+    If (($lModelID == 2511) And (GetGoldCharacter() < 99000)) Then ; Always pickup coins
+        Return True	; Gold coins
     EndIf
     
     ; If it's in the tree we handle it here
@@ -347,25 +335,7 @@ Func CanPickUpEx($aItemPtr)
 EndFunc
 
 Func CanSellEx($aItemPtr)
-    Local $lModelID = Item_GetItemInfoByPtr($aItemPtr, "ModelID")
-    
-    ; Never sell special items
-    If $lModelID == $ITEM_ID_Lockpicks Then
-        Return False
-    EndIf
-    
-    If $lModelID == 22269 Then
-        Return False  ; Never sell cupcakes
-    EndIf
-    
-    If IsPcon($aItemPtr) Then
-        Return False
-    EndIf
-    
-    If IsRareMaterial($aItemPtr) Then
-        Return False
-    EndIf
-    
+
     ; Use loot system for classified items
     Local $itemType = GetItemLootType($aItemPtr)
     If $itemType <> "" Then
