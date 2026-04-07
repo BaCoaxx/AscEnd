@@ -102,7 +102,7 @@ Func BuildLootTree()
         $gTreeItems($type & "_Parent") = $parent
         
         ; Defaults
-        GUICtrlSetState($parent, BitOR($GUI_CHECKED, $GUI_EXPAND)) ; pick up and expand by default
+        GUICtrlSetState($parent, $GUI_CHECKED) ; pick up by default
     Next
 EndFunc
 
