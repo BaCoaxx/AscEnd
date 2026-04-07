@@ -62,13 +62,11 @@ Func BuildLootTree()
         ; Children = Actions (radio style)
         Local $keep    = GUICtrlCreateTreeViewItem("Keep", $parent)
         Local $sell    = GUICtrlCreateTreeViewItem("Sell", $parent)
-        Local $salvage = GUICtrlCreateTreeViewItem("Salvage", $parent)
         
         ; Store control IDs
         $gTreeItems($type & "_Parent")  = $parent
         $gTreeItems($type & "_Keep")    = $keep
         $gTreeItems($type & "_Sell")    = $sell
-        $gTreeItems($type & "_Salvage") = $salvage
         
         ; Defaults
         GUICtrlSetState($parent, BitOR($GUI_CHECKED, $GUI_EXPAND))   ; pick up and expand by default
@@ -106,15 +104,12 @@ Func LoadLootSettings()
             ; Set action
             GUICtrlSetState($gTreeItems($type & "_Keep"), $GUI_UNCHECKED)
             GUICtrlSetState($gTreeItems($type & "_Sell"), $GUI_UNCHECKED)
-            GUICtrlSetState($gTreeItems($type & "_Salvage"), $GUI_UNCHECKED)
             
             Switch $action
                 Case "Keep"
                     If $pickup Then GUICtrlSetState($gTreeItems($type & "_Keep"), $GUI_CHECKED)
                 Case "Sell"
                     If $pickup Then GUICtrlSetState($gTreeItems($type & "_Sell"), $GUI_CHECKED)
-                Case "Salvage"
-                    If $pickup Then GUICtrlSetState($gTreeItems($type & "_Salvage"), $GUI_CHECKED)
             EndSwitch
         EndIf
     Next
@@ -150,7 +145,6 @@ Func HandleType($type, $clickedCtrl)
     Local $parent  = $gTreeItems($type & "_Parent")
     Local $keepID  = $gTreeItems($type & "_Keep")
     Local $sellID  = $gTreeItems($type & "_Sell")
-    Local $salvID  = $gTreeItems($type & "_Salvage")
     
     Local $enabled = GUICtrlRead($parent) = $GUI_CHECKED
     
@@ -158,7 +152,6 @@ Func HandleType($type, $clickedCtrl)
     If Not $enabled Then
         GUICtrlSetState($keepID, $GUI_UNCHECKED)
         GUICtrlSetState($sellID, $GUI_UNCHECKED)
-        GUICtrlSetState($salvID, $GUI_UNCHECKED)
         Return
     EndIf
     
@@ -166,19 +159,13 @@ Func HandleType($type, $clickedCtrl)
     Switch $clickedCtrl
         Case $keepID
             GUICtrlSetState($sellID, $GUI_UNCHECKED)
-            GUICtrlSetState($salvID, $GUI_UNCHECKED)
         Case $sellID
             GUICtrlSetState($keepID, $GUI_UNCHECKED)
-            GUICtrlSetState($salvID, $GUI_UNCHECKED)
-        Case $salvID
-            GUICtrlSetState($keepID, $GUI_UNCHECKED)
-            GUICtrlSetState($sellID, $GUI_UNCHECKED)
     EndSwitch
     
     ; Ensure at least one action is selected (default Keep)
     If Not (GUICtrlRead($keepID) = $GUI_CHECKED _
-        Or GUICtrlRead($sellID) = $GUI_CHECKED _
-        Or GUICtrlRead($salvID) = $GUI_CHECKED) Then
+        Or GUICtrlRead($sellID) = $GUI_CHECKED) Then
         GUICtrlSetState($keepID, $GUI_CHECKED)
     EndIf
 EndFunc
@@ -195,7 +182,6 @@ Func UpdateLootRules()
         Local $enabled = GUICtrlRead($gTreeItems($type & "_Parent")) = $GUI_CHECKED
         Local $keep    = GUICtrlRead($gTreeItems($type & "_Keep")) = $GUI_CHECKED
         Local $sell    = GUICtrlRead($gTreeItems($type & "_Sell")) = $GUI_CHECKED
-        Local $salvage = GUICtrlRead($gTreeItems($type & "_Salvage")) = $GUI_CHECKED
         
         ; Save pickup state
         $LootRules($type & "_Pickup") = $enabled
@@ -203,8 +189,6 @@ Func UpdateLootRules()
         ; Save action
         If $sell Then
             $LootRules($type & "_Action") = "Sell"
-        ElseIf $salvage Then
-            $LootRules($type & "_Action") = "Salvage"
         Else
             $LootRules($type & "_Action") = "Keep"
         EndIf
