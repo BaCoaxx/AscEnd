@@ -181,16 +181,13 @@ Next
 GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 ; CheckBox Options
-; Survivor Mode, 19 Stop, Purple & Collectors
+; Survivor Mode, 19 Stop
 Global Const $OPT_SURVIVOR  = 1
-Global Const $OPT_PURPLE    = 2
-Global Const $OPT_COLLECTOR = 4
 Global Const $OPT_19STOP    = 8
 
-
-$Loot = GUICtrlCreateGroup("Keep", 16, 129, 85, 57)
-$GUI_CBPurple = GUICtrlCreateCheckbox("Purple?", 24, 145, 73, 17, BitOR($GUI_SS_DEFAULT_CHECKBOX,$BS_LEFT))
-$GUI_CBCollector = GUICtrlCreateCheckbox("Collectors?", 24, 162, 73, 17, BitOR($GUI_SS_DEFAULT_CHECKBOX,$BS_LEFT))
+$Group4 = GUICtrlCreateGroup("Loot Config", 16, 129, 86, 57)
+$GUISettingsButton = GUICtrlCreateButton("Settings", 31, 146, 57, 33)
+GUICtrlSetOnEvent($GUISettingsButton, "GuiButtonHandler")
 GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 $Config = GUICtrlCreateGroup("Config", 108, 129, 101, 57)
@@ -203,14 +200,6 @@ Func GetSelectedOptions()
 
     If GUICtrlRead($GUI_CBSurvivor) = $GUI_CHECKED Then
         $options = BitOR($options, $OPT_SURVIVOR)
-    EndIf
-
-    If GUICtrlRead($GUI_CBPurple) = $GUI_CHECKED Then
-        $options = BitOR($options, $OPT_PURPLE)
-    EndIf
-
-    If GUICtrlRead($GUI_CBCollector) = $GUI_CHECKED Then
-        $options = BitOR($options, $OPT_COLLECTOR)
     EndIf
 
     If GUICtrlRead($GUI_CB19Stop) = $GUI_CHECKED Then
@@ -347,16 +336,11 @@ Func GuiButtonHandler()
                 GUICtrlSetState($GUIStartButton, $GUI_DISABLE)
                 GUICtrlSetState($FarmCombo, $GUI_DISABLE)
                 GUICtrlSetState($GUI_CBSurvivor, $GUI_DISABLE)
-                GUICtrlSetState($GUI_CBPurple, $GUI_DISABLE)
-                GUICtrlSetState($GUI_CBCollector, $GUI_DISABLE)
                 GUICtrlSetState($GUI_CB19Stop, $GUI_DISABLE)
+                GUICtrlSetState($GUISettingsButton, $GUI_DISABLE)
 
                 $Survivor = BitAND($options, $OPT_SURVIVOR)
                 LogStatus($Survivor ? "Survivor mode enabled." : "Survivor mode disabled.")
-                $Purple = BitAND($options, $OPT_PURPLE)
-                LogStatus($Purple ? "Keeping Purples." : "Discarding Purples.")
-                $Collector = BitAND($options, $OPT_COLLECTOR)
-                LogStatus($Collector ? "Keeping Collectors materials." : "Discarding Collectors materials.")
                 $_19Stop = BitAND($options, $OPT_19STOP)
                 LogStatus($_19Stop ? "Stopping at level 19, only applicable to hamnet." : "Sending to level 20.")
 
@@ -367,9 +351,8 @@ Func GuiButtonHandler()
             ElseIf $BotRunning Then
                 GUICtrlSetState($FarmCombo, $GUI_ENABLE)
                 GUICtrlSetState($GUI_CBSurvivor, $GUI_ENABLE)
-                GUICtrlSetState($GUI_CBPurple, $GUI_ENABLE)
-                GUICtrlSetState($GUI_CBCollector, $GUI_ENABLE)
                 GUICtrlSetState($GUI_CB19Stop, $GUI_ENABLE)
+                GUICtrlSetState($GUISettingsButton, $GUI_ENABLE)
                 
                 GUICTrlSetState($GUIStartButton, $GUI_DISABLE)
                 GUICtrlSetData($GUIStartButton, "Pausing...")
@@ -380,6 +363,9 @@ Func GuiButtonHandler()
         Case $GUIRefreshButton
             GUICtrlSetData($GUINameCombo, "")
             GUICtrlSetData($GUINameCombo, Scanner_GetLoggedCharNames())
+
+        Case $GUISettingsButton
+            ShowLootSettings()
 
         Case $GUI_EVENT_CLOSE
             Exit
@@ -449,9 +435,8 @@ Func ResetStart()
     GUICtrlSetState($GUIStartButton, $GUI_ENABLE)
     GUICtrlSetState($FarmCombo, $GUI_ENABLE)
     GUICtrlSetState($GUI_CBSurvivor, $GUI_ENABLE)
-    GUICtrlSetState($GUI_CBPurple, $GUI_ENABLE)
-    GUICtrlSetState($GUI_CBCollector, $GUI_ENABLE)
     GUICtrlSetState($GUI_CB19Stop, $GUI_ENABLE)
+    GUICtrlSetState($GUISettingsButton, $GUI_ENABLE)
     GUICtrlSetData($GUIStartButton, "Start")
     $CharrBossPickup = True
     $hasBonus = False

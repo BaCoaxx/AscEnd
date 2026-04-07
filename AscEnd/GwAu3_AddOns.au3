@@ -2297,12 +2297,12 @@ Func CanSell($aItem)
   
     Switch $IsPurple
     Case True
-       Return Not $Purple ; Is purple
+       Return Not GetLootPickup("Purple") ; Is purple
     EndSwitch
 
     Switch $IsPreCollectable
     Case True
-       Return Not $Collector ; Is pre-collectable
+       Return Not GetLootPickup("Collector") ; Is pre-collectable
     EndSwitch
 
     Switch $IsSpecial
@@ -4241,8 +4241,6 @@ Global $TimerToKill = 0
 
 Global $Survivor = False
 Global $_19Stop = False
-Global $Collector = False
-Global $Purple = False
 Global $spawn[2] = [0, 0]
 Global $hasBonus = False
 Global $CharrBossFarm = False
