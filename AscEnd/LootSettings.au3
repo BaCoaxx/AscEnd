@@ -6,7 +6,7 @@
 ; =========================
 ; GLOBAL VARIABLES
 ; =========================
-Global $gLootTypes[24] = [ _
+Global $gLootTypes[23] = [ _
     "Gold", "Purple", "Blue", _
     "Collectors", "Baked Husks", "Charr Carvings", "Dull Carapaces", "Enchanted Lodestones", "Gargoyle Skulls", "Grawl Necklaces", "Icy Lodestones", "Red Iris", "Skale Fins", "Skeletal Limbs", "Spider Legs", "Unnatural Seeds", "Worn Belts", _
     "Dye", "Black Dye", "White Dye", _
