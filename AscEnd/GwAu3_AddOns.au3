@@ -1035,7 +1035,7 @@ Func CharrCasterFilter($aAgentPtr)
     If Agent_GetAgentInfo($aAgentPtr, 'IsDead') > 0 Then Return False
 
     Local $ModelID = Agent_GetAgentInfo($aAgentPtr, 'PlayerNumber')
-    Local $CharrModelIDs[8] = [1452, 1450, 1451, 1453, 1649, 1639, 1659, 1641] ; 4 Bosses + Shaman, Chaot, Hunter, Ashen Claw
+    Local $CharrModelIDs[8] = [1452, 1450, 1451, 1453, 1649, 1638, 1659, 1641] ; 4 Bosses + Shaman, Chaot, Hunter, Ashen Claw
     Local $IsCharr = False
     For $i = 0 To UBound($CharrModelIDs) - 1
         If $ModelID == $CharrModelIDs[$i] Then
@@ -2202,7 +2202,7 @@ Func Sell($BagIndex)
     For $ii = 1 To Item_GetBagInfo($BagPtr, "Slots")
         $aItemPtr = Item_GetItemBySlot($BagIndex, $ii)
         If Item_GetItemInfoByPtr($aItemPtr, "ItemID") = 0 Then ContinueLoop
-        Local $sellable = CanSell($aItemPtr)
+        Local $sellable = CanSellEx($aItemPtr)
         Sleep(500)
         If $sellable Then
             Merchant_SellItem($aItemPtr)
@@ -2297,12 +2297,12 @@ Func CanSell($aItem)
   
     Switch $IsPurple
     Case True
-       Return Not $Purple ; Is purple
+       Return Not GetLootPickup("Purple") ; Is purple
     EndSwitch
 
     Switch $IsPreCollectable
     Case True
-       Return Not $Collector ; Is pre-collectable
+       Return Not GetLootPickup("Collector") ; Is pre-collectable
     EndSwitch
 
     Switch $IsSpecial
@@ -4241,8 +4241,6 @@ Global $TimerToKill = 0
 
 Global $Survivor = False
 Global $_19Stop = False
-Global $Collector = False
-Global $Purple = False
 Global $spawn[2] = [0, 0]
 Global $hasBonus = False
 Global $CharrBossFarm = False
