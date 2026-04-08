@@ -365,6 +365,9 @@ Func GuiButtonHandler()
             GUICtrlSetData($GUINameCombo, Scanner_GetLoggedCharNames())
 
         Case $GUISettingsButton
+            If Not IsHWnd($LootGui) Then
+                InitLootSettingsGUI()
+            EndIf
             ShowLootSettings()
 
         Case $GUI_EVENT_CLOSE
