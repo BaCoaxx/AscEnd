@@ -1,6 +1,7 @@
 #include-once
 #include <GUIConstantsEx.au3>
 #include <TreeViewConstants.au3>
+#include <GuiTreeView.au3>
 #include <WindowsConstants.au3>
 
 ; =========================
@@ -103,14 +104,14 @@ Func BuildLootTree()
             
             $gTreeItems($type & "_Keep") = $keep
             $gTreeItems($type & "_Sell") = $sell
-            GUICtrlSetState($keep, $GUI_CHECKED) ; Set 'Keep' as default action
+            _GUICtrlTreeView_SetChecked($tree, $keep, True) ; Set 'Keep' as default action
         EndIf
         
         ; Store the parent control ID in the dictionary for quick lookups
         $gTreeItems($type & "_Parent") = $parent
         
         ; Set the node to be checked (pickup) by default, and ensure it's collapsed
-        GUICtrlSetState($parent, $GUI_CHECKED)
+        _GUICtrlTreeView_SetChecked($tree, $parent, True)
     Next
 EndFunc
 
@@ -137,24 +138,21 @@ Func LoadLootSettings()
             Local $action = $LootRules($type & "_Action")
             
             ; Check or uncheck the parent node based on the pickup setting
-            If $pickup Then
-                GUICtrlSetState($gTreeItems($type & "_Parent"), $GUI_CHECKED)
-            Else
-                GUICtrlSetState($gTreeItems($type & "_Parent"), $GUI_UNCHECKED)
-            EndIf
+            _GUICtrlTreeView_SetChecked($tree, $gTreeItems($type & "_Parent"), $pickup)
             
             ; Only apply Keep/Sell to items that support actions
             If $type <> "Pcons" And $type <> "Charr Bags" And $type <> "Charr Salvage Kit" Then
                 ; Uncheck both before re-applying the saved one
-                GUICtrlSetState($gTreeItems($type & "_Keep"), $GUI_UNCHECKED)
-                GUICtrlSetState($gTreeItems($type & "_Sell"), $GUI_UNCHECKED)
+                _GUICtrlTreeView_SetChecked($tree, $gTreeItems($type & "_Keep"), False)
+                _GUICtrlTreeView_SetChecked($tree, $gTreeItems($type & "_Sell"), False)
                 
-                Switch $action
-                    Case "Keep"
-                        If $pickup Then GUICtrlSetState($gTreeItems($type & "_Keep"), $GUI_CHECKED)
-                    Case "Sell"
-                        If $pickup Then GUICtrlSetState($gTreeItems($type & "_Sell"), $GUI_CHECKED)
-                EndSwitch
+                If $pickup Then
+                    If $action = "Sell" Then
+                        _GUICtrlTreeView_SetChecked($tree, $gTreeItems($type & "_Sell"), True)
+                    Else
+                        _GUICtrlTreeView_SetChecked($tree, $gTreeItems($type & "_Keep"), True)
+                    EndIf
+                EndIf
             EndIf
         EndIf
     Next
@@ -173,9 +171,9 @@ Func HandleLootSettingsMsg()
             GUISetState(@SW_HIDE, $hLootGUI)
             
         Case $tree
-            ; Determine which node was clicked and handle radio toggle behavior
+            ; Enforce radio toggle behavior for all items using the UDF
             For $i = 0 To UBound($gLootTypes) - 1
-                HandleType($gLootTypes[$i], GUICtrlRead($tree))
+                HandleType($gLootTypes[$i])
             Next
             
             ; Clear focus highlighting so the treeview item doesn't stay blue
@@ -191,11 +189,11 @@ EndFunc
 ; HANDLE TREEVIEW LOGIC
 ; Enforces radio-button-like mutual exclusivity for "Keep" and "Sell" sub-items.
 ; Also unchecks child items if the parent (pickup) gets unchecked.
+; Uses _GUICtrlTreeView_GetChecked for robust state reading.
 ; =========================
-Func HandleType($type, $clickedID)
+Func HandleType($type)
     Local $parent  = $gTreeItems($type & "_Parent")
-    Local $state = GUICtrlRead($parent)
-    Local $enabled = (BitAND($state, $GUI_CHECKED) = $GUI_CHECKED)
+    Local $enabled = _GUICtrlTreeView_GetChecked($tree, $parent)
     
     ; Skip logic for categories without Keep/Sell options
     If $type = "Pcons" Or $type = "Charr Bags" Or $type = "Charr Salvage Kit" Then Return
@@ -205,27 +203,39 @@ Func HandleType($type, $clickedID)
     
     ; If the parent type is unchecked, visually uncheck its children
     If Not $enabled Then
-        GUICtrlSetState($keepID, $GUI_UNCHECKED)
-        GUICtrlSetState($sellID, $GUI_UNCHECKED)
+        _GUICtrlTreeView_SetChecked($tree, $keepID, False)
+        _GUICtrlTreeView_SetChecked($tree, $sellID, False)
         Return
     EndIf
     
-    ; Radio behavior: If 'Keep' is clicked, uncheck 'Sell' (and vice versa)
-    Switch $clickedID
-        Case $keepID
-            GUICtrlSetState($sellID, $GUI_UNCHECKED)
-        Case $sellID
-            GUICtrlSetState($keepID, $GUI_UNCHECKED)
-    EndSwitch
+    Local $keepChecked = _GUICtrlTreeView_GetChecked($tree, $keepID)
+    Local $sellChecked = _GUICtrlTreeView_GetChecked($tree, $sellID)
     
-    ; Ensure at least one action is selected if the parent is checked.
-    ; Defaults to 'Keep' if nothing is currently selected.
-    Local $keepState = GUICtrlRead($keepID)
-    Local $sellState = GUICtrlRead($sellID)
+    ; Read the last known action to detect changes
+    Local $lastAction = "Keep"
+    If $LootRules.Exists($type & "_Action") Then
+        $lastAction = $LootRules($type & "_Action")
+    EndIf
     
-    If Not ((BitAND($keepState, $GUI_CHECKED) = $GUI_CHECKED) _
-        Or (BitAND($sellState, $GUI_CHECKED) = $GUI_CHECKED)) Then
-        GUICtrlSetState($keepID, $GUI_CHECKED)
+    ; If both are checked, the user just checked the opposite of the last action
+    If $keepChecked And $sellChecked Then
+        If $lastAction = "Keep" Then
+            ; User checked Sell -> uncheck Keep
+            _GUICtrlTreeView_SetChecked($tree, $keepID, False)
+            $LootRules($type & "_Action") = "Sell"
+        Else
+            ; User checked Keep -> uncheck Sell
+            _GUICtrlTreeView_SetChecked($tree, $sellID, False)
+            $LootRules($type & "_Action") = "Keep"
+        EndIf
+    ElseIf Not $keepChecked And Not $sellChecked Then
+        ; User unchecked the active one -> force Keep
+        _GUICtrlTreeView_SetChecked($tree, $keepID, True)
+        $LootRules($type & "_Action") = "Keep"
+    ElseIf $keepChecked Then
+        $LootRules($type & "_Action") = "Keep"
+    ElseIf $sellChecked Then
+        $LootRules($type & "_Action") = "Sell"
     EndIf
 EndFunc
 
@@ -240,17 +250,15 @@ Func UpdateLootRules()
     For $i = 0 To UBound($gLootTypes) - 1
         Local $type = $gLootTypes[$i]
         
-        ; For TreeView Checkboxes, BitAND with $GUI_CHECKED must be used to properly extract the state
-        Local $state = GUICtrlRead($gTreeItems($type & "_Parent"))
-        Local $enabled = (BitAND($state, $GUI_CHECKED) = $GUI_CHECKED)
+        ; Use UDF to read checkbox states robustly
+        Local $enabled = _GUICtrlTreeView_GetChecked($tree, $gTreeItems($type & "_Parent"))
         
         ; Save pickup preference directly to dictionary
         $LootRules($type & "_Pickup") = $enabled
         
         ; Determine the action (Keep or Sell)
         If $type <> "Pcons" And $type <> "Charr Bags" And $type <> "Charr Salvage Kit" Then
-            Local $sellState = GUICtrlRead($gTreeItems($type & "_Sell"))
-            Local $sell = (BitAND($sellState, $GUI_CHECKED) = $GUI_CHECKED)
+            Local $sell = _GUICtrlTreeView_GetChecked($tree, $gTreeItems($type & "_Sell"))
             
             If $sell Then
                 $LootRules($type & "_Action") = "Sell"
