@@ -315,20 +315,26 @@ EndFunc
 
 Func CanPickUpEx($aItemPtr)
     Local $lModelID = Item_GetItemInfoByPtr($aItemPtr, "ModelID")
+    Local $aExtraID = Item_GetItemInfoByPtr($aItemPtr, "ExtraID")
+    Local $lRarity = Item_GetItemInfoByPtr($aItemPtr, "Rarity")
     
     ; Handle special cases first
     If (($lModelID == 2511) And (GetGoldCharacter() < 99000)) Then ; Always pickup coins
         Return True	; Gold coins
     EndIf
     
-    ; If it's in the tree we handle it here
+    If $lModelID == $ITEM_ID_Lockpicks Then Return True
+    If $lModelID == 22269 Then Return True ; Cupcakes
+    If $lModelID == $GC_I_MODELID_LUNAR_TOKEN Then Return True
+    If $lModelID == $ExpertSalvKit Then Return True
+    If IsRareMaterial($aItemPtr) Then Return False ; Never pickup rare mats by default? Or do we? Original had Return False
+    If $lModelID == $CharrSalvKit Then Return True
+    If $lModelID == 16453 Then Return True ; Charr Bag
+    
     ; Use loot system for classified items
     Local $itemType = GetItemLootType($aItemPtr)
     If $itemType <> "" Then
-        If $LootRules.Exists($itemType) Then
-            Return $LootRules($itemType)
-        EndIf
-        Return False
+        Return GetLootPickup($itemType)
     EndIf
     
     Return False
@@ -339,10 +345,7 @@ Func CanSellEx($aItemPtr)
     ; Use loot system for classified items
     Local $itemType = GetItemLootType($aItemPtr)
     If $itemType <> "" Then
-        If $LootRules.Exists($itemType & "_Sell") Then
-            Return $LootRules($itemType & "_Sell")
-        EndIf
-        Return False
+        Return (GetLootAction($itemType) == "Sell")
     EndIf
     
     Return False
