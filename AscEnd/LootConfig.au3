@@ -42,7 +42,7 @@ Global $ApplyBtn, $CloseBtn
 ; GUI Initialization
 ; ============================================================================
 Func InitLootSettingsGUI()
-	$LootGui = GUICreate("AscEnd - Loot Config", 258, 309, -1, -1, -1, BitOR($WS_EX_TRANSPARENT,$WS_EX_WINDOWEDGE))
+	$LootGui = GUICreate("AscEnd - Loot Config", 258, 309, -1, -1, -1, BitOR($WS_EX_TOPMOST, $WS_EX_WINDOWEDGE))
 	GUISetOnEvent($GUI_EVENT_CLOSE, "LootSettings_Close", $LootGui)
 
 	GUICtrlCreateGroup("Loot", 8, 7, 242, 295, -1, $WS_EX_TRANSPARENT)
