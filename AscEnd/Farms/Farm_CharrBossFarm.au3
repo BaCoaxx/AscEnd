@@ -91,7 +91,7 @@ Func InitialSetup()
         Case 63
             LogInfo("Loading E/Mo upkeep skills and build...")
             Sleep(500)
-            Attribute_LoadSkillTemplate("OgNEoIn99WgsihShNzVSLQC")
+            Attribute_LoadSkillTemplate("OgNEoMjN+XgsihShNzVSLQC")
             Sleep(250)
             $gUpkeepSkills = $EmoUpkeep
             Sleep(1500)
