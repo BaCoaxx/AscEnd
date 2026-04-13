@@ -845,8 +845,8 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
     Local $target, $targetCaster, $currentDistance, $targetX, $targetY
     Local $myX, $myY, $angle, $newX, $newY
 
-    Local $tolerance = 150
-    Local $adjustFactor = 0.7
+    Local $tolerance = 120
+    Local $adjustFactor = 0.6
     Local $desiredDistance = 900
     Local $PendingSkills[0]
 

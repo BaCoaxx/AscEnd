@@ -302,12 +302,6 @@ Func Bosses()
     If GetPartyDead() Then Return False
 
     Agent_Attack($SmokeSkin)
-    
-    If $gProf = 63 Then
-        Sleep(250)
-        Map_Move(-891.72, -3335.87)
-        Agent_Attack($SmokeSkin)
-    EndIf
 
     If StayAlive_Kill(625.78, -3160.56, "CharrFilter", 2700) Then
         LogInfo("Bosses cleared.")
