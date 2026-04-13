@@ -24,18 +24,21 @@ AscEnd currently includes the following Pre-Searing farms:
 - **Red Iris Run**
 - **Unnatural Seeds Farm/Spider Legs Farm** *- Why not kill two Norn with the same Dwarf?*
 - **Worn Belts Farm**
-- **Charr Boss Farm** *- This is currently set up for an E/Mo, tested on a level 18, all skills unlocked*
+- **Charr Boss Farm** *- This is currently set up for an E/Mo & N/R, tested on a level 18, all skills unlocked*
 - **Gargoyle Skulls Farm**
 - **Enchanted Lodes Farm**
 - **Icy Lodes Farm**
 - **Baked Husks Farm**
 - **Skeleton Limbs Farm**
 - **Skale Fins Farm**
+- **Skale Fins Alt Farm** *- Credit to BareBuns69 (Testing Phase)
 - **Dull Carapace Farm**
 - **Grawl Necklace Farm**
 - **Nick Exchange/Nick Farm + Exchange**
 
 Each farm is modular and designed to plug directly into the AscEnd hub.
+
+**UPDATE** - Improved Loot Configuration now that will save once applied, and settings will be found lootconfig.ini
 
 ---
 
