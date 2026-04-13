@@ -96,6 +96,10 @@ EndFunc   ;==>GetIsDead
 Func GetEnergy($aAgent = -2)
     Return Agent_GetAgentInfo($aAgent, "CurrentEnergy")
 EndFunc   ;==>GetEnergy
+
+Func GetEnergyPercent($aAgent = -2)
+    Return Agent_GetAgentInfo($aAgent, "EnergyPercent")
+EndFunc   ;==>GetEnergyPercent
 #EndRegion
 
 #Region Movement
@@ -341,7 +345,7 @@ Func AggroMoveSmartFilter($aX, $aY, $AggroRange = 1320, $maxdistance = 3500, $fi
         If CountSlots() <> 0 and GetPartyDead() = False Then
             If TimerDiff($TimerToKill) > 180000 Then Return
             If $LootRange <> 0 Then
-                PickUpLootInRange($LootRange)
+                PickUpLootInRange($LootRange, $aX, $aY)
             Else
                 PickupLoot()
             EndIf
@@ -753,6 +757,10 @@ Func SurvivorMode($Threshold = 65)
     Return False
 EndFunc   ;==> SurvivorMode
 
+Func GetMyHP()
+    Return Agent_GetAgentInfo(-2, "CurrentHP")
+EndFunc   ;==> GetMyHP
+
 Func CacheHeroesWithRez()
     ; Go over all heroes and find all Heroes with rez skills
     For $i = 1 To Party_GetMyPartyInfo("ArrayHeroPartyMemberSize")
@@ -837,12 +845,13 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
     Local $target, $targetCaster, $currentDistance, $targetX, $targetY
     Local $myX, $myY, $angle, $newX, $newY
 
-    Local $tolerance = 120
-    Local $adjustFactor = 0.6
+    Local $tolerance = 150
+    Local $adjustFactor = 0.7
     Local $desiredDistance = 900
     Local $PendingSkills[0]
 
     If GetPartyDead() Then Return False
+    If GetNumberOfFoesInRangeOfAgent(-2, $range, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc) = 0 Then Return False
 
     Do
         ; Repop Imp
@@ -903,8 +912,8 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
         Switch $gProf
             Case 63
                 EmoKill($targetCaster, $target)
-            ;~ Case 42
-            ;~     NecroKill($targetCaster, $target)
+            Case 42
+                NecroKill($targetCaster, $target)
             Case Else
                 Agent_Attack($target)
         EndSwitch
@@ -941,24 +950,133 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
 EndFunc   ;==>StayAlive_Kill
 
 Func EmoKill($targC, $targ)
-    $targetcaster = $targC
-    $target = $targ
+    Static $state = 0
 
-    If IsRecharged(1) Then UseSkillEx(1, -2) ; Glyph
+    Local $targetCaster = $targC
+    Local $target = $targ
 
-    ; We target the caster first as generally the caster's will heal or be bundled up with other casters.
-    If $targetCaster <> 0 Then
-        If IsRecharged(2) Then UseSkillEx(2, $targetCaster) ; Firestorm
-    Else
-        If IsRecharged(2) Then UseSkillEx(2, $target) ; Firestorm
+    If $target = 0 Or Agent_GetAgentInfo($target, "IsDead") Then
+        $state = 0
+        Return False
     EndIf
 
-    If IsRecharged(3) Then UseSkillEx(3, $target) ; Bane
-    If IsRecharged(4) Then UseSkillEx(4, $target) ; Flare
-    
-    If IsRecharged(5) Then UseSkillEx(5, -2) ; Reversal of Fortune
-    If IsRecharged(6) Then UseSkillEx(6, -2) ; Shielding Hands
+    Switch $state ; If we knock a skill out we move to the next one, if not we return, do a little dance and upkeep, then we try again :)
+        Case 0
+            If IsRecharged(1) Then
+                UseSkillEx(1, -2) ; Glyph
+                $state = 1
+                Return True
+            EndIf
+            Return False
+
+        Case 1 ; We target the caster first as generally the caster's will heal or be bundled up with other casters.
+            Local $fsTarget = ($targetCaster <> 0) ? $targetCaster : $target
+            If IsRecharged(2) Then
+                UseSkillEx(2, $fsTarget) ; Firestorm
+                $state = 2
+                Return True
+            EndIf
+            Return False
+
+        Case 2
+            If IsRecharged(3) Then
+                UseSkillEx(3, $target) ; Bane Signet
+                $state = 3
+                Return True
+            EndIf
+            Return False
+
+        Case 3
+            If IsRecharged(4) Then
+                UseSkillEx(4, $target) ; Flare
+                $state = 4
+                Return True
+            EndIf
+            Return False
+
+        Case 4
+            If IsRecharged(5) And NeedHeal(70) Then
+                UseSkillEx(5, -2) ; Reversal of Fortune
+                $state = 5
+                Return True
+            EndIf
+            Return False
+
+        Case 5
+            If IsRecharged(6) And NeedHeal(70) Then
+                UseSkillEx(6, -2) ; Shielding Hands
+                $state = 0
+                Return True
+            EndIf
+            Return False
+    EndSwitch
 EndFunc
+
+Func NecroKill($targC, $targ)
+    Local $aMe = Agent_GetAgentPtr(-2)
+    If $aMe = 0 Then Return
+
+    Local $hp = GetMyHP()
+    Local $energy = GetEnergyPercent()
+
+    Local $corpse = GetNearestCorpseToAgent(-2, 1600)
+    Local $corpseCount = GetNumberOfCorpseInRangeOfAgent(-2, 1600)
+    Local $minionCount = GetNumberOfMinionsInRangeOfAgent(-2, 1600)
+
+    Local $fightTarget = 0
+    If $targC <> 0 Then
+        $fightTarget = $targC
+    Else
+        $fightTarget = $targ
+    EndIf
+
+    ; 1. Heal only when actually needed
+    If IsRecharged(1) And $hp < 0.45 Then
+        UseSkillEx(1, -2)
+        Sleep(250)
+        Return
+    EndIf
+
+    ; 2. Build minions, but do not let it completely lock out damage
+    ; assuming skill 5 = minion skill
+    If $minionCount < 8 And $corpse <> 0 And $corpseCount > 0 And $energy > 0.30 Then
+        If IsRecharged(5) Then
+            UseSkillEx(5, $corpse)
+            Sleep(250)
+        EndIf
+    EndIf
+
+    ; 3. Damage skill 2
+    If IsRecharged(2) And $fightTarget <> 0 Then
+        UseSkillEx(2, $fightTarget)
+        Sleep(200)
+    EndIf
+
+    ; 4. Damage skill 4
+    If IsRecharged(4) And $fightTarget <> 0 Then
+        UseSkillEx(4, $fightTarget)
+        Sleep(200)
+    EndIf
+
+    ; 5. Damage skill 3
+    If IsRecharged(3) And $fightTarget <> 0 Then
+        UseSkillEx(3, $fightTarget)
+        Sleep(200)
+    EndIf
+
+    ; 6. If under cap, try minion again after damage
+    If $minionCount < 8 And $corpse <> 0 And $energy > 0.20 Then
+        If IsRecharged(5) Then
+            UseSkillEx(5, $corpse)
+            Sleep(250)
+        EndIf
+    EndIf
+
+    ; 7. Fallback
+    If $fightTarget <> 0 Then
+        Agent_Attack($fightTarget)
+    EndIf
+EndFunc   ;==>NecroKill
 #EndRegion
 
 #Region AgentFilters
@@ -992,11 +1110,11 @@ EndFunc   ;==>EnemyFilter
 
 Func CorpseFilter($aAgentPtr)
 
-    If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 3 Then Return False
-    If Agent_GetAgentInfo($aAgentPtr, 'HP') <= 0 Then Return True
-    If Agent_GetAgentInfo($aAgentPtr, 'IsDead') > 0 Then Return True
-
-    Return False
+    If $aAgentPtr = 0 Then Return False
+    If Agent_GetAgentInfo($aAgentPtr, "Allegiance") <> 3 Then Return False
+    If Agent_GetAgentInfo($aAgentPtr, "HP") > 0 Then Return False
+    
+    Return True
 EndFunc   ;==>CorpseFilter
 
 Func CharrFilter($aAgentPtr)
@@ -1035,7 +1153,7 @@ Func CharrCasterFilter($aAgentPtr)
     If Agent_GetAgentInfo($aAgentPtr, 'IsDead') > 0 Then Return False
 
     Local $ModelID = Agent_GetAgentInfo($aAgentPtr, 'PlayerNumber')
-    Local $CharrModelIDs[8] = [1452, 1450, 1451, 1453, 1649, 1639, 1659, 1641] ; 4 Bosses + Shaman, Chaot, Hunter, Ashen Claw
+    Local $CharrModelIDs[8] = [1452, 1450, 1451, 1453, 1649, 1638, 1659, 1641] ; 4 Bosses + Shaman, Chaot, Hunter, Ashen Claw
     Local $IsCharr = False
     For $i = 0 To UBound($CharrModelIDs) - 1
         If $ModelID == $CharrModelIDs[$i] Then
@@ -1109,9 +1227,10 @@ EndFunc   ;==>NickFilter
 
 Func MinionFilter($aAgentPtr)
 
-    If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 5 Then Return False
+    If $aAgentPtr = 0 Then Return False
+    If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 1 Then Return False
     If Agent_GetAgentInfo($aAgentPtr, 'HP') <= 0 Then Return False
-    If Agent_GetAgentInfo($aAgentPtr, 'IsDead') > 0 Then Return False
+    If Agent_GetAgentInfo($aAgentPtr, 'IsMinion') = 0 Then Return False
 
     Return True
 EndFunc   ;==>MinionFilter
@@ -1133,6 +1252,10 @@ EndFunc   ;==>GetNearestGadgetToAgent
 Func GetNearestCharrToAgent($aAgentID = -2, $aRange = 1320, $aType = $GC_I_AGENT_TYPE_LIVING, $aReturnMode = 1, $aCustomFilter = "CharrFilter")
     Return GetAgents($aAgentID, $aRange, $aType, $aReturnMode, $aCustomFilter)
 EndFunc   ;==>GetNearestCharrToAgent
+
+Func GetNearestCorpseToAgent($aAgentID = -2, $aRange = 1300, $aType = $GC_I_AGENT_TYPE_LIVING, $aReturnMode = 1, $aCustomFilter = "CorpseFilter")
+    Return GetAgents($aAgentID, $aRange, $aType, $aReturnMode, $aCustomFilter)
+EndFunc   ;==>GetNearestCorpseToAgent
 
 Func GetNumberOfFoesInRangeOfAgent($aAgentID = -2, $aRange = 1320, $aType = $GC_I_AGENT_TYPE_LIVING, $aReturnMode = 0, $aCustomFilter = "EnemyFilter")
     Return GetAgents($aAgentID, $aRange, $aType, $aReturnMode, $aCustomFilter)
@@ -1346,20 +1469,19 @@ Func CanPickUp($aItemPtr)
     Local $lRarity = Item_GetItemInfoByPtr($aItemPtr, "Rarity")
     If (($lModelID == 2511) And (GetGoldCharacter() < 99000)) Then
         Return True	; gold coins (only pick if character has less than 99k in inventory)
-    ElseIf ($lModelID == $ITEM_ID_Dyes) Then	; if dye
-        If (($aExtraID == $ITEM_ExtraID_BlackDye) Or ($aExtraID == $ITEM_ExtraID_WhiteDye)) Then ; only pick white and black ones
-            Return True
-        EndIf
-        Return False ; pick all dyes
-    ElseIf $lRarity == $RARITY_Gold Then ; gold items
-        Return True
-    ElseIf $lRarity == $RARITY_Purple Then ; purple items
-        Return True
-    ElseIf $lRarity == $RARITY_Blue Then ; blue items
+    ElseIf ($lModelID == $ITEM_ID_Dyes) Then	; Dye items
+        If $aExtraID == $ITEM_ExtraID_BlackDye Then Return $isBlackPickup
+        If $aExtraID == $ITEM_ExtraID_WhiteDye Then Return $isWhitePickup ; Only pick White and Black ones
+        Return $isOtherPickup ; Pick all dyes
+    ElseIf $lRarity == $RARITY_Gold Then ; Gold items
+        Return $isGoldPickup
+    ElseIf $lRarity == $RARITY_Purple Then ; Purple items
+        Return $isPurplePickup
+    ElseIf $lRarity == $RARITY_Blue Then ; Blue items
         If $CharrBossFarm Then
             Return False
         Else
-            Return True
+            Return $isBluePickup
         EndIf
     ElseIf $lModelID == $ITEM_ID_Lockpicks Then
         Return True
@@ -1370,22 +1492,22 @@ Func CanPickUp($aItemPtr)
     ElseIf IsPreCollectable($aItemPtr) Then
         If $CharrBossFarm Then
             If $lModelID == 423 Then ; Still going to grab those charr carvings
-                Return True
+                Return $isCollPickup
             EndIf
             Return False
         Else
-            Return True
+            Return $isCollPickup
         EndIf
     ElseIf $lModelID == $ExpertSalvKit Then
         Return True
     ElseIf IsPcon($aItemPtr) Then ; ==== Pcons ==== or all event items
-        Return True
-    ElseIf IsRareMaterial($aItemPtr) Then	; rare Mats
+        Return $isPconsPickup
+    ElseIf IsRareMaterial($aItemPtr) Then	; Rare Mats
         Return False
     ElseIf $lModelID == $CharrSalvKit Then
-        Return True
+        Return $isCSalvPickup
     ElseIf $lModelID == 16453 Then
-        Return True
+        Return $isCBagPickup
     Else
         Return False
     EndIf
@@ -2274,7 +2396,11 @@ Func CanPreSell($aItemPtr)
 EndFunc   ;==> CanPreSell
 
 Func CanSell($aItem)
+    Local $IsCharrRelated = IsCharrRelated($aItem)
+    Local $IsDye = IsDye($aItem)
+    Local $IsBlue = IsBlue($aItem)
     Local $IsPurple = IsPurple($aItem)
+    Local $IsGold = IsGold($aItem)
     Local $IsPreCollectable = IsPreCollectable($aItem)
     Local $RareSkin = IsRareSkin($aItem)
     Local $Pcon = IsPcon($aItem)
@@ -2294,15 +2420,45 @@ Func CanSell($aItem)
     Local $IsElonaAnniSkin = IsElonaAnniSkin($aItem)
     Local $IsEotnAnniSkin = IsEotnAnniSkin($aItem)
     Local $IsAnyCampAnniSkin = IsAnyCampAnniSkin($aItem)
-  
+
+    Switch $IsBlue
+    Case True
+       Return $isBlueSell ; Is blue
+    EndSwitch
+
     Switch $IsPurple
     Case True
-       Return Not $Purple ; Is purple
+       Return $isPurpleSell ; Is purple
+    EndSwitch
+
+    Switch $IsGold
+    Case True
+       Return $isGoldSell ; Is gold
+    EndSwitch
+    
+    Switch $IsDye
+        Case $ITEM_EXTRAID_BLACK
+            Return $isBlackSell
+        Case $ITEM_EXTRAID_WHITE
+            Return $isWhiteSell
+        Case Else
+            Return $isOtherSell
+    EndSwitch
+
+    Switch $IsCharrRelated
+    Case True
+        
+        Switch $ModelID
+            Case 18721
+                Return $isCSalvSell
+            Case 16453
+                Return $isCBagSell
+        EndSwitch
     EndSwitch
 
     Switch $IsPreCollectable
     Case True
-       Return Not $Collector ; Is pre-collectable
+       Return $isCollSell ; Is pre-collectable
     EndSwitch
 
     Switch $IsSpecial
@@ -2312,7 +2468,7 @@ Func CanSell($aItem)
  
     Switch $Pcon
     Case True
-       Return False ; Is a Pcon
+       Return $isPconsSell ; Is a Pcon
     EndSwitch
  
     Switch $Material
@@ -2390,6 +2546,15 @@ Func CanSell($aItem)
 #EndRegion
 
 #Region Items
+Func IsBlue($aItem)
+    Local $lRarity = Item_GetItemInfoByPtr($aItem, "Rarity")
+    
+    If $lRarity = $RARITY_Blue Then
+        Return True
+    EndIf
+    Return False
+EndFunc   ;==> IsBlue
+
 Func IsPurple($aItem)
     Local $lRarity = Item_GetItemInfoByPtr($aItem, "Rarity")
     
@@ -2398,6 +2563,43 @@ Func IsPurple($aItem)
     EndIf
     Return False
 EndFunc   ;==> IsPurple
+
+Func IsGold($aItem)
+    Local $lRarity = Item_GetItemInfoByPtr($aItem, "Rarity")
+    
+    If $lRarity = $RARITY_Gold Then
+        Return True
+    EndIf
+    Return False
+EndFunc   ;==> IsGold
+
+Func IsDye($aItem)
+    Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
+    If $ModelID <> $ITEM_ID_Dyes Then Return False
+
+    Local $ExtraID = Item_GetItemInfoByPtr($aItem, "ExtraID")
+
+    Switch $ExtraID
+        Case $ITEM_ExtraID_BlackDye
+            Return $ExtraID
+        Case $ITEM_ExtraID_WhiteDye
+            Return $ExtraID
+        Case Else
+            Return $ExtraID
+    EndSwitch
+
+    Return False
+EndFunc   ;==> IsDye
+
+Func IsCharrRelated($aItem)
+    Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
+
+    Switch $ModelID
+    Case 18721, 16453
+       Return $ModelID ; Charr Salv Kit, Charr Bag
+    EndSwitch
+    Return False
+EndFunc   ;==> IsCharrRelated
 
 Func IsPreCollectable($aItem)
     Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
@@ -2730,19 +2932,12 @@ EndFunc   ;==> IsRareMaterial
 
 Func IsSpecialItem($aItem)
     Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
-    Local $ExtraID = Item_GetItemInfoByPtr($aItem, "ExtraID")
 
     Switch $ModelID
     Case 5656, 18345, 21491, 37765, 21833, 28433, 28434
        Return True ; Special - ToT etc
     Case 22751
        Return True ; Lockpicks
-    Case 146
-       If $ExtraID = 10 Or $ExtraID = 12 Then
-          Return True ; Black & White Dye
-       Else
-          Return False
-       EndIf
     Case 24353, 24354
        Return True ; Chalice & Rin Relics
     Case 522
@@ -4241,8 +4436,6 @@ Global $TimerToKill = 0
 
 Global $Survivor = False
 Global $_19Stop = False
-Global $Collector = False
-Global $Purple = False
 Global $spawn[2] = [0, 0]
 Global $hasBonus = False
 Global $CharrBossFarm = False

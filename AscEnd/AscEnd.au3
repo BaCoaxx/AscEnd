@@ -2,6 +2,7 @@
 #include "../../API/_GwAu3.au3"
 #include "GwAu3_AddOns.au3"
 #include "../../API/Plugins/UtilityAI/_UtilityAI.au3"
+#include "LootConfig.au3"
 
 #Region Declarations
 

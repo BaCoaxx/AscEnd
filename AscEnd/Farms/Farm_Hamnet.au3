@@ -10,12 +10,9 @@
 
 #ce ----------------------------------------------------------------------------
 
-Global $HamnetPath[5][2] = [ _
-    [1925, 6315], _
-    [2431, 5106], _
-    [2577, 4177], _
-    [2714, 4172], _
-    [2360, 6003] _
+Global $HamnetPath[2][2] = [ _
+    [1926, 6161], _
+    [2749, 3953] _
 ]
 
 Global $currLevel = 0
@@ -110,39 +107,24 @@ Func Hamnet()
 
     $RunTime = TimerInit()
 
-    Local $lDeadlock = TimerInit()
+    Sleep(250)
+    RunTo($HamnetPath)
+    LogInfo("Got imps? ")
+    Sleep(250)
+    UseSummoningStone()
+    Sleep(250)
+    MoveTo(2650, 5122)
+    AggroMoveSmartFilter(2574, 5885, 2200, 2200, $BanditFilter, True)
 
-    While TimerDiff($lDeadlock) < 300000 ; 5 minute deadlock
-        Sleep(250)
-        RunTo($HamnetPath)
-        LogInfo("Got imps? ")
-        Sleep(250)
-        UseSummoningStone()
-        Sleep(250)
-        AggroMoveSmartFilter(2574, 5885, 2200, 2200, $BanditFilter, True)
-
-        If SurvivorMode() Then LogError("Survivor mode activated!")
-        
-        LogInfo("Run complete. Restarting...")
-        UpdateStats()
-        Sleep(250)
-        Resign()
-        Sleep(5000)
-        Map_ReturnToOutpost()
-        Sleep(1000)
-        Map_WaitMapLoading(165, 0)
-        Sleep(1000)
-        ExitLoop
-    WEnd
-
-    If TimerDiff($lDeadlock) >= 300000 Then
-        LogError("DEADLOCK DETECTED: Run exceeded 5 minutes!")
-        Resign()
-        Sleep(5000)
-        Map_ReturnToOutpost()
-        Sleep(1000)
-        Map_WaitMapLoading(165, 0)
-        Sleep(1000)
-        LogWarn("Recovered from deadlock, restarting...")
-    EndIf
+    If SurvivorMode() Then LogError("Survivor mode activated!")
+    
+    LogInfo("Run complete. Restarting...")
+    UpdateStats()
+    Sleep(250)
+    Resign()
+    Sleep(5000)
+    Map_ReturnToOutpost()
+    Sleep(1000)
+    Map_WaitMapLoading(165, 0)
+    Sleep(1000)
 EndFunc

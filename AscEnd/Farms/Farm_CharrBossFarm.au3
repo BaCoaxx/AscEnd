@@ -95,10 +95,10 @@ Func InitialSetup()
             Sleep(250)
             $gUpkeepSkills = $EmoUpkeep
             Sleep(1500)
-        Case 64
+        Case 42
             LogInfo("Loading N/R upkeep skills and build...")
             Sleep(500)
-            Attribute_LoadSkillTemplate("OAJUQqyaScF+ONtJTTZO0GAA")
+            Attribute_LoadSkillTemplate("OAJUQqyaScF+ONTpNZi2zBAA")
             Sleep(250)
             $gUpkeepSkills = $NecroUpKeep
             Sleep(1500)
@@ -225,7 +225,7 @@ Func Grawl()
 
     Do 
         StayAlive()
-    Until GetNumberOfFoesInRangeOfAgent(-2, 900) > 0 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime - 100000
+    Until GetNumberOfFoesInRangeOfAgent(-2, 900) > 0 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime - 105000
 
     If StayAlive_Kill(-5639.52, -3424.85, "EnemyFilter", 1800) Then
         LogInfo("Grawl will not be a problem anymore.")
@@ -233,6 +233,8 @@ Func Grawl()
         LogInfo("Picking up loot?")
         Sleep(250)
         PickUpLootInRange(3500)
+    Else
+        LogInfo("No Grawl found!")
     EndIf
 
     If GetPartyDead() Then Return False
@@ -241,7 +243,7 @@ EndFunc
 Func SecondGroup()
     Do
         Sleep(250)
-    Until Agent_GetAgentInfo(-2, "EnergyPercent") > 0.8 Or GetPartyDead()
+    Until GetEnergyPercent() > 0.8 Or GetPartyDead()
 
     MoveUpkeepEx(-4128.60, -3726.73, $gUpkeepSkills)
     MoveUpkeepEx(-3020.96, -3535.49, $gUpkeepSkills)
@@ -254,9 +256,9 @@ Func SecondGroup()
 
     Do
         StayAlive()
-    Until GetNumberOfCharrInRangeOfXY(-964.62, -3168.00, 2000) > 2 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime
+    Until GetNumberOfCharrInRangeOfXY(-964.62, -3168.00, 2400) > 2 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime
 
-    If StayAlive_Kill(-964.62, -3168.00, "CharrFilter", 2000) Then LogInfo("Second group of charr cleared.")
+    If StayAlive_Kill(-964.62, -3168.00, "CharrFilter", 2400) Then LogInfo("Second group of charr cleared.")
 
     If GetPartyDead() Then Return False
 EndFunc
@@ -300,8 +302,14 @@ Func Bosses()
     If GetPartyDead() Then Return False
 
     Agent_Attack($SmokeSkin)
+    
+    If $gProf = 63 Then
+        Sleep(250)
+        Map_Move(-891.72, -3335.87)
+        Agent_Attack($SmokeSkin)
+    EndIf
 
-    If StayAlive_Kill(1606.00, -3324.00, "CharrFilter", 2800) Then
+    If StayAlive_Kill(625.78, -3160.56, "CharrFilter", 2700) Then
         LogInfo("Bosses cleared.")
         Sleep(250)
         LogInfo("Picking up loot...")

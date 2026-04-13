@@ -10,18 +10,17 @@
 
 #ce ----------------------------------------------------------------------------
 
-Global $CharrPath[7][2] = [ _
+Global $CharrPath[6][2] = [ _
     [6076, 4777], _
     [3435, 6366], _
     [679, 6551], _
     [-221, 7057], _
     [-2353, 8856], _
-    [-2869, 9117], _
-    [-3468, 10648] _
+    [-2869, 9117] _
 ]
 
 Global $CharrState
-Global $desiredDistance = 1000
+Global $desiredDistance = 980
 Global $hasRun = False
 
 Func Farm_CharrAtTheGate()
@@ -125,6 +124,8 @@ Func CharrAtGate()
     UseSummoningStone()
     RunTo($CharrPath)
     LogInfo("Come here you furry bastards!")
+    Sleep(250)
+    MoveTo(-3460, 11320)
     
     Local $targetAgent, $currentDistance, $targetX, $targetY
     Local $myX, $myY, $angle, $newX, $newY
