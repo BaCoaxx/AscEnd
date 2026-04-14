@@ -758,7 +758,7 @@ Func SurvivorMode($Threshold = 65)
 EndFunc   ;==> SurvivorMode
 
 Func GetMyHP()
-    Return Agent_GetAgentInfo(-2, "CurrentHP")
+    Return Agent_GetAgentInfo(-2, "HPPercent")
 EndFunc   ;==> GetMyHP
 
 Func CacheHeroesWithRez()
