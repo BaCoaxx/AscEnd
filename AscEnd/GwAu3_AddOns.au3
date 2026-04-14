@@ -4415,7 +4415,7 @@ Global Const $GC_BonusWeapons[12] = [ _
 Global $gProf
 Global $gUpkeepSkills
 Global $EmoUpkeep[2] = [8, 7]
-Global $NecroUpKeep[0] = []
+Global $NecroUpKeep[1] = [1]
 
 ;~ General Items
 Global $General_Items_Array[6] = [2989, 2991, 2992, 5899, 5900, 22751]
