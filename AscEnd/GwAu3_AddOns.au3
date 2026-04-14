@@ -1583,15 +1583,48 @@ Func InventoryPre()
     EndIf
     
     If GetGoldCharacter() >= 100 Then
-        LogInfo("Identifying")
+        LogInfo("Identifying items..")
         For $i = 1 To 4
             Ident($i)
         Next
         
-        LogInfo("Selling")
+        LogInfo("Selling items..")
         For $i = 1 To 4
             Sell($i)
         Next
+        
+        If $isSalvRunes Then
+            If FindRareRuneOrInsignia() <> 0 Then
+                LogInfo("Salvaging Runes/Insignias..")
+                For $i = 1 To 4
+                    SalvageRunes($i)
+                Next
+
+                LogInfo("Second round of salvaging Runes/Insignias..")
+                For $i = 1 To 4
+                    SalvageRunes($i)
+                Next
+
+                LogWarn("Selling leftover items..")
+                For $i = 1 To 4
+                    Sell($i)
+                Next
+            EndIf
+        EndIf
+        
+        If $isSalvWeapons Then
+            If FindRareRuneOrInsignia() <> 0 Then
+                LogInfo("Salvaging Weapons..")
+                For $i = 1 To 4
+                    SalvageMods($i)
+                Next
+
+                LogWarn("Selling leftover items..")
+                For $i = 1 To 4
+                    Sell($i)
+                Next
+            EndIf
+        EndIf
     Else
         LogError("Not enough gold to buy ID kit, returning...")
         Return
@@ -1634,11 +1667,11 @@ Func Inventory()
     If FindRareRuneOrInsignia() <> 0 Then
         LogInfo("Salvage all Runes")
         For $i = 1 To 4
-            Salvage($i)
+            SalvageRunes($i)
         Next
         LogInfo("Second Round of Salvage")
         For $i = 1 To 4
-            Salvage($i)
+            SalvageMods($i)
         Next
 
         LogInfo("Sell leftover items")
@@ -1860,10 +1893,6 @@ Func Ident($BagIndex)
     $BagPtr = Item_GetBagPtr($BagIndex)
     For $ii = 1 To Item_GetBagInfo($BagPtr, "Slots")
         If FindIdentificationKit() = 0 Then
-            ;~ If GetGoldCharacter() < 500 And GetGoldStorage() > 499 Then
-            ;~     Item_WithdrawGold(500)
-            ;~     Sleep(1000)
-            ;~ EndIf
             Local $j = 0
             Do
                 Merchant_BuyItem($NormalIDKit, 1)
@@ -1881,51 +1910,61 @@ Func Ident($BagIndex)
     Next
 EndFunc   ;==>Ident
 
-Func Salvage($BagIndex)
+Func SalvageRunes($BagIndex)
     Local $BagPtr
     Local $aItemPtr
     Local $aItemID
     Local $aSalvageKitID
     $BagPtr = Item_GetBagPtr($BagIndex)
     For $ii = 1 To Item_GetBagInfo($BagPtr, "Slots")
-        If FindExpertSalvageKit() = 0 Then
-            If GetGoldCharacter() < 400 And GetGoldStorage() > 399 Then
-                Item_WithdrawGold(400)
-                Sleep(1000)
-            EndIf
-            Local $j = 0
-            Do
-                Merchant_BuyItem($ExpertSalvKit, 1)
-                Sleep(1000)
-                $j = $j + 1
-            Until FindExpertSalvageKit() <> 0 Or $j = 3
-            If $j = 3 Then ExitLoop
-            Sleep(1000)
+        If FindCharrSalvageKit() = 0 Then
+            LogError("Charr Salvage Kit not found..Keep hunting bucko!")
+            Return False
         EndIf
         $aItemPtr = Item_GetItemBySlot($BagIndex, $ii)
         If Item_GetItemInfoByPtr($aItemPtr, "ItemID") = 0 Then ContinueLoop
-        If IsRareRune($aItemPtr) = 0 And IsRareInsignia($aItemPtr) = 0 Then
+        If IsRareRunePre($aItemPtr) = 0 And IsRareInsigniaPre($aItemPtr) = 0 Then
             Continueloop
         Else
             If IsAlreadySalvaged($aItemPtr) Then ContinueLoop
-            If IsRareRune($aItemPtr) Then
-                ;StartSalvage2($aItemPtr, FindExpertSalvageKit())
-                ;Sleep(500)
-                ;Item_SalvageMod(1)
-                ;Sleep(500)
-                Item_SalvageItem($aItemPtr, "Expert", "Suffix")
-            ElseIf IsRareInsignia($aItemPtr) Then
-                ;StartSalvage2($aItemPtr, FindExpertSalvageKit())
-                ;Sleep(500)
-                ;Item_SalvageMod(0)
-                ;Sleep(500)
-                Item_SalvageItem($aItemPtr, "Expert", "Prefix")
+            If IsRareRunePre($aItemPtr) Then
+                Item_SalvageItem($aItemPtr, "Charr", "Suffix")
+            ElseIf IsRareInsigniaPre($aItemPtr) Then
+                Item_SalvageItem($aItemPtr, "Charr", "Prefix")
             Else
                 Continueloop
             EndIf
         EndIf
     Next
-EndFunc   ;==>Salvage
+EndFunc   ;==>SalvageRunes
+
+Func SalvageMods($BagIndex)
+    Local $BagPtr
+    Local $aItemPtr
+    Local $aItemID
+    Local $aSalvageKitID
+    $BagPtr = Item_GetBagPtr($BagIndex)
+    For $ii = 1 To Item_GetBagInfo($BagPtr, "Slots")
+        If FindCharrSalvageKit() = 0 Then
+            LogError("Charr Salvage Kit not found..Keep hunting bucko!")
+            Return False
+        EndIf
+        $aItemPtr = Item_GetItemBySlot($BagIndex, $ii)
+        If Item_GetItemInfoByPtr($aItemPtr, "ItemID") = 0 Then ContinueLoop
+        If IsRareRunePre($aItemPtr) = 0 And IsRareInsigniaPre($aItemPtr) = 0 Then
+            Continueloop
+        Else
+            If IsAlreadySalvaged($aItemPtr) Then ContinueLoop
+            If IsRareRunePre($aItemPtr) Then
+                Item_SalvageItem($aItemPtr, "Charr", "Suffix")
+            ElseIf IsRareInsigniaPre($aItemPtr) Then
+                Item_SalvageItem($aItemPtr, "Charr", "Prefix")
+            Else
+                Continueloop
+            EndIf
+        EndIf
+    Next
+EndFunc   ;==>SalvageMods
 
 Func IsAlreadySalvaged($aItemPtr)
     Local $modelID
@@ -2067,14 +2106,14 @@ Func FindIdentificationKit()
     Return $lKitPtr
 EndFunc   ;==>FindIdentificationKit
 
-Func FindExpertSalvageKit()
+Func FindCharrSalvageKit()
     Local $lItemPtr
     Local $lKitPtr = 0
     For $i = 1 To 4
         For $j = 1 To Item_GetBagInfo(Item_GetBagPtr($i), 'Slots')
             $lItemPtr = Item_GetItemBySlot($i, $j)
             Switch Item_GetItemInfoByPtr($lItemPtr, 'ModelID')
-                Case 2991
+                Case 18721
                     $lKitPtr = $lItemPtr
                 Case Else
                     ContinueLoop
@@ -2082,18 +2121,18 @@ Func FindExpertSalvageKit()
         Next
     Next
     Return $lKitPtr
-EndFunc   ;==>FindExpertSalvageKit
+EndFunc   ;==>FindCharrSalvageKit
 
 Func FindRareRuneOrInsignia()
     Local $lItemPtr
     For $i = 1 To 4
         For $j = 1 To Item_GetBagInfo(Item_GetBagPtr($i), 'Slots')
             $lItemPtr = Item_GetItemBySlot($i, $j)
-            If IsRareRune($lItemPtr) Or IsRareInsignia($lItemPtr) Then Return True
+            If IsRareRunePre($lItemPtr) Or IsRareInsigniaPre($lItemPtr) Then Return True
         Next
     Next
     Return False
-EndFunc	   ;==>FindSellableRune
+EndFunc	   ;==>FindRareRuneOrInsignia
 
 Func FindConset()
     Local $lItemPtr
@@ -2409,8 +2448,8 @@ Func CanSell($aItem)
     Local $IsCaster = IsPerfectCaster($aItem)
     Local $IsStaff = IsPerfectStaff($aItem)
     Local $IsShield = IsPerfectShield($aItem)
-    Local $IsRune = IsRareRune($aItem)
-    Local $IsInsignia = IsRareInsignia($aItem)
+    Local $IsRune = IsRareRunePre($aItem)
+    Local $IsInsignia = IsRareInsigniaPre($aItem)
     Local $IsReq8 = IsReq8Max($aItem)
     Local $IsReq7 = IsReq7Max($aItem)
     Local $IsTome = IsRegularTome($aItem)
@@ -2446,8 +2485,7 @@ Func CanSell($aItem)
     EndSwitch
 
     Switch $IsCharrRelated
-    Case True
-        
+    Case True   
         Switch $ModelID
             Case 18721
                 Return $isCSalvSell
@@ -3616,9 +3654,11 @@ Func IsPerfectShield($aItem)
     Return False
 EndFunc   ;==> IsPerfectShield
 
-Func IsRareRune($aItem)
+Func IsRareRunePre($aItem)
     Local $ModStruct = Item_GetModStruct($aItem)
-    Local $SupVigor = StringInStr($ModStruct, "C202EA27", 0, 1) ; Mod struct for Sup vigor rune
+
+    Local $SupVigor = StringInStr($ModStruct, "C202EA27", 0, 1) ; Sup vigor rune
+
     Local $minorStrength = StringInStr($ModStruct, "0111E821", 0, 1) ; minor Strength
     Local $minorTactics = StringInStr($ModStruct, "0115E821", 0, 1) ; minor Tactics
     Local $minorExpertise = StringInStr($ModStruct, "0117E821", 0, 1) ; minor Expertise
@@ -3635,29 +3675,54 @@ Func IsRareRune($aItem)
     Local $minorMystic = StringInStr($ModStruct, "012CE821", 0, 1) ; minor Mystic
     Local $minorVigor = StringInStr($ModStruct, "C202E827", 0, 1) ; minor Vigor
     Local $minorVitae = StringInStr($ModStruct, "12020824", 0, 1) ; minor Vitae
+    Local $minorIllusion = StringInStr($ModStruct, "0101E821", 0, 1) ; minor Illusion
+    Local $minorDomination = StringInStr($ModStruct, "0102E821", 0, 1) ; minor Domination
+    Local $minorBlood = StringInStr($ModStruct, "0104E821", 0, 1) ; minor Blood
+    Local $minorDeath = StringInStr($ModStruct, "0105E821", 0, 1) ; minor Death
+    Local $minorCurses = StringInStr($ModStruct, "0107E821", 0, 1) ; minor Curses
+    Local $minorAir = StringInStr($ModStruct, "0108E821", 0, 1) ; minor Air
+    Local $minorEarth = StringInStr($ModStruct, "0109E821", 0, 1) ; minor Earth
+    Local $minorFire = StringInStr($ModStruct, "010AE821", 0, 1) ; minor Fire
+    Local $minorWater = StringInStr($ModStruct, "010BE821", 0, 1) ; minor Water
+    Local $minorSmiting = StringInStr($ModStruct, "010EE821", 0, 1) ; minor Smiting
+    Local $minorAxe = StringInStr($ModStruct, "0112E821", 0, 1) ; minor Axe
+    Local $minorHammer = StringInStr($ModStruct, "0113E821", 0, 1) ; minor Hammer
+    Local $minorSword = StringInStr($ModStruct, "0114E821", 0, 1) ; minor Sword
+    Local $minorAbsorption = StringInStr($ModStruct, "FC000824", 0, 1) ; minor Absorption
+    Local $minorBeast = StringInStr($ModStruct, "0116E821", 0, 1) ; minor Beast
+    Local $minorWilderness = StringInStr($ModStruct, "0118E821", 0, 1) ; minor Wilderness
+
+    Local $runeAttunement = StringInStr($ModStruct, "11020824", 0, 1) ; Attunement
+    Local $runeRecovery = StringInStr($ModStruct, "13020824", 0, 1) ; Recovery
+    Local $runeRestoration = StringInStr($ModStruct, "14020824", 0, 1) ; Restoration
+    Local $runeClarity = StringInStr($ModStruct, "15020824", 0, 1) ; Clarity
+    Local $runePurity = StringInStr($ModStruct, "16020824", 0, 1) ; Purity
 
     Local $majorFast = StringInStr($ModStruct, "0200E821", 0, 1) ; major Fastcast
     Local $majorVigor = StringInStr($ModStruct, "C202E927", 0, 1) ; major Vigor
 
-    Local $supSmite = StringInStr($ModStruct, "030EE821", 0, 1) ; superior Smite
-    Local $supDeath = StringInStr($ModStruct, "0305E821", 0, 1) ; superior Death
-    Local $supDom = StringInStr($ModStruct, "0302E821", 0, 1) ; superior Dom
-    Local $supAir = StringInStr($ModStruct, "0308E821", 0, 1) ; superior Air
-    Local $supChannel = StringInStr($ModStruct, "0322E821", 0, 1) ; superior Channel
-    Local $supCommu = StringInStr($ModStruct, "0320E821", 0, 1) ; superior Commu
-
-    If $minorStrength > 0 Or $minorTactics > 0 Or $minorExpertise > 0 Or $minorMarksman > 0 Or $minorHealing > 0 Or $minorProt > 0 Or $minorDivine > 0 Then 
-           Return True
+    If $minorStrength > 0 Or $minorTactics > 0 Or $minorExpertise > 0 Or $minorMarksman > 0 Or $minorHealing > 0 Or $minorProt > 0 Or $minorDivine > 0 Then
+        Return True
     ElseIf $minorSoul > 0 Or $minorFastcast > 0 Or $minorInsp > 0 Or $minorEnergy > 0 Or $minorSpawn > 0 Or $minorScythe > 0 Or $minorMystic > 0 Then
         Return True
-    ElseIf $minorVigor > 0 Or $minorVitae > 0 Or $majorFast > 0 Or $majorVigor > 0 Or $supSmite > 0 Or $supDeath > 0 Or $supDom > 0 Then
+    ElseIf $minorVigor > 0 Or $minorVitae > 0 Or $majorFast > 0 Or $majorVigor > 0 Then
         Return True
-    ElseIf $supAir > 0 Or $supChannel > 0 Or $supCommu > 0 Or $SupVigor > 0 Then
+    ElseIf $SupVigor > 0 Then
+        Return True
+    ElseIf $minorIllusion > 0 Or $minorDomination > 0 Or $minorBlood > 0 Or $minorDeath > 0 Or $minorCurses > 0 Then
+        Return True
+    ElseIf $minorAir > 0 Or $minorEarth > 0 Or $minorFire > 0 Or $minorWater > 0 Or $minorSmiting > 0 Then
+        Return True
+    ElseIf $minorAxe > 0 Or $minorHammer > 0 Or $minorSword > 0 Or $minorAbsorption > 0 Then
+        Return True
+    ElseIf $minorBeast > 0 Or $minorWilderness > 0 Then
+        Return True
+    ElseIf $runeAttunement > 0 Or $runeRecovery > 0 Or $runeRestoration > 0 Or $runeClarity > 0 Or $runePurity > 0 Then
         Return True
     Else
-       Return False
+        Return False
     EndIf
-EndFunc   ;==> IsRareRune
+EndFunc   ;==> IsRareRunePre
 
 Func IsSellableRune($aItem)
     Local $ModStruct = Item_GetModStruct($aItem)
@@ -3713,7 +3778,7 @@ Func IsSupVigor($aItem)
     EndIf
 EndFunc   ;==> IsSupVigor
 
-Func IsRareInsignia($aItem)
+Func IsRareInsigniaPre($aItem)
     Local $ModStruct = Item_GetModStruct($aItem)
     Local $Sentinel = StringInStr($ModStruct, "FB010824", 0, 1) ; Sentinel insig
     Local $Tormentor = StringInStr($ModStruct, "EC010824", 0, 1) ; Tormentor insig
@@ -3723,15 +3788,60 @@ Func IsRareInsignia($aItem)
     Local $Nightstalker = StringInStr($ModStruct, "E1010824", 0, 1) ; Nightstalker insig
     Local $Centurions = StringInStr($ModStruct, "07020824", 0, 1) ; Centurions insig
     Local $Blessed = StringInStr($ModStruct, "E9010824", 0, 1) ; Blessed insig
+    Local $Radiant = StringInStr($ModStruct, "E5010824", 0, 1) ; Radiant insig
+    Local $Survivor = StringInStr($ModStruct, "E6010824", 0, 1) ; Survivor insig
+    Local $Stalwart = StringInStr($ModStruct, "E7010824", 0, 1) ; Stalwart insig
+    Local $Brawler = StringInStr($ModStruct, "E8010824", 0, 1) ; Brawler insig
+    Local $Herald = StringInStr($ModStruct, "EA010824", 0, 1) ; Herald insig
+    Local $Sentry = StringInStr($ModStruct, "EB010824", 0, 1) ; Sentry insig
+    Local $Frostbound = StringInStr($ModStruct, "FC010824", 0, 1) ; Frostbound insig
+    Local $Earthbound = StringInStr($ModStruct, "FD010824", 0, 1) ; Earthbound insig
+    Local $Pyrebound = StringInStr($ModStruct, "FE010824", 0, 1) ; Pyrebound insig
+    Local $Stormbound = StringInStr($ModStruct, "FF010824", 0, 1) ; Stormbound insig
+    Local $Beastmaster = StringInStr($ModStruct, "00020824", 0, 1) ; Beastmaster insig
+    Local $Scout = StringInStr($ModStruct, "01020824", 0, 1) ; Scout insig
+    Local $Knight = StringInStr($ModStruct, "F9010824", 0, 1) ; Knight insig
+    Local $Dreadnought = StringInStr($ModStruct, "FA010824", 0, 1) ; Dreadnought insig
+    Local $Lieutenant = StringInStr($ModStruct, "08020824", 0, 1) ; Lieutenant insig
+    Local $Stonefist = StringInStr($ModStruct, "09020824", 0, 1) ; Stonefist insig
+    Local $Wanderer = StringInStr($ModStruct, "F6010824", 0, 1) ; Wanderer insig
+    Local $Disciple = StringInStr($ModStruct, "F7010824", 0, 1) ; Disciple insig
+    Local $Anchorite = StringInStr($ModStruct, "F8010824", 0, 1) ; Anchorite insig
+    Local $Prismatic = StringInStr($ModStruct, "F1010824", 0, 1) ; Prismatic insig
+    Local $Hydromancer = StringInStr($ModStruct, "F2010824", 0, 1) ; Hydromancer insig
+    Local $Geomancer = StringInStr($ModStruct, "F3010824", 0, 1) ; Geomancer insig
+    Local $Pyromancer = StringInStr($ModStruct, "F4010824", 0, 1) ; Pyromancer insig
+    Local $Aeromancer = StringInStr($ModStruct, "F5010824", 0, 1) ; Aeromancer insig
+    Local $Undertaker = StringInStr($ModStruct, "ED010824", 0, 1) ; Undertaker insig
+    Local $Bonelace = StringInStr($ModStruct, "EE010824", 0, 1) ; Bonelace insig
+    Local $MinionMaster = StringInStr($ModStruct, "EF010824", 0, 1) ; MinionMaster insig
+    Local $Blighter = StringInStr($ModStruct, "F0010824", 0, 1) ; Blighter insig
+    Local $Bloodstained = StringInStr($ModStruct, "0A020824", 0, 1) ; Bloodstained insig
+    Local $Artificer = StringInStr($ModStruct, "E2010824", 0, 1) ; Artificer insig
+    Local $Virtuoso = StringInStr($ModStruct, "E4010824", 0, 1) ; Virtuoso insig
 
     If $Sentinel > 0 Or $Tormentor > 0 Or $WindWalker > 0 Or $Prodigy > 0 Or $Shamans > 0 Or $Nightstalker > 0 Or $Centurions > 0 Or $Blessed > 0 Then
-       Return True
+        Return True
+    ElseIf $Radiant > 0 Or $Survivor > 0 Or $Stalwart > 0 Or $Brawler > 0 Or $Herald > 0 Or $Sentry > 0 Then
+        Return True
+    ElseIf $Frostbound > 0 Or $Earthbound > 0 Or $Pyrebound > 0 Or $Stormbound > 0 Or $Beastmaster > 0 Or $Scout > 0 Then
+        Return True
+    ElseIf $Knight > 0 Or $Dreadnought > 0 Or $Lieutenant > 0 Or $Stonefist > 0 Then
+        Return True
+    ElseIf $Wanderer > 0 Or $Disciple > 0 Or $Anchorite > 0 Then
+        Return True
+    ElseIf $Prismatic > 0 Or $Hydromancer > 0 Or $Geomancer > 0 Or $Pyromancer > 0 Or $Aeromancer > 0 Then
+        Return True
+    ElseIf $Undertaker > 0 Or $Bonelace > 0 Or $MinionMaster > 0 Or $Blighter > 0 Or $Bloodstained > 0 Then
+        Return True
+    ElseIf $Artificer > 0 Or $Virtuoso > 0 Then
+        Return True
     Else
-       Return False
+        Return False
     EndIf
-EndFunc   ;==> IsRareInsignia
+EndFunc   ;==> IsRareInsigniaPre
 
-Func IsSellableInsignia($aItem)
+Func IsSellableInsigniaPre($aItem)
     Local $ModStruct = Item_GetModStruct($aItem)
     Local $Sentinel = StringInStr($ModStruct, "FB010824", 0, 1) ; Sentinel insig
     Local $Tormentor = StringInStr($ModStruct, "EC010824", 0, 1) ; Tormentor insig
@@ -4305,7 +4415,7 @@ Global Const $GC_BonusWeapons[12] = [ _
 Global $gProf
 Global $gUpkeepSkills
 Global $EmoUpkeep[2] = [8, 7]
-Global $NecroUpKeep[1] = [1]
+Global $NecroUpKeep[0] = []
 
 ;~ General Items
 Global $General_Items_Array[6] = [2989, 2991, 2992, 5899, 5900, 22751]
