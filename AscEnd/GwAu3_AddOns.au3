@@ -1469,9 +1469,9 @@ Func CanPickUp($aItemPtr)
     Local $lRarity = Item_GetItemInfoByPtr($aItemPtr, "Rarity")
     If (($lModelID == 2511) And (GetGoldCharacter() < 99000)) Then
         Return True	; gold coins (only pick if character has less than 99k in inventory)
-    ElseIf ($lModelID == $ITEM_ID_Dyes) Then	; Dye items
-        If $aExtraID == $ITEM_ExtraID_BlackDye Then Return $isBlackPickup
-        If $aExtraID == $ITEM_ExtraID_WhiteDye Then Return $isWhitePickup ; Only pick White and Black ones
+    ElseIf ($lModelID == $GC_I_MODELID_DYE) Then	; Dye items
+        If $aExtraID == $GC_I_EXTRAID_DYE_BLACK Then Return $isBlackPickup
+        If $aExtraID == $GC_I_EXTRAID_DYE_WHITE Then Return $isWhitePickup ; Only pick White and Black ones
         Return $isOtherPickup ; Pick all dyes
     ElseIf $lRarity == $RARITY_Gold Then ; Gold items
         Return $isGoldPickup
@@ -2437,9 +2437,9 @@ Func CanSell($aItem)
     EndSwitch
     
     Switch $IsDye
-        Case $ITEM_EXTRAID_BLACK
+        Case $GC_I_EXTRAID_DYE_BLACK
             Return $isBlackSell
-        Case $ITEM_EXTRAID_WHITE
+        Case $GC_I_EXTRAID_DYE_WHITE
             Return $isWhiteSell
         Case Else
             Return $isOtherSell
@@ -2575,14 +2575,14 @@ EndFunc   ;==> IsGold
 
 Func IsDye($aItem)
     Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
-    If $ModelID <> $ITEM_ID_Dyes Then Return False
+    If $ModelID <> $GC_I_MODELID_DYE Then Return False
 
     Local $ExtraID = Item_GetItemInfoByPtr($aItem, "ExtraID")
 
     Switch $ExtraID
-        Case $ITEM_ExtraID_BlackDye
+        Case $GC_I_EXTRAID_DYE_BLACK
             Return $ExtraID
-        Case $ITEM_ExtraID_WhiteDye
+        Case $GC_I_EXTRAID_DYE_WHITE
             Return $ExtraID
         Case Else
             Return $ExtraID
@@ -4310,11 +4310,6 @@ Global $NecroUpKeep[1] = [1]
 ;~ General Items
 Global $General_Items_Array[6] = [2989, 2991, 2992, 5899, 5900, 22751]
 Global Const $ITEM_ID_Lockpicks = 22751
-
-;~ Dyes
-Global Const $ITEM_ID_Dyes = 146
-Global Const $ITEM_ExtraID_BlackDye = 10
-Global Const $ITEM_ExtraID_WhiteDye = 12
 
 ;~ Alcohol
 Global $Alcohol_Array[19] = [910, 2513, 5585, 6049, 6366, 6367, 6375, 15477, 19171, 19172, 19173, 22190, 24593, 28435, 30855, 31145, 31146, 35124, 36682]
