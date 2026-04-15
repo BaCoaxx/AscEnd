@@ -794,47 +794,52 @@ Func StayAlive()
     Local $maxKillTime = 180000
     Local $PendingSkills[0]
 
-        ; Upkeep these skills
-        If IsArray($gUpkeepSkills) Then
-            Local $IsQueued[UBound($gUpkeepSkills)]
+    ; Repop Imp
+    If Not Agent_GetAgentEffectInfo(-2, 2886, "HasEffect") And Not HasImp(-2) Then
+        UseSummoningStone()
+    EndIf
 
-            For $i = 0 To UBound($gUpkeepSkills) - 1
+    ; Upkeep these skills
+    If IsArray($gUpkeepSkills) Then
+        Local $IsQueued[UBound($gUpkeepSkills)]
 
-                Local $slot = $gUpkeepSkills[$i]
-                Local $aSkill = Skill_GetSkillBarInfo($slot, "SkillID")
+        For $i = 0 To UBound($gUpkeepSkills) - 1
 
-                Local $hasEffect = Agent_GetAgentEffectInfo(-2, $aSkill, "HasEffect")
-                Local $skillDuration = Agent_GetAgentEffectInfo(-2, $aSkill, "Duration")
-                Local $timeRemaining = Agent_GetAgentEffectInfo(-2, $aSkill, "TimeRemaining")
+            Local $slot = $gUpkeepSkills[$i]
+            Local $aSkill = Skill_GetSkillBarInfo($slot, "SkillID")
 
-                Local $recastTime = ($skillDuration * 1000) / 8
+            Local $hasEffect = Agent_GetAgentEffectInfo(-2, $aSkill, "HasEffect")
+            Local $skillDuration = Agent_GetAgentEffectInfo(-2, $aSkill, "Duration")
+            Local $timeRemaining = Agent_GetAgentEffectInfo(-2, $aSkill, "TimeRemaining")
 
-                If Not $hasEffect Or $timeRemaining <= $recastTime Then ; If skill is not active or about to expire, use it if it's recharged
-                    If IsRecharged($slot) Then
-                        UseSkillEx($slot, -2)
-                    Else
-                        If Not $IsQueued[$i] Then ; We catch and reapply any skills that weren't recharged
-                            $IsQueued[$i] = True
-                            _ArrayAdd($PendingSkills, $i)
-                        EndIf
-                    EndIf
-                EndIf
+            Local $recastTime = ($skillDuration * 1000) / 8
 
-                If GetPartyDead() Then Return False
-
-            Next
-
-            For $j = 0 To UBound($PendingSkills) - 1 ; Reapply any missed skills here
-
-                Local $i = $PendingSkills[$j]
-                Local $slot = $gUpkeepSkills[$i]
-
+            If Not $hasEffect Or $timeRemaining <= $recastTime Then ; If skill is not active or about to expire, use it if it's recharged
                 If IsRecharged($slot) Then
                     UseSkillEx($slot, -2)
-                    $IsQueued[$i] = False
+                Else
+                    If Not $IsQueued[$i] Then ; We catch and reapply any skills that weren't recharged
+                        $IsQueued[$i] = True
+                        _ArrayAdd($PendingSkills, $i)
+                    EndIf
                 EndIf
-            Next
-        EndIf
+            EndIf
+
+            If GetPartyDead() Then Return False
+
+        Next
+
+        For $j = 0 To UBound($PendingSkills) - 1 ; Reapply any missed skills here
+
+            Local $i = $PendingSkills[$j]
+            Local $slot = $gUpkeepSkills[$i]
+
+            If IsRecharged($slot) Then
+                UseSkillEx($slot, -2)
+                $IsQueued[$i] = False
+            EndIf
+        Next
+    EndIf
 EndFunc   ;==>Stay Alive
 
 Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
@@ -845,7 +850,7 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
     Local $target, $targetCaster, $currentDistance, $targetX, $targetY
     Local $myX, $myY, $angle, $newX, $newY
 
-    Local $tolerance = 120
+    Local $tolerance = 150
     Local $adjustFactor = 0.6
     Local $desiredDistance = 900
     Local $PendingSkills[0]
@@ -907,7 +912,9 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
         
         $target = GetNearestEnemyToAgent(-2, $range, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc)
 
-        Agent_Attack($target)
+        If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
+            Agent_Attack($target)
+        EndIf
 
         Switch $gProf
             Case 63
@@ -964,12 +971,9 @@ Func EmoKill($targC, $targ)
         Case 0
             If IsRecharged(1) Then
                 UseSkillEx(1, -2) ; Glyph
-                $state = 1
-                Return True
             EndIf
-            Return False
 
-        Case 1 ; We target the caster first as generally the caster's will heal or be bundled up with other casters.
+            ; We target the caster first as generally the caster's will heal or be bundled up with other casters.
             Local $fsTarget = ($targetCaster <> 0) ? $targetCaster : $target
             If IsRecharged(2) Then
                 UseSkillEx(2, $fsTarget) ; Firestorm
@@ -978,31 +982,27 @@ Func EmoKill($targC, $targ)
             EndIf
             Return False
 
-        Case 2
+        Case 1
             If IsRecharged(3) Then
                 UseSkillEx(3, $target) ; Bane Signet
+            EndIf
+
+            If IsRecharged(4) Then
+                UseSkillEx(4, $target) ; Flare
+                $state = 2
+                Return True
+            EndIf
+            Return False
+
+        Case 2
+            If IsRecharged(5) And NeedHeal(70) Then
+                UseSkillEx(5, -2) ; Reversal of Fortune
                 $state = 3
                 Return True
             EndIf
             Return False
 
         Case 3
-            If IsRecharged(4) Then
-                UseSkillEx(4, $target) ; Flare
-                $state = 4
-                Return True
-            EndIf
-            Return False
-
-        Case 4
-            If IsRecharged(5) And NeedHeal(70) Then
-                UseSkillEx(5, -2) ; Reversal of Fortune
-                $state = 5
-                Return True
-            EndIf
-            Return False
-
-        Case 5
             If IsRecharged(6) And NeedHeal(70) Then
                 UseSkillEx(6, -2) ; Shielding Hands
                 $state = 0
@@ -1074,7 +1074,9 @@ Func NecroKill($targC, $targ)
 
     ; 7. Fallback
     If $fightTarget <> 0 Then
-        Agent_Attack($fightTarget)
+        If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
+            Agent_Attack($fightTarget)
+        EndIf
     EndIf
 EndFunc   ;==>NecroKill
 #EndRegion
@@ -1613,8 +1615,13 @@ Func InventoryPre()
         EndIf
         
         If $isSalvWeapons Then
-            If FindRareRuneOrInsignia() <> 0 Then
+            If FindRareMod() <> 0 Then
                 LogInfo("Salvaging Weapons..")
+                For $i = 1 To 4
+                    SalvageMods($i)
+                Next
+
+                LogInfo("Second round of salvaging Mods..")
                 For $i = 1 To 4
                     SalvageMods($i)
                 Next
@@ -1951,13 +1958,13 @@ Func SalvageMods($BagIndex)
         EndIf
         $aItemPtr = Item_GetItemBySlot($BagIndex, $ii)
         If Item_GetItemInfoByPtr($aItemPtr, "ItemID") = 0 Then ContinueLoop
-        If IsRareRunePre($aItemPtr) = 0 And IsRareInsigniaPre($aItemPtr) = 0 Then
+        If IsRareMod($aItemPtr) = 0 Then
             Continueloop
         Else
             If IsAlreadySalvaged($aItemPtr) Then ContinueLoop
-            If IsRareRunePre($aItemPtr) Then
+            If IsRareMod($aItemPtr) Then
                 Item_SalvageItem($aItemPtr, "Charr", "Suffix")
-            ElseIf IsRareInsigniaPre($aItemPtr) Then
+            ElseIf IsRareMod($aItemPtr) Then
                 Item_SalvageItem($aItemPtr, "Charr", "Prefix")
             Else
                 Continueloop
@@ -2133,6 +2140,18 @@ Func FindRareRuneOrInsignia()
     Next
     Return False
 EndFunc	   ;==>FindRareRuneOrInsignia
+
+Func FindRareMod()
+    Local $lItemPtr
+    For $i = 1 To 4
+        For $j = 1 To Item_GetBagInfo(Item_GetBagPtr($i), 'Slots')
+            $lItemPtr = Item_GetItemBySlot($i, $j)
+
+            If IsRareMod($lItemPtr) Then Return True
+        Next
+    Next
+    Return False
+EndFunc   ;==>FindRareMod
 
 Func FindConset()
     Local $lItemPtr
@@ -2460,19 +2479,25 @@ Func CanSell($aItem)
     Local $IsEotnAnniSkin = IsEotnAnniSkin($aItem)
     Local $IsAnyCampAnniSkin = IsAnyCampAnniSkin($aItem)
 
+    Local $type = Item_GetItemInfoByPtr($aItem, "ItemType")
+
     Switch $IsBlue
     Case True
-       Return $isBlueSell ; Is blue
+        If $type == $GC_I_TYPE_RUNE_AND_MOD Then Return False
+        Return $isBlueSell ; Is blue
     EndSwitch
 
     Switch $IsPurple
     Case True
-       Return $isPurpleSell ; Is purple
+        If $type == $GC_I_TYPE_RUNE_AND_MOD Then Return False
+        Return $isPurpleSell ; Is purple
     EndSwitch
 
     Switch $IsGold
     Case True
-       Return $isGoldSell ; Is gold
+        If $type == $GC_I_TYPE_RUNE_AND_MOD Then Return False
+        If $IsSpecial Then Return False
+        Return $isGoldSell ; Is gold
     EndSwitch
     
     Switch $IsDye
@@ -2988,8 +3013,8 @@ Func IsSpecialItem($aItem)
        Return True ; Commendations
     Case 19186, 19187, 19188, 19189
         Return True ; Djinn Essences
-    Case 18721, 16453
-        Return True ; Charr Salv Kit, Charr Bag
+    Case 31149
+        Return True ;Gifts of the Huntsman
     EndSwitch
     Return False
 EndFunc   ;==> IsSpecialItem
@@ -3653,6 +3678,87 @@ Func IsPerfectShield($aItem)
     EndIf
     Return False
 EndFunc   ;==> IsPerfectShield
+
+Func IsRareMod($aItem)
+    Local $ModStruct = Item_GetModStruct($aItem)
+
+    ; =========================
+    ; MARTIAL – % Stance
+    ; =========================
+    Local $Stance10 = StringInStr($ModStruct, "0A00A822", 0, 1)
+    Local $Stance11 = StringInStr($ModStruct, "0B00A822", 0, 1)
+    Local $Stance12 = StringInStr($ModStruct, "0C00A822", 0, 1)
+    Local $Stance13 = StringInStr($ModStruct, "0D00A822", 0, 1)
+    Local $Stance14 = StringInStr($ModStruct, "0E00A822", 0, 1)
+    Local $Stance15 = StringInStr($ModStruct, "0F00A822", 0, 1)
+
+    ; =========================
+    ; MARTIAL – % HP > 50%
+    ; =========================
+    Local $HP5010 = StringInStr($ModStruct, "0A327822", 0, 1)
+    Local $HP5011 = StringInStr($ModStruct, "0B327822", 0, 1)
+    Local $HP5012 = StringInStr($ModStruct, "0C327822", 0, 1)
+    Local $HP5013 = StringInStr($ModStruct, "0D327822", 0, 1)
+    Local $HP5014 = StringInStr($ModStruct, "0E327822", 0, 1)
+    Local $HP5015 = StringInStr($ModStruct, "0F327822", 0, 1)
+
+    ; =========================
+    ; CASTER – Fire +1
+    ; =========================
+    Local $Fire15 = StringInStr($ModStruct, "0F0A1824", 0, 1)
+    Local $Fire16 = StringInStr($ModStruct, "100A1824", 0, 1)
+    Local $Fire17 = StringInStr($ModStruct, "110A1824", 0, 1)
+    Local $Fire18 = StringInStr($ModStruct, "120A1824", 0, 1)
+    Local $Fire19 = StringInStr($ModStruct, "130A1824", 0, 1)
+    Local $Fire20 = StringInStr($ModStruct, "140A1824", 0, 1)
+
+    ; =========================
+    ; CASTER – Death +1
+    ; =========================
+    Local $Death15 = StringInStr($ModStruct, "0F051824", 0, 1)
+    Local $Death16 = StringInStr($ModStruct, "10051824", 0, 1)
+    Local $Death17 = StringInStr($ModStruct, "11051824", 0, 1)
+    Local $Death18 = StringInStr($ModStruct, "12051824", 0, 1)
+    Local $Death19 = StringInStr($ModStruct, "13051824", 0, 1)
+    Local $Death20 = StringInStr($ModStruct, "14051824", 0, 1)
+
+    ; =========================
+    ; CASTER – Domination +1
+    ; =========================
+    Local $Dom15 = StringInStr($ModStruct, "0F021824", 0, 1)
+    Local $Dom16 = StringInStr($ModStruct, "10021824", 0, 1)
+    Local $Dom17 = StringInStr($ModStruct, "11021824", 0, 1)
+    Local $Dom18 = StringInStr($ModStruct, "12021824", 0, 1)
+    Local $Dom19 = StringInStr($ModStruct, "13021824", 0, 1)
+    Local $Dom20 = StringInStr($ModStruct, "14021824", 0, 1)
+
+    ; =========================
+    ; SHIELD – vs Charr
+    ; =========================
+    Local $SCharr5  = StringInStr($ModStruct, "05014821", 0, 1)
+    Local $SCharr6  = StringInStr($ModStruct, "06014821", 0, 1)
+    Local $SCharr7  = StringInStr($ModStruct, "07014821", 0, 1)
+    Local $SCharr8  = StringInStr($ModStruct, "08014821", 0, 1)
+    Local $SCharr9  = StringInStr($ModStruct, "09014821", 0, 1)
+    Local $SCharr10 = StringInStr($ModStruct, "0A014821", 0, 1)
+
+    If $Stance10 > 0 Or $Stance11 > 0 Or $Stance12 > 0 Or $Stance13 > 0 Or $Stance14 > 0 Or $Stance15 > 0 Then
+        Return True
+    ElseIf $HP5010 > 0 Or $HP5011 > 0 Or $HP5012 > 0 Or $HP5013 > 0 Or $HP5014 > 0 Or $HP5015 > 0 Then
+        Return True
+    ElseIf $Fire15 > 0 Or $Fire16 > 0 Or $Fire17 > 0 Or $Fire18 > 0 Or $Fire19 > 0 Or $Fire20 > 0 Then
+        Return True
+    ElseIf $Death15 > 0 Or $Death16 > 0 Or $Death17 > 0 Or $Death18 > 0 Or $Death19 > 0 Or $Death20 > 0 Then
+        Return True
+    ElseIf $Dom15 > 0 Or $Dom16 > 0 Or $Dom17 > 0 Or $Dom18 > 0 Or $Dom19 > 0 Or $Dom20 > 0 Then
+        Return True
+    ElseIf $SCharr5 > 0 Or $SCharr6 > 0 Or $SCharr7 > 0 Or $SCharr8 > 0 Or $SCharr9 > 0 Or $SCharr10 > 0 Then
+        Return True
+    Else
+        Return False
+    EndIf
+
+EndFunc   ;==> IsRareMod
 
 Func IsRareRunePre($aItem)
     Local $ModStruct = Item_GetModStruct($aItem)

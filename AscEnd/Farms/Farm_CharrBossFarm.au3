@@ -212,7 +212,9 @@ Func FirstGroupEmo()
 
     Local $target = GetNearestCharrToAgent(-2)
     
-    Agent_Attack($target)
+    If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
+        Agent_Attack($target)
+    EndIf
 
     If StayAlive_Kill(-10317, -5215,"CharrFilter", 2600) Then
         LogInfo("First group of charr cleared.")
@@ -232,7 +234,9 @@ Func FirstGroupNecro()
 
     Local $target = GetNearestCharrToAgent(-2)
 
-    Agent_Attack($target)
+    If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
+        Agent_Attack($target)
+    EndIf
 
     If StayAlive_Kill(-10510.99, -6543.00,"CharrFilter", 2000) Then
         LogInfo("First group of charr cleared.")
@@ -349,11 +353,15 @@ Func LeftCornerEmo()
     
     Local $target = GetNearestCharrToAgent(-2)
 
-    Agent_Attack($target)
+    If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
+        Agent_Attack($target)
+    EndIf
 
     MoveUpkeepEx(-571.48, -1651.94, $gUpkeepSkills) ; Move back incase we over aggro, imp can take a hit
 
-    Agent_Attack($target)
+    If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
+        Agent_Attack($target)
+    EndIf
 
     If StayAlive_Kill(-571.48, -1651.94, "CharrFilter", 1500) Then LogInfo("Left corner group cleared.")
 
@@ -374,11 +382,15 @@ Func LeftCornerNecro()
 
     Local $target = GetNearestCharrToAgent(-2)
 
-    Agent_Attack($target)
+    If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
+        Agent_Attack($target)
+    EndIf
 
     MoveUpkeepEx(-146.63, -2284.94, $gUpkeepSkills) ; Move back incase we over aggro, imp can take a hit
 
-    Agent_Attack($target)
+    If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
+        Agent_Attack($target)
+    EndIf
 
     If StayAlive_Kill(-146.63, -2284.94, "CharrFilter", 1500) Then LogInfo("Left corner group cleared.")
 
@@ -398,7 +410,9 @@ Func BossesEmo()
 
     If GetPartyDead() Then Return False
 
-    Agent_Attack($SmokeSkin)
+    If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
+        Agent_Attack($SmokeSkin)
+    EndIf
 
     If StayAlive_Kill(625.78, -3160.56, "CharrFilter", 2700) Then
         LogInfo("Bosses cleared.")
@@ -431,7 +445,9 @@ Func Bosses()
 
     If GetPartyDead() Then Return False
 
-    Agent_Attack($SmokeSkin)
+    If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
+        Agent_Attack($SmokeSkin)
+    EndIf
 
     If StayAlive_Kill(625.78, -3160.56, "CharrFilter", 2700) Then
         ; Bigger loot sweep after bosses

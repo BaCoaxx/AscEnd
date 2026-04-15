@@ -107,11 +107,11 @@ Func Hamnet()
 
     $RunTime = TimerInit()
 
-    Sleep(250)
-    RunTo($HamnetPath)
     LogInfo("Got imps? ")
     Sleep(250)
     UseSummoningStone()
+    Sleep(250)
+    RunTo($HamnetPath)
     Sleep(250)
     MoveTo(2650, 5122)
     AggroMoveSmartFilter(2574, 5885, 2200, 2200, $BanditFilter, True)
