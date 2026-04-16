@@ -10,9 +10,12 @@
 
 #ce ----------------------------------------------------------------------------
 
-Global $HamnetPath[2][2] = [ _
-    [1926, 6161], _
-    [2749, 3953] _
+Global $HamnetPath[5][2] = [ _
+    [1925, 6315], _
+    [2431, 5106], _
+    [2577, 4177], _
+    [2714, 4172], _
+    [2360, 6003] _
 ]
 
 Global $currLevel = 0
@@ -107,13 +110,12 @@ Func Hamnet()
 
     $RunTime = TimerInit()
 
+    Sleep(250)
+    RunTo($HamnetPath)
     LogInfo("Got imps? ")
     Sleep(250)
     UseSummoningStone()
     Sleep(250)
-    RunTo($HamnetPath)
-    Sleep(250)
-    MoveTo(2650, 5122)
     AggroMoveSmartFilter(2574, 5885, 2200, 2200, $BanditFilter, True)
 
     If SurvivorMode() Then LogError("Survivor mode activated!")

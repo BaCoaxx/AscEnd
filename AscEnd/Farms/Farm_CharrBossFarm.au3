@@ -414,7 +414,7 @@ Func BossesEmo()
         Agent_Attack($SmokeSkin)
     EndIf
 
-    If StayAlive_Kill(625.78, -3160.56, "CharrFilter", 2700) Then
+    If StayAlive_Kill(625.78, -3160.56, "CharrFilter", 2800) Then
         LogInfo("Bosses cleared.")
         Sleep(250)
         LogInfo("Picking up loot...")
@@ -429,7 +429,7 @@ Func BossesEmo()
     If GetPartyDead() Then Return False
 EndFunc
 
-Func Bosses()
+Func BossesNecro()
     Local $SmokeSkin = 1452
     Local $timer
 

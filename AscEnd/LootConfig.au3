@@ -45,10 +45,10 @@ Global $ApplyBtn, $CloseBtn
 ; GUI Initialization
 ; ============================================================================
 Func InitLootSettingsGUI()
-    $LootGui = GUICreate("AscEnd - Loot Config", 258, 351, -1, -1, -1, BitOR($WS_EX_TOPMOST,$WS_EX_WINDOWEDGE))
+    $LootGui = GUICreate("AscEnd - Loot Config", 258, 309, -1, -1, -1, BitOR($WS_EX_TOPMOST,$WS_EX_WINDOWEDGE))
     GUISetOnEvent($GUI_EVENT_CLOSE, "LootSettings_Close", $LootGui)
 
-    GUICtrlCreateGroup("Loot", 8, 7, 242, 335, -1, $WS_EX_TRANSPARENT)
+    GUICtrlCreateGroup("Loot", 8, 7, 242, 295, -1, $WS_EX_TRANSPARENT)
     GUICtrlSetFont(-1, 12, 800, 0, "Arial")
 
     GUICtrlCreateGroup("Purple", 95, 29, 64, 65)
@@ -129,16 +129,10 @@ Func InitLootSettingsGUI()
     $CollectorPickup = GUICtrlCreateCheckbox("", 228, 244, 17, 17, BitOR($GUI_SS_DEFAULT_CHECKBOX,$BS_CENTER,$BS_VCENTER))
     GUICtrlCreateGroup("", -99, -99, 1, 1)
 
-    GUICtrlCreateGroup("Salvage", 19, 244, 104, 63)
-    GUICtrlSetFont(-1, 10, 400, 0, "Arial Rounded MT Bold")
-    $SalvWeaponsCB = GUICtrlCreateCheckbox("Weapons", 30, 262, 81, 17, BitOR($GUI_SS_DEFAULT_CHECKBOX,$BS_LEFT))
-    $SalvRunesCB   = GUICtrlCreateCheckbox("Runes/Insigs", 30, 280, 90, 17, BitOR($GUI_SS_DEFAULT_CHECKBOX,$BS_LEFT))
-    GUICtrlCreateGroup("", -99, -99, 1, 1)
-
-    $ApplyBtn = GUICtrlCreateButton("Apply", 131, 298, 51, 33)
+    $ApplyBtn = GUICtrlCreateButton("Apply", 19, 250, 51, 33)
     GUICtrlSetOnEvent(-1, "LootSettings_Apply")
 
-    $CloseBtn = GUICtrlCreateButton("Close", 184, 298, 51, 33)
+    $CloseBtn = GUICtrlCreateButton("Close", 72, 250, 51, 33)
     GUICtrlSetOnEvent(-1, "LootSettings_Close")
     GUICtrlCreateGroup("", -99, -99, 1, 1)
 
@@ -153,8 +147,6 @@ Func InitLootSettingsGUI()
     If $isCBagPickup Then GUICtrlSetState($CBagPickup, $GUI_CHECKED)
     If $isCSalvPickup Then GUICtrlSetState($CSalvPickup, $GUI_CHECKED)
     If $isCollPickup Then GUICtrlSetState($CollectorPickup, $GUI_CHECKED)
-    If $isSalvWeapons Then GUICtrlSetState($SalvWeaponsCB, $GUI_CHECKED)
-    If $isSalvRunes Then GUICtrlSetState($SalvRunesCB, $GUI_CHECKED)
 
     If $isPurpleSell Then
         GUICtrlSetState($Radio4, $GUI_CHECKED)
@@ -232,8 +224,6 @@ Func LootSettings_Apply()
     $isCBagPickup   = (BitAND(GUICtrlRead($CBagPickup), $GUI_CHECKED) == $GUI_CHECKED)
     $isCSalvPickup  = (BitAND(GUICtrlRead($CSalvPickup), $GUI_CHECKED) == $GUI_CHECKED)
     $isCollPickup   = (BitAND(GUICtrlRead($CollectorPickup), $GUI_CHECKED) == $GUI_CHECKED)
-    $isSalvWeapons  = (BitAND(GUICtrlRead($SalvWeaponsCB), $GUI_CHECKED) == $GUI_CHECKED)
-    $isSalvRunes    = (BitAND(GUICtrlRead($SalvRunesCB),   $GUI_CHECKED) == $GUI_CHECKED)
     
     ; 2. Read Sells
     $isPurpleSell   = (BitAND(GUICtrlRead($Radio4), $GUI_CHECKED) == $GUI_CHECKED)
@@ -268,8 +258,6 @@ Func LootSettings_Apply()
     IniWrite($sIniFile, "Sell",   "CSalv", $isCSalvSell ? "1" : "0")
     IniWrite($sIniFile, "Pickup", "Coll", $isCollPickup ? "1" : "0")
     IniWrite($sIniFile, "Sell",   "Coll", $isCollSell ? "1" : "0")
-    IniWrite($sIniFile, "Salvage", "Weapons", $isSalvWeapons ? "1" : "0")
-    IniWrite($sIniFile, "Salvage", "RunesInsigs", $isSalvRunes ? "1" : "0")
 
     If IsDeclared("LogStatus") Then LogStatus("Loot configuration applied and saved.")
 

@@ -856,7 +856,7 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
     Local $PendingSkills[0]
 
     If GetPartyDead() Then Return False
-    If GetNumberOfFoesInRangeOfAgent(-2, $range, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc) = 0 Then Return False
+    If GetNumberOfCharrInRangeOfXY($refX, $refY, $range) = 0 Then Return True
 
     Do
         ; Repop Imp
@@ -906,7 +906,7 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
             Next
         EndIf
 
-        If GetNumberOfFoesInRangeOfAgent(-2, $range, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc) = 0 Then Return True
+        If GetNumberOfCharrInRangeOfXY($refX, $refY, $range) = 0 Then Return True
 
         $targetCaster = GetNearestEnemyToAgent(-2, $range, $GC_I_AGENT_TYPE_LIVING, 1, "CharrCasterFilter")
         
@@ -957,59 +957,41 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
 EndFunc   ;==>StayAlive_Kill
 
 Func EmoKill($targC, $targ)
-    Static $state = 0
 
     Local $targetCaster = $targC
     Local $target = $targ
 
-    If $target = 0 Or Agent_GetAgentInfo($target, "IsDead") Then
-        $state = 0
-        Return False
+    If IsRecharged(1) Then
+        UseSkillEx(1, -2) ; Glyph
     EndIf
 
-    Switch $state ; If we knock a skill out we move to the next one, if not we return, do a little dance and upkeep, then we try again :)
-        Case 0
-            If IsRecharged(1) Then
-                UseSkillEx(1, -2) ; Glyph
-            EndIf
+    ; We target the caster first as generally the caster's will heal or be bundled up with other casters.
+    Local $fsTarget = ($targetCaster <> 0) ? $targetCaster : $target
+    If IsRecharged(2) Then
+        UseSkillEx(2, $fsTarget) ; Firestorm
+    EndIf
 
-            ; We target the caster first as generally the caster's will heal or be bundled up with other casters.
-            Local $fsTarget = ($targetCaster <> 0) ? $targetCaster : $target
-            If IsRecharged(2) Then
-                UseSkillEx(2, $fsTarget) ; Firestorm
-                $state = 2
-                Return True
-            EndIf
-            Return False
+    If Not Agent_GetAgentEffectInfo(-2, 288, "HasEffect") Then ; Healing Breeze
+        If IsRecharged(8) Then
+            UseSkillEx(8, -2)
+        EndIf
+    EndIf
 
-        Case 1
-            If IsRecharged(3) Then
-                UseSkillEx(3, $target) ; Bane Signet
-            EndIf
+    If IsRecharged(3) Then
+        UseSkillEx(3, $target) ; Bane Signet
+    EndIf
 
-            If IsRecharged(4) Then
-                UseSkillEx(4, $target) ; Flare
-                $state = 2
-                Return True
-            EndIf
-            Return False
+    If IsRecharged(4) Then
+        UseSkillEx(4, $target) ; Flare
+    EndIf
 
-        Case 2
-            If IsRecharged(5) And NeedHeal(70) Then
-                UseSkillEx(5, -2) ; Reversal of Fortune
-                $state = 3
-                Return True
-            EndIf
-            Return False
+    If IsRecharged(5) And NeedHeal(70) Then
+        UseSkillEx(5, -2) ; Reversal of Fortune
+    EndIf
 
-        Case 3
-            If IsRecharged(6) And NeedHeal(70) Then
-                UseSkillEx(6, -2) ; Shielding Hands
-                $state = 0
-                Return True
-            EndIf
-            Return False
-    EndSwitch
+    If IsRecharged(6) And NeedHeal(70) Then
+        UseSkillEx(6, -2) ; Shielding Hands
+    EndIf
 EndFunc
 
 Func NecroKill($targC, $targ)
@@ -1594,44 +1576,6 @@ Func InventoryPre()
         For $i = 1 To 4
             Sell($i)
         Next
-        
-        If $isSalvRunes Then
-            If FindRareRuneOrInsignia() <> 0 Then
-                LogInfo("Salvaging Runes/Insignias..")
-                For $i = 1 To 4
-                    SalvageRunes($i)
-                Next
-
-                LogInfo("Second round of salvaging Runes/Insignias..")
-                For $i = 1 To 4
-                    SalvageRunes($i)
-                Next
-
-                LogWarn("Selling leftover items..")
-                For $i = 1 To 4
-                    Sell($i)
-                Next
-            EndIf
-        EndIf
-        
-        If $isSalvWeapons Then
-            If FindRareMod() <> 0 Then
-                LogInfo("Salvaging Weapons..")
-                For $i = 1 To 4
-                    SalvageMods($i)
-                Next
-
-                LogInfo("Second round of salvaging Mods..")
-                For $i = 1 To 4
-                    SalvageMods($i)
-                Next
-
-                LogWarn("Selling leftover items..")
-                For $i = 1 To 4
-                    Sell($i)
-                Next
-            EndIf
-        EndIf
     Else
         LogError("Not enough gold to buy ID kit, returning...")
         Return
@@ -1674,11 +1618,11 @@ Func Inventory()
     If FindRareRuneOrInsignia() <> 0 Then
         LogInfo("Salvage all Runes")
         For $i = 1 To 4
-            SalvageRunes($i)
+            ;SalvageRunes($i)
         Next
         LogInfo("Second Round of Salvage")
         For $i = 1 To 4
-            SalvageMods($i)
+            ;SalvageMods($i)
         Next
 
         LogInfo("Sell leftover items")
@@ -1916,62 +1860,6 @@ Func Ident($BagIndex)
         Sleep(250)
     Next
 EndFunc   ;==>Ident
-
-Func SalvageRunes($BagIndex)
-    Local $BagPtr
-    Local $aItemPtr
-    Local $aItemID
-    Local $aSalvageKitID
-    $BagPtr = Item_GetBagPtr($BagIndex)
-    For $ii = 1 To Item_GetBagInfo($BagPtr, "Slots")
-        If FindCharrSalvageKit() = 0 Then
-            LogError("Charr Salvage Kit not found..Keep hunting bucko!")
-            Return False
-        EndIf
-        $aItemPtr = Item_GetItemBySlot($BagIndex, $ii)
-        If Item_GetItemInfoByPtr($aItemPtr, "ItemID") = 0 Then ContinueLoop
-        If IsRareRunePre($aItemPtr) = 0 And IsRareInsigniaPre($aItemPtr) = 0 Then
-            Continueloop
-        Else
-            If IsAlreadySalvaged($aItemPtr) Then ContinueLoop
-            If IsRareRunePre($aItemPtr) Then
-                Item_SalvageItem($aItemPtr, "Charr", "Suffix")
-            ElseIf IsRareInsigniaPre($aItemPtr) Then
-                Item_SalvageItem($aItemPtr, "Charr", "Prefix")
-            Else
-                Continueloop
-            EndIf
-        EndIf
-    Next
-EndFunc   ;==>SalvageRunes
-
-Func SalvageMods($BagIndex)
-    Local $BagPtr
-    Local $aItemPtr
-    Local $aItemID
-    Local $aSalvageKitID
-    $BagPtr = Item_GetBagPtr($BagIndex)
-    For $ii = 1 To Item_GetBagInfo($BagPtr, "Slots")
-        If FindCharrSalvageKit() = 0 Then
-            LogError("Charr Salvage Kit not found..Keep hunting bucko!")
-            Return False
-        EndIf
-        $aItemPtr = Item_GetItemBySlot($BagIndex, $ii)
-        If Item_GetItemInfoByPtr($aItemPtr, "ItemID") = 0 Then ContinueLoop
-        If IsRareMod($aItemPtr) = 0 Then
-            Continueloop
-        Else
-            If IsAlreadySalvaged($aItemPtr) Then ContinueLoop
-            If IsRareMod($aItemPtr) Then
-                Item_SalvageItem($aItemPtr, "Charr", "Suffix")
-            ElseIf IsRareMod($aItemPtr) Then
-                Item_SalvageItem($aItemPtr, "Charr", "Prefix")
-            Else
-                Continueloop
-            EndIf
-        EndIf
-    Next
-EndFunc   ;==>SalvageMods
 
 Func IsAlreadySalvaged($aItemPtr)
     Local $modelID
@@ -2454,6 +2342,7 @@ Func CanPreSell($aItemPtr)
 EndFunc   ;==> CanPreSell
 
 Func CanSell($aItem)
+    Local $IsRareMod = IsRareMod($aItem)
     Local $IsCharrRelated = IsCharrRelated($aItem)
     Local $IsDye = IsDye($aItem)
     Local $IsBlue = IsBlue($aItem)
@@ -2483,19 +2372,19 @@ Func CanSell($aItem)
 
     Switch $IsBlue
     Case True
-        If $type == $GC_I_TYPE_RUNE_AND_MOD Then Return False
+        If $IsRareMod Then Return False
         Return $isBlueSell ; Is blue
     EndSwitch
 
     Switch $IsPurple
     Case True
-        If $type == $GC_I_TYPE_RUNE_AND_MOD Then Return False
+        If $IsRareMod Then Return False
         Return $isPurpleSell ; Is purple
     EndSwitch
 
     Switch $IsGold
     Case True
-        If $type == $GC_I_TYPE_RUNE_AND_MOD Then Return False
+        If $IsRareMod Then Return False
         If $IsSpecial Then Return False
         Return $isGoldSell ; Is gold
     EndSwitch
