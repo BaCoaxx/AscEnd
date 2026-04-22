@@ -1462,23 +1462,22 @@ Func CanPickUp($aItemPtr)
     ElseIf $lRarity == $RARITY_Purple Then ; Purple items
         Return $isPurplePickup
     ElseIf $lRarity == $RARITY_Blue Then ; Blue items
-        If $CharrBossFarm Then
-            Return False
-        Else
-            Return $isBluePickup
-        EndIf
+        Return $isBluePickup
     ElseIf $lModelID == $ITEM_ID_Lockpicks Then
         Return True
     ElseIf $lModelID == 22269 Then	; Cupcakes
         Return True
     ElseIf $lModelID == $GC_I_MODELID_LUNAR_TOKEN Then ; Lunar Tokens
         Return True
+    ElseIf $lModelID == $GC_I_MODELID_VICTORY_TOKEN Then ; Victory Tokens
+        Return True
     ElseIf IsPreCollectable($aItemPtr) Then
         If $CharrBossFarm Then
             If $lModelID == 423 Then ; Still going to grab those charr carvings
                 Return $isCollPickup
+            Else
+                Return False
             EndIf
-            Return False
         Else
             Return $isCollPickup
         EndIf
@@ -2860,7 +2859,7 @@ Func IsPcon($aItem)
        Return True ; Alcohol
     Case 6376, 21809, 21810, 21813, 36683
        Return True ; Party
-    Case 21492, 21812, 22269, 22644, 22752, 28436
+    Case 18345, 21492, 21812, 22269, 22644, 22752, 28436
        Return True ; Sweets
     Case 6370, 21488, 21489, 22191, 26784, 28433
        Return True ; DP Removal

@@ -29,8 +29,6 @@ Global $isCSalvPickup  = (IniRead($sIniFile, "Pickup", "CSalv", "0") == "1")
 Global $isCSalvSell    = (IniRead($sIniFile, "Sell", "CSalv", "0") == "1")
 Global $isCollPickup   = (IniRead($sIniFile, "Pickup", "Coll", "0") == "1")
 Global $isCollSell     = (IniRead($sIniFile, "Sell", "Coll", "0") == "1")
-Global $isSalvWeapons  = (IniRead($sIniFile, "Salvage", "Weapons", "0") == "1")
-Global $isSalvRunes    = (IniRead($sIniFile, "Salvage", "RunesInsigs", "0") == "1")
 
 ; Declare GUI Control Variables globally so Event Functions can read them
 Global $LootGui, $PurplePickup, $Radio3, $Radio4, $GoldPickup, $Radio1, $Radio2
@@ -38,7 +36,6 @@ Global $BluePickup, $Radio5, $Radio6, $BlackPickup, $Radio7, $Radio8
 Global $WhitePickup, $Radio11, $Radio12, $OtherDyePickup, $Radio9, $Radio10
 Global $PconPickup, $Radio13, $Radio14, $CBagPickup, $Radio15, $Radio16
 Global $CSalvPickup, $Radio17, $Radio18, $CollectorPickup, $Radio19, $Radio20
-Global $SalvWeaponsCB, $SalvRunesCB
 Global $ApplyBtn, $CloseBtn
 
 ; ============================================================================
