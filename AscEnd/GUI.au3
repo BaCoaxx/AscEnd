@@ -106,51 +106,6 @@ Global Const $NICHOLAS_EPOCH = "2026/03/25 07:00:00"
 Global Const $NICHOLAS_EPOCH_INDEX = 6
 Global Const $VANGUARD_EPOCH = "2026/01/14 16:01:00"
 
-Func GetOpenWindows() ; Get all open window titles (Running bots have the window title changed to their Character Name)
-    Local $aWins = WinList()
-    Local $aWinTitles[0]
-
-    For $i = 1 To $aWins[0][0]
-        Local $sTitle = StringStripWS($aWins[$i][0], 3)
-        If $sTitle = "" Then ContinueLoop
-
-        ReDim $aWinTitles[UBound($aWinTitles) + 1]
-        $aWinTitles[UBound($aWinTitles) - 1] = $sTitle
-    Next
-
-    Return $aWinTitles
-EndFunc
-
-Func IsRunningBot($aWinTitles, $sCharName) ; Check if a window title matches a character name
-    For $i = 0 To UBound($aWinTitles) - 1
-        If $aWinTitles[$i] = $sCharName Then Return True
-    Next
-    Return False
-EndFunc
-
-Func FilterOutRunningBots($sAllNames) ; Filter out running bots from a list of character names
-    If $sAllNames = "" Then Return ""
-
-    Local $aWinTitles = GetOpenWindows()
-    Local $aNames = StringSplit($sAllNames, "|", 2)
-
-    Local $sFiltered = ""
-    For $i = 0 To UBound($aNames) - 1
-        Local $sCharName = StringStripWS($aNames[$i], 3)
-        If $sCharName = "" Then ContinueLoop
-
-        If Not IsRunningBot($aWinTitles, $sCharName) Then
-            If $sFiltered = "" Then
-                $sFiltered = $sCharName
-            Else
-                $sFiltered &= "|" & $sCharName
-            EndIf
-        EndIf
-    Next
-
-    Return $sFiltered
-EndFunc
-
 Func _GetNicholasItemByOffset($iDayOffset)
     Local $iItemCount = UBound($aNicholasItems)
     
@@ -210,7 +165,7 @@ $Group1 = GUICtrlCreateGroup("Select Your Character", 16, 24, 193, 49)
 Global $GUINameCombo
 If $doLoadLoggedChars Then
     $GUINameCombo = GUICtrlCreateCombo($g_s_MainCharName, 24, 40, 177, 25, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
-    GUICtrlSetData(-1, FilterOutRunningBots(Scanner_GetLoggedCharNames()))
+    GUICtrlSetData(-1, Scanner_GetLoggedCharNames())
 Else
     $GUINameCombo = GUICtrlCreateInput($g_s_MainCharName, 24, 40, 177, 25)
 EndIf
@@ -407,7 +362,7 @@ Func GuiButtonHandler()
 
         Case $GUIRefreshButton
             GUICtrlSetData($GUINameCombo, "")
-            GUICtrlSetData($GUINameCombo, FilterOutRunningBots(Scanner_GetLoggedCharNames()))
+            GUICtrlSetData($GUINameCombo, Scanner_GetLoggedCharNames())
 
         Case $GUISettingsButton
             If Not IsHWnd($LootGui) Then
