@@ -3,24 +3,29 @@
 #cs ----------------------------------------------------------------------------
 
      AutoIt Version: 3.3.18.0
-     Author:         BareBuns69
+     Author:         BareBuns69 #ImissGWA2
 
      Script Function:
         Skale Alt Farm - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
-Global $SkaleFarmAlt[10][2] = [ _
+Global $SkaleFarmAlt[15][2] = [ _
     [22522, 5012], _
     [22341, 4315], _
     [21134, 3500], _
     [18193, 3242], _
     [17267, 2995], _
     [16679, 2634], _
-    [16494, 2607], _
-    [16355, 1724], _
-    [15557, 938], _
-    [16895, 1956] _
+    [16476, 2856], _
+	[15708, 3056], _
+    [16467, 4952], _ ; deep north aggro
+	[15957, 4433], _
+    [15504, 2734], _
+	[13497, 1878], _ ; deep west aggro
+	[15611, 501], _  ; start balling them up
+	[16665, 698], _
+	[17464, 1773] _ ; nuke spot
 ]
 
 Func Farm_SkaleAlt()
@@ -92,11 +97,12 @@ Func SkaleAlt()
 
     $RunTime = TimerInit()
 
-    UseSummoningStone()
+    ;UseSummoningStone()  
     RunTo($SkaleFarmAlt)
     Sleep(500)
-    AggroMoveSmartFilter(16895, 1956, 1100, 1100, $SkaleFilter, True, 1300)
+    AggroMoveSmartFilter(17464, 1773, 1100, 1100, $SkaleFilter, True, 1300)
     Other_RndSleep(250)
+	
     LogInfo("Run complete. Restarting...")
     UpdateStats()
     Other_RndSleep(250)

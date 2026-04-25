@@ -270,7 +270,7 @@ Func GetHealOnBar()
     For $slot = 1 To 8
         Local $skillID = Skill_GetSkillbarInfo($slot, "SkillID")
         If IsHealingSkill($skillID) Then
-            If IsRecharged($slot) Then Return $slot
+            If IsRecharged($slot) And Not Agent_GetAgentEffectInfo(-2, $skillID, "HasEffect") Then Return $slot
         EndIf
     Next
     Return 0
