@@ -86,9 +86,6 @@ Func BakedHusk()
     Resign()
     Sleep(5000)
     Map_ReturnToOutpost()
-    Sleep(1000)
-    Map_WaitMapLoading(164, 0)
-    Sleep(1000)
 EndFunc
 
 Func RunToWurms($g_ai2_RunPath)

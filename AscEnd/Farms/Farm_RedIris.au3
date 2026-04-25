@@ -79,9 +79,6 @@ Func IrisFarm()
     Resign()
     Sleep(5000)
     Map_ReturnToOutpost()
-    Sleep(1000)
-    Map_WaitMapLoading(164, 0)
-    Sleep(1000)
 EndFunc
 
 Func IrisPickup()

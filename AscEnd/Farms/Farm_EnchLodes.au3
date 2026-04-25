@@ -100,9 +100,6 @@ Func EnchLodes()
     Resign()
     Sleep(5000)
     Map_ReturnToOutpost()
-    Sleep(1000)
-    Map_WaitMapLoading(163, 0)
-    Sleep(1000)
 EndFunc
 
 Func RunToElodes($g_ai2_RunPath)

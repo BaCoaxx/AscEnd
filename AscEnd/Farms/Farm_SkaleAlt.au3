@@ -10,11 +10,17 @@
 
 #ce ----------------------------------------------------------------------------
 
-Global $SkaleFarmAlt[4][2] = [ _
-    [16060, 2900], _
-    [14107, 1935], _
-    [16539, 717], _
-    [17989, 2234] _
+Global $SkaleFarmAlt[10][2] = [ _
+    [22522, 5012], _
+    [22341, 4315], _
+    [21134, 3500], _
+    [18193, 3242], _
+    [17267, 2995], _
+    [16679, 2634], _
+    [16494, 2607], _
+    [16355, 1724], _
+    [15557, 938], _
+    [16895, 1956] _
 ]
 
 Func Farm_SkaleAlt()
@@ -89,7 +95,7 @@ Func SkaleAlt()
     UseSummoningStone()
     RunTo($SkaleFarmAlt)
     Sleep(500)
-    AggroMoveSmartFilter(17989, 2234, 2000, 2000, $SkaleFilter, True, 2000)
+    AggroMoveSmartFilter(16895, 1956, 1100, 1100, $SkaleFilter, True, 1300)
     Other_RndSleep(250)
     LogInfo("Run complete. Restarting...")
     UpdateStats()
@@ -97,7 +103,4 @@ Func SkaleAlt()
     Resign()
     Sleep(5000)
     Map_ReturnToOutpost()
-    Sleep(1000)
-    Map_WaitMapLoading(166, 0)
-    Sleep(1000)
 EndFunc

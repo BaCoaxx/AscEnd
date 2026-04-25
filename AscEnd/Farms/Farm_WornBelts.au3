@@ -110,14 +110,11 @@ Func WornBeltsFarm()
     Resign()
     Sleep(5000)
     Map_ReturnToOutpost()
-    Sleep(1000)
-    Map_WaitMapLoading(164, 0)
-    Sleep(1000)
 EndFunc
 
 Func RunToWB($g_a_RunPath)
     For $i = 0 To UBound($g_a_RunPath) - 1
-        AggroMoveSmartFilter($g_a_RunPath[$i][0], $g_a_RunPath[$i][1], 2200, 2200, $BanditFilter, True, 2200)
+        AggroMoveSmartFilter($g_a_RunPath[$i][0], $g_a_RunPath[$i][1], 2200, 2200, $BanditFilter, True, 2500)
         If SurvivorMode() Then
             LogError("Survivor mode activated!")
             Return

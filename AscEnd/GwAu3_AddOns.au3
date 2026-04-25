@@ -315,16 +315,16 @@ Global $g_aErrorSkills[4] = [ _
     $GC_I_SKILL_ID_READ_THE_WIND, _
     $GC_I_SKILL_ID_FRENZY _
 ]
+
 Func AggroMoveSmartFilter($aX, $aY, $AggroRange = 1320, $maxdistance = 3500, $filterArray = 0, $KO = False, $LootRange = 0)
 
     If GetPartyDead() Then Return
     $TimerToKill = TimerInit()
-    Local $random = 50
     Local $iBlocked = 0
-    Local $enemy
-    Local $distance
+    Local $Enemy
+    Local $Distance
 
-    Map_Move($aX, $aY, $random)
+    Map_Move($aX, $aY)
     $coords[0] = Agent_GetAgentInfo(-2, 'X')
     $coords[1] = Agent_GetAgentInfo(-2, 'Y')
     
@@ -332,31 +332,43 @@ Func AggroMoveSmartFilter($aX, $aY, $AggroRange = 1320, $maxdistance = 3500, $fi
         If GetPartyDead() Then ExitLoop
         Other_RndSleep(250)
         $oldCoords = $coords
-        
+
+        $CurX = Agent_GetAgentInfo(-2, "X")
+        $CurY = Agent_GetAgentInfo(-2, "Y")
+
         ; Check for healing in case some grawl lobbed a brick
         If NeedHeal(70) Then UseHeal()
 
-        Local $CurX = Agent_GetAgentInfo(-2, "X")
-        Local $CurY = Agent_GetAgentInfo(-2, "Y")
-        _UAI_Fight($CurX, $CurY, $AggroRange, $maxdistance, $g_i_FinisherMode, 0, $filterArray, $KO)
+        If GetNumberOfFoesInRangeOfAgent(-2, $AggroRange, $GC_I_AGENT_TYPE_LIVING, 1, "EnemyFilter") > 0 Then
+            If GetPartyDead() Then ExitLoop
+            
+            $Enemy = GetNearestEnemyToAgent(-2, $AggroRange, $GC_I_AGENT_TYPE_LIVING, 1, "EnemyFilter")
+            If GetPartyDead() Then ExitLoop
+            $Distance = ComputeDistance(Agent_GetAgentInfo($Enemy, 'X'), Agent_GetAgentInfo($Enemy, 'Y'), Agent_GetAgentInfo(-2, 'X'), Agent_GetAgentInfo(-2, 'Y'))
+            If $Distance < $AggroRange And $Enemy <> 0 And Not GetPartyDead() Then
+            
 
-        If SurvivorMode() Then Return
-        
-        If CountSlots() <> 0 and GetPartyDead() = False Then
-            If TimerDiff($TimerToKill) > 180000 Then Return
-            If $LootRange <> 0 Then
-                PickUpLootInRange($LootRange, $aX, $aY)
-            Else
-                PickupLoot()
+                _UAI_Fight($CurX, $CurY, $AggroRange, $maxdistance, $g_i_FinisherMode, 0, $filterArray, $KO)
+
+                If SurvivorMode() Then Return
+
+                Other_RndSleep(250)
+                
+                ; Check for healing after combat
+                If NeedHeal(50) Then UseHeal()
+
+                Other_RndSleep(250)
             EndIf
         EndIf
 
-        Other_RndSleep(250)
-        
-        ; Check for healing after combat
-        If NeedHeal(50) Then UseHeal()
-
-        Other_RndSleep(250)
+        If CountSlots() <> 0 and GetPartyDead() = False Then
+            If TimerDiff($TimerToKill) > 180000 Then Return
+            If $LootRange <> 0 Then
+                PickUpLootInRange($LootRange, $CurX, $CurY)
+            Else
+                PickUpLoot()
+            EndIf
+        EndIf
 
         If GetPartyDead() Then ExitLoop
         $coords[0] = Agent_GetAgentInfo(-2, 'X')
@@ -528,6 +540,7 @@ Func AggroMoveToExFilter($aX, $aY, $range = 1700, $filterFunc = "EnemyFilter")
     Map_Move($aX, $aY, $random)
     $coords[0] = Agent_GetAgentInfo(-2, 'X')
     $coords[1] = Agent_GetAgentInfo(-2, 'Y')
+
     Do
         If GetPartyDead() Then ExitLoop
         Other_RndSleep(250)
@@ -727,7 +740,7 @@ Func FightExFilter($AggroRange, $filterFunc = "EnemyFilter")
 
         If CountSlots() <> 0 And Not GetPartyDead() Then
             If TimerDiff($TimerToKill) > 180000 Then Return
-            PickupLoot()
+            PickUpLoot()
         EndIf
 EndFunc   ;==>FightExFilter
 
@@ -2859,7 +2872,7 @@ Func IsPcon($aItem)
        Return True ; Alcohol
     Case 6376, 21809, 21810, 21813, 36683
        Return True ; Party
-    Case 18345, 21492, 21812, 22269, 22644, 22752, 28436
+    Case 18345, 21492, 21812, 22269, 22644, 22752, 28436, 36681
        Return True ; Sweets
     Case 6370, 21488, 21489, 22191, 26784, 28433
        Return True ; DP Removal

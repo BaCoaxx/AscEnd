@@ -104,8 +104,9 @@ Func Hamnet()
     EndIf
 
     Sleep(250)
+    Map_InitMapIsLoaded()
     Map_Move(400, 7550)
-    Map_WaitMapLoading(161, 1)
+    Map_WaitMapIsLoaded()
     Sleep(1000)
 
     $RunTime = TimerInit()
@@ -126,7 +127,4 @@ Func Hamnet()
     Resign()
     Sleep(5000)
     Map_ReturnToOutpost()
-    Sleep(1000)
-    Map_WaitMapLoading(165, 0)
-    Sleep(1000)
 EndFunc
