@@ -18,14 +18,14 @@ Global $SkaleFarmAlt[15][2] = [ _
     [17267, 2995], _
     [16679, 2634], _
     [16476, 2856], _
-	[15708, 3056], _
+    [15708, 3056], _
     [16467, 4952], _ ; deep north aggro
-	[15957, 4433], _
+    [16016, 4221], _
     [15504, 2734], _
-	[13497, 1878], _ ; deep west aggro
-	[15611, 501], _  ; start balling them up
-	[16665, 698], _
-	[17464, 1773] _ ; nuke spot
+    [13497, 1878], _ ; deep west aggro
+    [15611, 501], _  ; start balling them up
+    [16665, 698], _
+    [17662, 1539] _ ; nuke spot
 ]
 
 Func Farm_SkaleAlt()
@@ -100,7 +100,7 @@ Func SkaleAlt()
     ;UseSummoningStone()  
     RunTo($SkaleFarmAlt)
     Sleep(500)
-    AggroMoveSmartFilter(17464, 1773, 1100, 1100, $SkaleFilter, True, 1300)
+    AggroMoveSmartFilter(17662, 1539, 1100, 1100, $SkaleFilter, True, 1300)
     Other_RndSleep(250)
 	
     LogInfo("Run complete. Restarting...")
