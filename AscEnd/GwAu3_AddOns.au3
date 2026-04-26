@@ -938,6 +938,7 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
                 Agent_Attack($target)
         EndSwitch
 
+        If TimerDiff($timer) >= 900000 Then Return ; Deadlock Return after 15 mins in the function
         $myX = Agent_GetAgentInfo(-2, "X")
         $myY = Agent_GetAgentInfo(-2, "Y")
 
