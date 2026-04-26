@@ -416,11 +416,11 @@ Func BossesEmo()
         Sleep(250)
         LogInfo("Picking up loot...")
         Sleep(250)
-        PickUpLootInRange(1500, 1606.00, -3324.00)
+        PickUpLootInRange(1800, 1606.00, -3324.00)
         Sleep(250)
-        PickUpLootInRange(1500, -571.48, -1651.94)
+        PickUpLootInRange(1800, -571.48, -1651.94)
         Sleep(250)
-        PickUpLootInRange(1500, -1283.85, -3241.65)
+        PickUpLootInRange(1800, -1283.85, -3241.65)
     EndIf
     
     If GetPartyDead() Then Return False
