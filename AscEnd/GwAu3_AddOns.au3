@@ -1027,17 +1027,17 @@ Func NecroKill($targC, $targ)
     EndIf
 
     ; 1. Heal only when actually needed
-    If IsRecharged(1) And $hp < 0.45 Then
+    If IsRecharged(1) And $hp < 0.70 Then
         UseSkillEx(1, -2)
         Sleep(250)
         Return
     EndIf
 
     ; 2. Build minions, but do not let it completely lock out damage
-    ; assuming skill 5 = minion skill
+    ; assuming skill 3 = minion skill
     If $minionCount < 8 And $corpse <> 0 And $corpseCount > 0 And $energy > 0.30 Then
-        If IsRecharged(5) Then
-            UseSkillEx(5, $corpse)
+        If IsRecharged(3) Then
+            UseSkillEx(3, $corpse)
             Sleep(250)
         EndIf
     EndIf
@@ -1054,27 +1054,21 @@ Func NecroKill($targC, $targ)
         Sleep(200)
     EndIf
 
-    ; 5. Damage skill 3
-    If IsRecharged(3) And $fightTarget <> 0 Then
-        UseSkillEx(3, $fightTarget)
+    ; 5. Damage skill 5
+    If IsRecharged(5) And $fightTarget <> 0 Then
+        UseSkillEx(5, $fightTarget)
         Sleep(200)
     EndIf
 
     ; 6. If under cap, try minion again after damage
     If $minionCount < 8 And $corpse <> 0 And $energy > 0.20 Then
-        If IsRecharged(5) Then
-            UseSkillEx(5, $corpse)
+        If IsRecharged(3) Then
+            UseSkillEx(3, $corpse)
             Sleep(250)
         EndIf
     EndIf
 
-    ; 7. Fallback
-    If $fightTarget <> 0 Then
-        If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
-            Agent_Attack($fightTarget)
-        EndIf
-    EndIf
-EndFunc   ;==>NecroKill
+ EndFunc   ;==>NecroKill
 #EndRegion
 
 #Region AgentFilters

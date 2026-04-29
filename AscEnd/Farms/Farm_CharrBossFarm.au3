@@ -231,9 +231,7 @@ Func FirstGroupNecro()
 
     Local $target = GetNearestCharrToAgent(-2)
 
-    If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
-        Agent_Attack($target)
-    EndIf
+    Agent_Attack($target)
 
     If StayAlive_Kill(-10510.99, -6543.00,"CharrFilter", 2000) Then
         LogInfo("First group of charr cleared.")
@@ -249,7 +247,6 @@ EndFunc
 Func GrawlEmo()
     MoveUpkeepEx(-5639.52, -3424.85, $gUpkeepSkills)
     Sleep(250)
-    LogInfo("Taking out the trash...")
 
     $timer = TimerInit()
 
@@ -257,14 +254,19 @@ Func GrawlEmo()
         StayAlive()
     Until GetNumberOfFoesInRangeOfAgent(-2, 900) > 0 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime - 105000
 
+    If GetPartyDead() Then Return False
+
+    If GetNumberOfFoesInRangeOfAgent(-2, 900) = 0 Then
+        LogInfo("No Grawl found!")
+        Return True
+    EndIf
+
     If StayAlive_Kill(-5639.52, -3424.85, "EnemyFilter", 1800) Then
         LogInfo("Grawl will not be a problem anymore.")
         Sleep(250)
         LogInfo("Picking up loot?")
         Sleep(250)
         PickUpLootInRange(3500)
-    Else
-        LogInfo("No Grawl found!")
     EndIf
 
     If GetPartyDead() Then Return False
@@ -273,14 +275,14 @@ EndFunc
 Func GrawlNecro()
     MoveUpkeepEx(-5527.56, -4527.28, $gUpkeepSkills)
     LogInfo("Checking for grawl...")
-    Local $timer = TimerInit()
+    $timer = TimerInit()
 
     Do
         StayAlive()
-        If GetPartyDead() Then Return False
         Sleep(100)
-    Until GetNumberOfFoesInRangeOfAgent(-2, 1600) > 0 _
-        Or TimerDiff($timer) > 5000
+    Until GetNumberOfFoesInRangeOfAgent(-2, 1600) > 0 Or TimerDiff($timer) > 5000 Or GetPartyDead()
+
+    If GetPartyDead() Then Return False
 
     ; Skip if nothing is there
     If GetNumberOfFoesInRangeOfAgent(-2, 1600) = 0 Then
@@ -301,6 +303,8 @@ Func SecondGroupEmo()
         Sleep(250)
     Until GetEnergyPercent() > 0.8 Or GetPartyDead()
 
+    If GetPartyDead() Then Return False
+
     MoveUpkeepEx(-4128.60, -3726.73, $gUpkeepSkills)
     MoveUpkeepEx(-3020.96, -3535.49, $gUpkeepSkills)
     
@@ -313,6 +317,8 @@ Func SecondGroupEmo()
     Do
         StayAlive()
     Until GetNumberOfCharrInRangeOfXY(-964.62, -3168.00, 2400) > 2 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime
+
+    If GetPartyDead() Then Return False
 
     If StayAlive_Kill(-964.62, -3168.00, "CharrFilter", 2400) Then LogInfo("Second group of charr cleared.")
 
@@ -332,7 +338,9 @@ Func SecondGroupNecro()
         LogInfo("First group of charr cleared.")
         LogInfo("Checking for nearby foes...")
     EndIf
+
     If GetPartyDead() Then Return False
+    
     Return True
 EndFunc
 
@@ -371,6 +379,7 @@ Func LeftCornerNecro()
     $timer = TimerInit()
 
     LogInfo("Waiting for left corner group...")
+    
     Do
         StayAlive()
     Until GetNumberOfCharrInRangeOfAgent(-2, 1500) > 2 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime
@@ -379,17 +388,13 @@ Func LeftCornerNecro()
 
     Local $target = GetNearestCharrToAgent(-2)
 
-    If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
-        Agent_Attack($target)
-    EndIf
+    Agent_Attack($target)
 
     MoveUpkeepEx(-146.63, -2284.94, $gUpkeepSkills) ; Move back incase we over aggro, imp can take a hit
 
-    If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
-        Agent_Attack($target)
-    EndIf
+    Agent_Attack($target)
 
-    If StayAlive_Kill(-146.63, -2284.94, "CharrFilter", 1500) Then LogInfo("Left corner group cleared.")
+    If StayAlive_Kill(-146.63, -2284.94, "CharrFilter", 2200) Then LogInfo("Left corner group cleared.")
 
     If GetPartyDead() Then Return False
 EndFunc
@@ -427,7 +432,7 @@ Func BossesEmo()
 EndFunc
 
 Func BossesNecro()
-    Local $SmokeSkin = 1452
+Local $SmokeSkin = 1452
     Local $timer
 
     MoveUpkeepEx(-891.72, -3335.87, $gUpkeepSkills)
@@ -436,22 +441,31 @@ Func BossesNecro()
 
     Do
         StayAlive()
-		Until GetNumberOfCharrInRangeOfXY(-485.44, 3128.33, 2700) < 6 _
-        Or GetPartyDead() _
-        Or TimerDiff($timer) > 1250
+        Sleep(100)
+    Until GetNumberOfCharrInRangeOfXY(-485.44, 3128.33, 2700) < 6 Or GetPartyDead() Or TimerDiff($timer) > 1250
 
     If GetPartyDead() Then Return False
 
-    If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
-        Agent_Attack($SmokeSkin)
-    EndIf
-
-    If StayAlive_Kill(625.78, -3160.56, "CharrFilter", 2700) Then
-        ; Bigger loot sweep after bosses
-        LogInfo("Picking up loot...")
-        Sleep(250)
-        PickUpLootInRange(2200)
-    EndIf
+    LogInfo("Clearing boss group...")
+    StayAlive_Kill(625.78, -3160.56, "CharrFilter", 2700)
 
     If GetPartyDead() Then Return False
+
+    LogInfo("Picking up boss loot...")
+
+    MoveTo(625.78, -3160.56)
+    Sleep(750)
+
+    PickUpLootInRange(3500, 625.78, -3160.56)
+    Sleep(750)
+
+    PickUpLootInRange(3500, 625.78, -3160.56)
+    Sleep(750)
+
+    PickUpLootInRange(3500, 625.78, -3160.56)
+
+    If GetPartyDead() Then Return False
+
+    LogInfo("Bosses complete.")
+    Return True
 EndFunc
