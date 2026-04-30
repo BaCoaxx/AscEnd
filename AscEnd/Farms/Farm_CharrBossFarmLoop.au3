@@ -44,8 +44,7 @@ Global $CharrPortalPathLoop[5][2] = [ _
 ]
 
 ; After charr farming, run back to the portal.
-Global $RunBackPath[6][2] = [ _
-    [-2703, -3874], _
+Global $RunBackPath[5][2] = [ _
     [-9018, -5112], _
     [-12717, -9127], _
     [-11811, -9887], _
@@ -90,6 +89,8 @@ EndFunc
 
 Func OpenGate() ; Pull lever until we get to the Northlands
     
+    If Map_GetMapID() <> 146 Then Return ; Keep track of where we are - Failsafe(Should be in Lakeside Country)
+
     Do
         LogInfo("Opening the gate lever...")
         Agent_GoSignpost(GetNearestGadgetToAgent(-2))
@@ -113,6 +114,9 @@ EndFunc
 
 Func CharrCombatLoop() ; Combat loop for charr bosses
     OpenGate()
+    
+    If Map_GetMapID() <> 147 Then Return False ; Keep track of where we are - Failsafe(Should be in the Northlands)
+
     LogInfo("Arrived in the Northlands, time to burn some furr.")
     
     $RunTime = TimerInit()
@@ -161,6 +165,8 @@ Func CharrCombatLoop() ; Combat loop for charr bosses
 EndFunc
 
 Func RunBackToPortal()
+    LogInfo("Bless the tree of hindrance!!")
+    MoveTo(798, -3309)
     RunToUpkeep($RunBackPath, $gUpkeepSkills)
 
     If GetPartyDead() Then

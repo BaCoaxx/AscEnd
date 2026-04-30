@@ -869,7 +869,13 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
     Local $PendingSkills[0]
 
     If GetPartyDead() Then Return False
-    If GetNumberOfCharrInRangeOfXY($refX, $refY, $range) = 0 Then Return True
+
+    Switch $filterFunc
+        Case "CharrFilter"
+            If GetNumberOfCharrInRangeOfXY($refX, $refY, $range) = 0 Then Return True
+        Case "EnemyFilter"
+            If GetNumberOfFoesInRangeOfAgent($refX, $refY, $range) = 0 Then Return True
+    EndSwitch
 
     Do
         ; Repop Imp

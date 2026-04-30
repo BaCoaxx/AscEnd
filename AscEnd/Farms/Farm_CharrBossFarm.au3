@@ -245,23 +245,23 @@ Func FirstGroupNecro()
 EndFunc
 
 Func GrawlEmo()
-    MoveUpkeepEx(-5639.52, -3424.85, $gUpkeepSkills)
+    MoveUpkeepEx(-5605.52, -3688.85, $gUpkeepSkills)
     Sleep(250)
 
     $timer = TimerInit()
 
     Do 
         StayAlive()
-    Until GetNumberOfFoesInRangeOfAgent(-2, 900) > 0 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime - 105000
+    Until GetNumberOfFoesInRangeOfAgent(-2, 1800) > 0 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime - 105000
 
     If GetPartyDead() Then Return False
 
-    If GetNumberOfFoesInRangeOfAgent(-2, 900) = 0 Then
+    If GetNumberOfFoesInRangeOfAgent(-2, 1800) = 0 Then
         LogInfo("No Grawl found!")
         Return True
     EndIf
 
-    If StayAlive_Kill(-5639.52, -3424.85, "EnemyFilter", 1800) Then
+    If StayAlive_Kill(-5605.52, -3688.85, "EnemyFilter", 1800) Then
         LogInfo("Grawl will not be a problem anymore.")
         Sleep(250)
         LogInfo("Picking up loot?")
