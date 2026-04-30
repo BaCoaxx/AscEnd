@@ -874,7 +874,7 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
         Case "CharrFilter"
             If GetNumberOfCharrInRangeOfXY($refX, $refY, $range) = 0 Then Return True
         Case "EnemyFilter"
-            If GetNumberOfFoesInRangeOfAgent($refX, $refY, $range) = 0 Then Return True
+            If GetNumberOfFoesInRangeOfAgent(-2, $range) = 0 Then Return True
     EndSwitch
 
     Do
