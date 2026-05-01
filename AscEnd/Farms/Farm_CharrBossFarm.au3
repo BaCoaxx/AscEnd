@@ -266,7 +266,7 @@ Func GrawlEmo()
         Sleep(250)
         LogInfo("Picking up loot?")
         Sleep(250)
-        PickUpLootInRange(3500)
+        PickUpLootInRange(2000, -5605.52, -3688.85)
     EndIf
 
     If GetPartyDead() Then Return False
