@@ -1021,9 +1021,9 @@ Func NecroKill($targC, $targ)
     Local $hp = GetMyHP()
     Local $energy = GetEnergyPercent()
 
-    Local $corpse = GetNearestCorpseToAgent(-2, 1600)
-    Local $corpseCount = GetNumberOfCorpseInRangeOfAgent(-2, 1600)
-    Local $minionCount = GetNumberOfMinionsInRangeOfAgent(-2, 1600)
+    Local $corpse = GetNearestCorpseToAgent(-2, 1800)
+    Local $corpseCount = GetNumberOfCorpseInRangeOfAgent(-2, 1800)
+    Local $minionCount = GetNumberOfMinionsInRangeOfAgent(-2, 1800)
 
     Local $fightTarget = 0
     If $targC <> 0 Then
@@ -1033,20 +1033,20 @@ Func NecroKill($targC, $targ)
     EndIf
 
     ; 1. Heal only when actually needed
-    If IsRecharged(1) And $hp < 0.70 Then
+    If IsRecharged(1) And $hp < 0.80 Then
         UseSkillEx(1, -2)
         Sleep(250)
         Return
     EndIf
 
-    ; 2. Build minions, but do not let it completely lock out damage
-    ; assuming skill 3 = minion skill
-    If $minionCount < 8 And $corpse <> 0 And $corpseCount > 0 And $energy > 0.30 Then
-        If IsRecharged(3) Then
-            UseSkillEx(3, $corpse)
-            Sleep(250)
-        EndIf
-    EndIf
+    ; Priority minion creation
+		If $corpse <> 0 And $minionCount < 10 Then
+			If IsRecharged(3) And $energy > 0.15 Then
+				UseSkillEx(3, $corpse)
+				Sleep(500)
+				Return
+			EndIf
+		EndIf
 
     ; 3. Damage skill 2
     If IsRecharged(2) And $fightTarget <> 0 Then
@@ -1067,13 +1067,13 @@ Func NecroKill($targC, $targ)
     EndIf
 
     ; 6. If under cap, try minion again after damage
-    If $minionCount < 8 And $corpse <> 0 And $energy > 0.20 Then
-        If IsRecharged(3) Then
-            UseSkillEx(3, $corpse)
-            Sleep(250)
-        EndIf
-    EndIf
-
+    If $corpse <> 0 And $minionCount < 10 Then
+			If IsRecharged(3) And $energy > 0.15 Then
+        UseSkillEx(3, $corpse)
+        Sleep(500)
+        Return
+			EndIf
+		EndIf
  EndFunc   ;==>NecroKill
 #EndRegion
 
