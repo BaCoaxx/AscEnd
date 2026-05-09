@@ -374,12 +374,12 @@ Func LeftCornerEmo()
 EndFunc
 
 Func LeftCornerNecro()
-    MoveUpkeepEx(-146.63, -2284.94, $gUpkeepSkills)
+    ; First standing/wait spot
+    MoveUpkeepEx(-381, -2202, $gUpkeepSkills)
 
     $timer = TimerInit()
 
     LogInfo("Waiting for left corner group...")
-    
     Do
         StayAlive()
     Until GetNumberOfCharrInRangeOfAgent(-2, 1500) > 2 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime
@@ -388,15 +388,38 @@ Func LeftCornerNecro()
 
     Local $target = GetNearestCharrToAgent(-2)
 
-    Agent_Attack($target)
+    If $target <> 0 Then
+        Agent_Attack($target)
+        Sleep(500)
+    EndIf
 
-    MoveUpkeepEx(-146.63, -2284.94, $gUpkeepSkills) ; Move back incase we over aggro, imp can take a hit
+    ; Move-back safety spot
+    MoveUpkeepEx(316, -2627, $gUpkeepSkills)
 
-    Agent_Attack($target)
+    If $target <> 0 Then Agent_Attack($target)
 
-    If StayAlive_Kill(-146.63, -2284.94, "CharrFilter", 2200) Then LogInfo("Left corner group cleared.")
+    LogInfo("Clearing left corner ele boss group...")
+
+    ; First kill spot
+    If StayAlive_Kill(316, -2627, "CharrFilter", 2300) Then
+        LogInfo("Left corner first kill spot cleared.")
+    EndIf
 
     If GetPartyDead() Then Return False
+
+    ; Second kill spot
+    MoveUpkeepEx(614, -2627, $gUpkeepSkills)
+
+    If StayAlive_Kill(614, -2627, "CharrFilter", 2400) Then
+        LogInfo("Left corner ele boss cleared.")
+    EndIf
+
+    If GetPartyDead() Then Return False
+
+    LogInfo("Picking up left corner ele boss loot...")
+    PickUpLootInRange(3700, 614, -2627)
+
+    Return True
 EndFunc
 
 Func BossesEmo()
@@ -432,37 +455,34 @@ Func BossesEmo()
 EndFunc
 
 Func BossesNecro()
-Local $SmokeSkin = 1452
-    Local $timer
+    LogInfo("Clearing remaining boss group...")
 
-    MoveUpkeepEx(-891.72, -3335.87, $gUpkeepSkills)
+    ; Kill spot 1
+    MoveUpkeepEx(1276, -2344, $gUpkeepSkills)
 
-    $timer = TimerInit()
-
-    Do
-        StayAlive()
-        Sleep(100)
-    Until GetNumberOfCharrInRangeOfXY(-485.44, 3128.33, 2700) < 6 Or GetPartyDead() Or TimerDiff($timer) > 1250
+    If StayAlive_Kill(1276, -2344, "CharrFilter", 2500) Then
+        LogInfo("Boss kill spot 1 cleared.")
+    EndIf
 
     If GetPartyDead() Then Return False
 
-    LogInfo("Clearing boss group...")
-    StayAlive_Kill(625.78, -3160.56, "CharrFilter", 2700)
+    Sleep(750)
+
+    ; Kill spot 2
+    MoveUpkeepEx(1276, -2344, $gUpkeepSkills)
+
+    If StayAlive_Kill(1276, -2344, "CharrFilter", 3400) Then
+        LogInfo("Boss kill spot 2 cleared.")
+    EndIf
 
     If GetPartyDead() Then Return False
 
-    LogInfo("Picking up boss loot...")
+    Sleep(1000)
 
-    MoveTo(625.78, -3160.56)
-    Sleep(750)
+    LogInfo("Picking up remaining boss loot...")
 
-    PickUpLootInRange(3500, 625.78, -3160.56)
-    Sleep(750)
-
-    PickUpLootInRange(3500, 625.78, -3160.56)
-    Sleep(750)
-
-    PickUpLootInRange(3500, 625.78, -3160.56)
+    ; Loot after both boss spots are clear
+    PickUpLootInRange(4800, 1276, -2344)
 
     If GetPartyDead() Then Return False
 
