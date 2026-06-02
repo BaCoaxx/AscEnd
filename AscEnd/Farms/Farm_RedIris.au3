@@ -55,16 +55,14 @@ Func IrisSetup()
             Sleep(2000)
         WEnd
     EndIf
-
-    ExitAshford() ; Gate trick setup
-    Map_Move(-11100, -6200)
-    Map_WaitMapLoading(164, 0)
-    Sleep(2000)
 EndFunc
 
 Func IrisFarm()
-    Map_Move(-11089, -6250) ; Leave Ashford Abbey
-    Map_WaitMapLoading(146, 1)
+    If Map_GetMapID() <> 164 Then
+        Map_RndTravel(164)
+    EndIf
+
+    ExitAshford()
 
     Sleep(1000)
 
@@ -72,13 +70,13 @@ Func IrisFarm()
 
     UseSummoningStone()
     RunToIris($IrisPath)
+
+    If SurvivorMode() Or GetPartyDead() Then Return
+    
     Other_RndSleep(250)
     LogInfo("Iris farming run complete. Restarting...")
     UpdateStats()
     Other_RndSleep(250)
-    Resign()
-    Sleep(5000)
-    Map_ReturnToOutpost()
 EndFunc
 
 Func IrisPickup()
@@ -120,6 +118,11 @@ Func RunToIris($g_a_RunPath)
     For $i = 0 To UBound($g_a_RunPath) - 1
         MoveTo($g_a_RunPath[$i][0], $g_a_RunPath[$i][1], 50)
         
+        If SurvivorMode() Or GetPartyDead() Then
+            LogError("Run failed. Restarting...")
+            Return
+        EndIf
+
         If $g_a_RunPath[$i][2] = "RedIris" Then IrisPickUp()
     Next
 EndFunc

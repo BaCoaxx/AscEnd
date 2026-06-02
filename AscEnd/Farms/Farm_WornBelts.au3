@@ -93,30 +93,36 @@ Func WornBeltsSetup()
 EndFunc
 
 Func WornBeltsFarm()
-    Map_Move(-11089, -6250) ; Leave Ashford Abbey
-    Map_WaitMapLoading(146, 1)
+    If Map_GetMapID() <> 164 Then
+        Map_RndTravel(164)
+    EndIf
+
+    ExitAshford()
 
     Sleep(1000)
 
     $RunTime = TimerInit()
 
     RunTo($BeltFarmPath)
+
+    If GetPartyDead() Or SurvivorMode() Then Return
+
     UseSummoningStone()
     RunToWB($BeltFarmBattle)
+
+    If GetPartyDead() Or SurvivorMode() Then Return
+
     Other_RndSleep(250)
     LogInfo("Worn Belts Farm complete. Restarting...")
     UpdateStats()
     Other_RndSleep(250)
-    Resign()
-    Sleep(5000)
-    Map_ReturnToOutpost()
 EndFunc
 
 Func RunToWB($g_a_RunPath)
     For $i = 0 To UBound($g_a_RunPath) - 1
         AggroMoveSmartFilter($g_a_RunPath[$i][0], $g_a_RunPath[$i][1], 2200, 2200, $BanditFilter, True, 2500)
-        If SurvivorMode() Then
-            LogError("Survivor mode activated!")
+        If SurvivorMode() Or GetPartyDead() Then
+            LogError("Run failed. Restarting...")
             Return
         EndIf
     Next

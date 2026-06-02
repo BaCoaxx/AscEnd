@@ -60,16 +60,14 @@ Func BakedHuskSetup()
             Sleep(2000)
         WEnd
     EndIf
-
-    ExitAshford() ; Gate trick setup
-    Map_Move(-11100, -6200)
-    Map_WaitMapLoading(164, 0)
-    Sleep(2000)
 EndFunc
 
 Func BakedHusk()
-    Map_Move(-11089, -6250)
-    Map_WaitMapLoading(146, 1)
+    If Map_GetMapID() <> 164 Then
+        Map_RndTravel(164)
+    EndIf
+
+    ExitAshford()
 
     Sleep(1000)
 
@@ -78,21 +76,24 @@ Func BakedHusk()
     LogInfo("Ooo get your wurms out. Ohh baby, baby!!")
     UseSummoningStone()
     RunToWurms($WurmPath)
+    
+    If GetPartyDead() Or SurvivorMode() Then
+        LogError("Run failed. Restarting...")
+        Return
+    EndIf
+    
     LogInfo("Just call me the Wurminat0r 3000..")
     Other_RndSleep(250)
     LogInfo("Run complete. Restarting...")
     UpdateStats()
     Other_RndSleep(250)
-    Resign()
-    Sleep(5000)
-    Map_ReturnToOutpost()
 EndFunc
 
 Func RunToWurms($g_ai2_RunPath)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
         AggroMoveSmartFilter($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 1800, 1800, $WurmFilter, True, 1800)
-        If SurvivorMode() Then
-            LogError("Survivor mode activated!")
+        If SurvivorMode() Or GetPartyDead() Then
+            LogError("Run failed. Restarting...")
             Return
         EndIf
         Sleep(100)

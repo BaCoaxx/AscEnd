@@ -79,13 +79,13 @@ Func SkaleAltSetup()
             MoveTo(23038, 11847)
     EndSelect
 
-        MoveTo(22552, 7515) ; Gate trick setup
-        Map_Move(22530, 7300)
-        Map_WaitMapLoading(162, 1)
-        Sleep(2000)
-        Map_Move(22538, 7280)
-        Map_WaitMapLoading(166, 0)
-        Sleep(2000)
+    MoveTo(22552, 7515) ; Gate trick setup
+    Map_Move(22530, 7300)
+    Map_WaitMapLoading(162, 1)
+    Sleep(2000)
+    Map_Move(22538, 7280)
+    Map_WaitMapLoading(166, 0)
+    Sleep(2000)
 EndFunc
 
 Func SkaleAlt()

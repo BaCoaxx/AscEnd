@@ -11,11 +11,16 @@
 #ce ----------------------------------------------------------------------------
 
 Global $HamnetPath[5][2] = [ _
-    [1925, 6315], _
-    [2431, 5106], _
-    [2577, 4177], _
-    [2714, 4172], _
-    [2360, 6003] _
+    [2029, 6454], _
+    [2440, 5035], _
+    [2615, 4486], _
+    [2292, 4856], _
+    [2377, 5398] _
+]
+
+Global $HamnetLeavePath[2][2] = [ _
+    [93, 8574], _
+    [357, 7858] _
 ]
 
 Global $currLevel = 0
@@ -76,17 +81,12 @@ Func HamnetSetup()
     EndIf
 
     Sleep(1000)
-
-    MoveTo(-29.32, 8804.68)
-    Map_Move(400, 7550) ; Gate trick setup
-    Map_WaitMapLoading(161, 1)
-    Sleep(2000)
-    Map_Move(400, 7800)
-    Map_WaitMapLoading(165, 0)
 EndFunc
 
 Func Hamnet()
-    Sleep(2000)
+    If Map_GetMapID() <> 165 Then
+        Map_RndTravel(165)
+    EndIf
 
     $currLevel = Agent_GetAgentInfo(-2, "Level")
 
@@ -103,28 +103,24 @@ Func Hamnet()
         $oldLevel = $currLevel
     EndIf
 
-    Sleep(250)
-    Map_InitMapIsLoaded()
-    Map_Move(400, 7550)
-    Map_WaitMapIsLoaded()
-    Sleep(1000)
+    ExitFoibles()
 
     $RunTime = TimerInit()
 
+    MoveTo(709, 7115)
+    LogInfo("Got imps? ")
+    UseSummoningStone()
+
     Sleep(250)
     RunTo($HamnetPath)
-    LogInfo("Got imps? ")
-    Sleep(250)
-    UseSummoningStone()
-    Sleep(250)
+
     AggroMoveSmartFilter(2574, 5885, 2200, 2200, $BanditFilter, True)
 
-    If SurvivorMode() Then LogError("Survivor mode activated!")
+    If SurvivorMode() Or GetPartyDead() Then
+        LogError("Run failed. Restarting...")
+    EndIf
     
     LogInfo("Run complete. Restarting...")
     UpdateStats()
     Sleep(250)
-    Resign()
-    Sleep(5000)
-    Map_ReturnToOutpost()
 EndFunc

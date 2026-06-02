@@ -73,60 +73,39 @@ Func UnnaturalSeedSetup()
             Sleep(2000)
         WEnd
     EndIf
-
-    $spawn[0] = Agent_GetAgentInfo(-2, "X")
-    $spawn[1] = Agent_GetAgentInfo(-2, "Y")
-    Local $sp1 = ComputeDistance(23020, 10125, $spawn[0], $spawn[1])
-        
-    Select
-        Case $sp1 <= 2400
-            LogInfo("Little high, little low.")
-            MoveTo(22865, 11380)
-            MoveTo(22958, 11149)
-        Case $sp1 > 2400 And $sp1 <= 4200
-            LogInfo("Anywhere the wind blows.")
-            MoveTo(23038, 11847)
-        Case $sp1 > 4200
-            LogInfo("King Adelbern, doesn't even matter.")
-            MoveTo(23186, 13527)
-            MoveTo(23038, 11847)
-    EndSelect
-
-        MoveTo(22552, 7515) ; Gate trick setup
-        Map_Move(22530, 7300)
-        Map_WaitMapLoading(162, 1)
-        Sleep(2000)
-        Map_Move(22538, 7280)
-        Map_WaitMapLoading(166, 0)
-        Sleep(2000)
 EndFunc
 
 Func UnnaturalSeed()
-    Other_RndSleep(250)
-    MoveTo(22552, 7515)
-    Map_Move(22530, 7300)
-    Map_WaitMapLoading(162, 1)
+    If Map_GetMapID() <> 166 Then
+        Map_RndTravel(166)
+    EndIf
+
+    ExitRanik()
+
     Sleep(1000)
 
     $RunTime = TimerInit()
 
     UseSummoningStone()
     RunTo($SeedsPath)
+
+    If GetPartyDead() Or SurvivorMode() Then Return
+    
     RunToSeeds($SeedsFoePath)
+
+    If GetPartyDead() Or SurvivorMode() Then Return
+
     Other_RndSleep(250)
     LogInfo("Run complete. Restarting...")
     UpdateStats()
     Other_RndSleep(250)
-    Resign()
-    Sleep(5000)
-    Map_ReturnToOutpost()
 EndFunc
 
 Func RunToSeeds($g_ai2_RunPath)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
         AggroMoveSmartFilter($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 1200, 1200, $SpiderAloeFilter, True, 1000)
-        If SurvivorMode() Then
-            LogError("Survivor mode activated!")
+        If SurvivorMode() Or GetPartyDead() Then
+            LogError("Run failed. Restarting...")
             Return
         EndIf
         Sleep(500)

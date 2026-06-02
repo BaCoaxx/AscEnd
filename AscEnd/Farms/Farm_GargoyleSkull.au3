@@ -67,8 +67,8 @@ Func Farm_GargoyleSkull()
 
             GargoyleSkull()
 
-            If SurvivorMode() Then
-                LogError("Survivor mode activated!")
+            If SurvivorMode() Or GetPartyDead() Then
+                LogError("Run failed. Restarting...")
                 ExitLoop
             EndIf
         WEnd
@@ -92,14 +92,21 @@ Func GargoyleSkullSetup()
 
     ExitBarradin()
 
+    Sleep(1000)
+
     RunTo($GargPath1)
     LogInfo("Who dares to toil, with the gargoyle? ME!")
+
+    Sleep(500)
 EndFunc
 
 Func GargoyleSkull()
+    If GetPartyDead() Or SurvivorMode() Then Return
+    
     MoveTo(-3579, 9052)
+    Map_InitMapIsLoaded()
     Map_Move(-2862, 9414)
-    Map_WaitMapLoading(145, 1)
+    Map_WaitMapIsLoaded()
     
     Sleep(1000)
     
@@ -111,14 +118,17 @@ Func GargoyleSkull()
     GargoyleKillPhrase()
     AggroMoveSmartFilter(-6655, 15657, 2000, 2000)
 
+    If GetPartyDead() Or SurvivorMode() Then Return
+
     LogInfo("Run complete. Restarting...")
     UpdateStats()
     Other_RndSleep(250)
-    If SurvivorMode() Then Return
 
     RunTo($GargPath3)
+
+    Map_InitMapIsLoaded()
     Map_Move(-4000, 9560)
-    Map_WaitMapLoading(160, 1)
+    Map_WaitMapIsLoaded()
     Sleep(2000)
 EndFunc
 

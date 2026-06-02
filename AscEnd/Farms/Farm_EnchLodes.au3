@@ -74,39 +74,41 @@ Func EnchLodesSetup()
     EndIf
 
     LogInfo("We need loads of lodes, so let's go!")
-
-    ExitBarradin()
-    Sleep(2000)
-    Map_Move(-7029, 1435)
-    Map_WaitMapLoading(163, 0)
-    Sleep(2000)
 EndFunc
 
 Func EnchLodes()
+    If Map_GetMapID() <> 163 Then
+        Map_RndTravel(163)
+    EndIf
+
     ExitBarradin()
+
     Sleep(1000)
     
     $RunTime = TimerInit()
 
     LogInfo("I smell trouble, so let there be rubble! Come here Stone Elementals!")
     RunTo($EnchLodesPath1)
+
+    If SurvivorMode() Or GetPartyDead() Then Return
+    
     LogInfo("I'm going to turn you into hardcore!")
     UseSummoningStone()
     RunToElodes($ELodePath2)
+    
+    If SurvivorMode() Or GetPartyDead() Then Return
+
     Other_RndSleep(250)
     LogInfo("Run complete. Restarting...")
     UpdateStats()
     Other_RndSleep(250)
-    Resign()
-    Sleep(5000)
-    Map_ReturnToOutpost()
 EndFunc
 
 Func RunToElodes($g_ai2_RunPath)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
         AggroMoveSmartFilter($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 1600, 1600, $EnchLodesFilter, True, 1600)
-        If SurvivorMode() Then
-            LogError("Survivor mode activated!")
+        If SurvivorMode() Or GetPartyDead() Then
+            LogError("Run failed. Restarting...")
             Return
         EndIf
         Sleep(100)

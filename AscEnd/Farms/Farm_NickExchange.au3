@@ -103,8 +103,10 @@ Func NickExchange()
     EndSelect
 
     MoveTo(22552, 7515)
+    Map_InitMapIsLoaded()
     Map_Move(22530, 7300)
-    Map_WaitMapLoading(162, 1)
+    Map_WaitMapIsLoaded()
+    
     Sleep(1000)
 
     $RunTime = TimerInit()
@@ -112,6 +114,12 @@ Func NickExchange()
     UseSummoningStone()
 
     RunTo($NickPath)
+
+    If GetPartyDead() Or SurvivorMode() Then
+        $BotRunning = False
+        Return
+    EndIf
+
     Sleep(500)
     Agent_GoNPC(GetNick())
     Sleep(500)

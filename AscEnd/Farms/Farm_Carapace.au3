@@ -84,8 +84,8 @@ Func Farm_Carapace()
 
             Carapace()
 
-            If SurvivorMode() Then
-                LogError("Survivor mode activated!")
+            If SurvivorMode() Or GetPartyDead() Then
+                LogError("Run failed. Restarting...")
                 ExitLoop
             EndIf
         WEnd
@@ -108,6 +108,7 @@ Func CarapaceSetup()
     EndIf
 
     ExitAshford()
+    
     Sleep(1000)
 
     LogInfo("Rumour has it, Sarah is out looking for Myrtle Weed again. Fifth time this week!")
@@ -118,8 +119,11 @@ Func CarapaceSetup()
 EndFunc
 
 Func Carapace()
+    If GetPartyDead() Or SurvivorMode() Then Return
+
+    Map_InitMapIsLoaded()
     Map_Move(4545, -19766)
-    Map_WaitMapLoading(162, 1)
+    Map_WaitMapIsLoaded()
     Sleep(1000)
 
     $RunTime = TimerInit()
@@ -130,28 +134,34 @@ Func Carapace()
     
     RunTo($CarapacePath1)
     LogInfo("Crunchy underfoot. I should probably tread lighter.")
+
+    If GetPartyDead() Or SurvivorMode() Then Return
     
     RunToCarapace($CarapaceFarm)
     LogInfo("They fall so easily. Guess everything does, eventually...")
     
+    If GetPartyDead() Or SurvivorMode() Then Return
+
     RunTo($CarapacePath2)
     LogInfo("Autumn is nature's way of reminding us that letting go can be beautiful.")
 
+    If GetPartyDead() Or SurvivorMode() Then Return
+    
     Other_RndSleep(250)
     
     LogInfo("Run complete. Restarting...")
     UpdateStats()
-    If SurvivorMode() Then Return
     Sleep(1000)
+    Map_InitMapIsLoaded()
     Map_Move(-17382, 17060)
-    Map_WaitMapLoading(146, 1)
+    Map_WaitMapIsLoaded()
     Sleep(1000)
 EndFunc
 
 Func RunToCarapace($g_ai2_RunPath)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
         AggroMoveSmartFilter($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 1400, 1400, $CarapaceFilter, True, 1400)
-        If SurvivorMode() Then Return
+        If SurvivorMode() Or GetPartyDead() Then Return
         Sleep(100)
     Next
 EndFunc

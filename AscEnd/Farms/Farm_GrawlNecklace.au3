@@ -84,40 +84,42 @@ Func GrawlNecklaceSetup()
     EndIf
 
     LogInfo("The stench of stupid grawl is rife out here today, let's go!")
-
-    ExitBarradin()
-    Sleep(2000)
-    Map_Move(-7029, 1435)
-    Map_WaitMapLoading(163, 0)
-    Sleep(2000)
 EndFunc
 
 Func GrawlNecklace()
+    If Map_GetMapID() <> 163 Then
+        Map_RndTravel(163)
+    EndIf
+
     ExitBarradin()
+
     Sleep(1000)
     
     $RunTime = TimerInit()
 
     LogInfo("The Grawl aren't the only monsters in Ascalon. I see mine in the mirror.")
     RunTo($GrawlNecklacePath)
+
+    If GetPartyDead() Or SurvivorMode() Then Return
+    
     LogInfo("I'm running on rage and caffeine. Mostly rage.")
     UseSummoningStone()
     RunToGrawlNecklaces($GrawlNecklaceFarm)
+
+    If GetPartyDead() Or SurvivorMode() Then Return
+    
     LogInfo("That's for the last patrol you ambushed, you filthy beasts.")
     Other_RndSleep(250)
     LogInfo("Run complete. Restarting...")
     UpdateStats()
     Other_RndSleep(250)
-    Resign()
-    Sleep(5000)
-    Map_ReturnToOutpost()
 EndFunc
 
 Func RunToGrawlNecklaces($g_ai2_RunPath)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
         AggroMoveSmartFilter($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 1300, 1300, $GrawlNecklaceFilter, True, 1300)
-        If SurvivorMode() Then
-            LogError("Survivor mode activated!")
+        If SurvivorMode() Or GetPartyDead() Then
+            LogError("Run failed. Restarting...")
             Return
         EndIf
         Sleep(100)

@@ -77,14 +77,22 @@ Func SkeletonSetup()
 EndFunc
 
 Func SkeletonLimbs()
+    If Map_GetMapID() <> 164 Then
+        Map_RndTravel(164)
+    EndIf
+
     MoveTo(-13613, -7065)
+    Map_InitMapIsLoaded()
     Map_Move(-14379, -7090)
-    Map_WaitMapLoading(145, 1)
+    Map_WaitMapIsLoaded()
     Sleep(1000)
 
     $RunTime = TimerInit()
     
     RunTo($SkelePath1)
+
+    If GetPartyDead() Or SurvivorMode() Then Return
+
     LogInfo("Come hither o pile of bones....")
 
     Sleep(1000)
@@ -92,23 +100,25 @@ Func SkeletonLimbs()
     UseSummoningStone()
 
     RunToSkelly($SkeleFarm1)
+    
+    If GetPartyDead() Or SurvivorMode() Then Return
+    
     LogInfo("I'm a bonafide hustler! Mhmm let's go.")
     RunToSkelly($SkeleFarm2)
+
+    If GetPartyDead() Or SurvivorMode() Then Return
     
     Other_RndSleep(250)
     LogInfo("Run complete. Restarting...")
     UpdateStats()
     Other_RndSleep(250)
-    Resign()
-    Sleep(5000)
-    Map_ReturnToOutpost()
 EndFunc
 
 Func RunToSkelly($g_ai2_RunPath)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
         AggroMoveSmartFilter($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 1800, 1800, $SkellyFilter, True, 1800)
-        If SurvivorMode() Then
-            LogError("Survivor mode activated!")
+        If Survivor() Or GetPartyDead() Then
+            LogError("Run failed. Restarting...")
             Return
         EndIf
         Sleep(100)

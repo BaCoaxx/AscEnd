@@ -203,8 +203,9 @@ Func UnlockAshford()
     If Not RunToMove($Ashford) Then Return False
     
     UpdateStats()
+    Map_InitMapIsLoaded()
     Map_Move(-11250, -6200)
-    Map_WaitMapLoading(164, 0)
+    Map_WaitMapIsLoaded()
     Sleep(1000)
     
     If Map_GetMapID() = 164 Then
@@ -229,16 +230,18 @@ Func UnlockBarradin()
     
     If Not RunToMove($Barradin1) Then Return False
     
+    Map_InitMapIsLoaded()
     Map_Move(-14650, 10030)
-    Map_WaitMapLoading(160, 1)
+    Map_WaitMapIsLoaded()
     Sleep(1000)
     UseSummoningStone()
     
     If Not RunToMove($Barradin2) Then Return False
     
     UpdateStats()
+    Map_InitMapIsLoaded()
     Map_Move(-7200, 1427)
-    Map_WaitMapLoading(163, 0)
+    Map_WaitMapIsLoaded()
     Sleep(1000)
     
     If Map_GetMapID() = 163 Then
@@ -263,15 +266,17 @@ Func UnlockRanik()
     
     If Not RunToMove($Ranik1) Then Return False
     
+    Map_InitMapIsLoaded()
     Map_Move(4300, -19900)
-    Map_WaitMapLoading(162, 1)
+    Map_WaitMapIsLoaded()
     UseSummoningStone()
     
     If Not RunToMove($Ranik2) Then Return False
     
     UpdateStats()
+    Map_InitMapIsLoaded()
     Map_Move(22600, 7250)
-    Map_WaitMapLoading(166, 0)
+    Map_WaitMapIsLoaded()
     Sleep(1000)
     
     If Map_GetMapID() = 166 Then
@@ -296,16 +301,18 @@ Func UnlockFoibles()
     
     If Not RunToMove($Foibles1) Then Return False
     
+    Map_InitMapIsLoaded()
     Map_Move(-14000, -20200)
-    Map_WaitMapLoading(161, 1)
+    Map_WaitMapIsLoaded()
     Sleep(1000)
     UseSummoningStone()
     
     If Not RunToMove($Foibles2) Then Return False
     
     UpdateStats()
+    Map_InitMapIsLoaded()
     Map_Move(300, 7700)
-    Map_WaitMapLoading(165, 0)
+    Map_WaitMapIsLoaded()
     Sleep(1000)
     
     If Map_GetMapID() = 165 Then
@@ -316,10 +323,11 @@ Func UnlockFoibles()
     Return False
 EndFunc
 
-Func ExitAscalon() ; Gate Trick
+Func ExitAscalon()
     MoveTo(7630, 5544)
+    Map_InitMapIsLoaded()
     Map_Move(6985, 4939)
-    Map_WaitMapLoading(146, 1)
+    Map_WaitMapIsLoaded()
     Sleep(2000)
 EndFunc
 
@@ -337,16 +345,52 @@ Func ExitAshford()
             MoveTo(-12536.56, -6758.55)
             MoveTo(-11457.08, -6238.37)
     EndSelect
-        
+    
+    Map_InitMapIsLoaded()
     Map_Move(-11089, -6250)
-    Map_WaitMapLoading(146, 1)
+    Map_WaitMapIsLoaded()
     Sleep(2000)
 EndFunc
 
 Func ExitBarradin()
     MoveTo(-7088, 1427)
+    Map_InitMapIsLoaded()
     Map_Move(-7531, 1421)
-    Map_WaitMapLoading(160, 1)
+    Map_WaitMapIsLoaded()
+    Sleep(2000)
+EndFunc
+
+Func ExitRanik()
+    $spawn[0] = Agent_GetAgentInfo(-2, "X")
+    $spawn[1] = Agent_GetAgentInfo(-2, "Y")
+    Local $sp1 = ComputeDistance(23020, 10125, $spawn[0], $spawn[1])
+        
+    Select
+        Case $sp1 <= 2400
+            LogInfo("Little high, little low.")
+            MoveTo(22865, 11380)
+            MoveTo(22958, 11149)
+        Case $sp1 > 2400 And $sp1 <= 4200
+            LogInfo("Anywhere the wind blows.")
+            MoveTo(23038, 11847)
+        Case $sp1 > 4200
+            LogInfo("King Adelbern, doesn't even matter.")
+            MoveTo(23186, 13527)
+            MoveTo(23038, 11847)
+    EndSelect
+
+    MoveTo(22552, 7515)
+    Map_InitMapIsLoaded()
+    Map_Move(22530, 7300)
+    Map_WaitMapIsLoaded()
+    Sleep(2000)
+EndFunc
+
+Func ExitFoibles()
+    RunTo($HamnetLeavePath)
+    Map_InitMapIsLoaded()
+    Map_Move(633, 7270)
+    Map_WaitMapIsLoaded()
     Sleep(2000)
 EndFunc
 

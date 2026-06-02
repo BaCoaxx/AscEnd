@@ -150,9 +150,14 @@ Func _GetVanguardQuestByOffset($iDayOffset)
 EndFunc
 
 Func _NowUTC()
-    Local $iTZ = _Date_Time_GetTimeZoneInformation()
-    Local $iBias = $iTZ[1] ; minutes offset from UTC
-    Return _DateAdd("n", -$iBias, _NowCalc())
+    Local $tSystemTime = _Date_Time_GetSystemTime()
+    Return StringFormat("%04d/%02d/%02d %02d:%02d:%02d", _
+        DllStructGetData($tSystemTime, "Year"), _
+        DllStructGetData($tSystemTime, "Month"), _
+        DllStructGetData($tSystemTime, "Day"), _
+        DllStructGetData($tSystemTime, "Hour"), _
+        DllStructGetData($tSystemTime, "Minute"), _
+        DllStructGetData($tSystemTime, "Second"))
 EndFunc
 
 ; Main Form

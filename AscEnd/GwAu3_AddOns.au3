@@ -95,7 +95,7 @@ EndFunc   ;==>GetEnergyPercent
 Func RunTo($g_ai2_RunPath, $aFightBack = False)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
         MoveTo($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 50, $aFightBack)
-        If SurvivorMode(40) Then Return
+        If SurvivorMode(40) Or GetPartyDead() Then Return
     Next
 EndFunc   ;==>RunTo
 
@@ -974,9 +974,9 @@ Func NecroKill($targC, $targ)
     Local $hp = GetMyHP()
     Local $energy = GetEnergyPercent()
 
-    Local $corpse = GetNearestCorpseToAgent(-2, 1800)
-    Local $corpseCount = GetNumberOfCorpseInRangeOfAgent(-2, 1800)
-    Local $minionCount = GetNumberOfMinionsInRangeOfAgent(-2, 1800)
+    Local $corpse = GetNearestCorpseToAgent(-2, 1600)
+    Local $corpseCount = GetNumberOfCorpseInRangeOfAgent(-2, 1600)
+    Local $minionCount = GetNumberOfMinionsInRangeOfAgent(-2, 1600)
 
     Local $fightTarget = 0
     If $targC <> 0 Then
@@ -986,20 +986,20 @@ Func NecroKill($targC, $targ)
     EndIf
 
     ; 1. Heal only when actually needed
-    If IsRecharged(1) And $hp < 0.80 Then
+    If IsRecharged(1) And $hp < 0.70 Then
         UseSkillEx(1, -2)
         Sleep(250)
         Return
     EndIf
 
-    ; Priority minion creation
-		If $corpse <> 0 And $minionCount < 10 Then
-			If IsRecharged(3) And $energy > 0.15 Then
-				UseSkillEx(3, $corpse)
-				Sleep(500)
-				Return
-			EndIf
-		EndIf
+    ; 2. Build minions, but do not let it completely lock out damage
+    ; assuming skill 3 = minion skill
+    If $minionCount < 8 And $corpse <> 0 And $corpseCount > 0 And $energy > 0.30 Then
+        If IsRecharged(3) Then
+            UseSkillEx(3, $corpse)
+            Sleep(250)
+        EndIf
+    EndIf
 
     ; 3. Damage skill 2
     If IsRecharged(2) And $fightTarget <> 0 Then
@@ -1020,13 +1020,13 @@ Func NecroKill($targC, $targ)
     EndIf
 
     ; 6. If under cap, try minion again after damage
-    If $corpse <> 0 And $minionCount < 10 Then
-			If IsRecharged(3) And $energy > 0.15 Then
-        UseSkillEx(3, $corpse)
-        Sleep(500)
-        Return
-			EndIf
-		EndIf
+    If $minionCount < 8 And $corpse <> 0 And $energy > 0.20 Then
+        If IsRecharged(3) Then
+            UseSkillEx(3, $corpse)
+            Sleep(250)
+        EndIf
+    EndIf
+
  EndFunc   ;==>NecroKill
 #EndRegion
 

@@ -5,7 +5,6 @@
 #include "Farm_Hamnet.au3"
 #include "Farm_RunToOutposts.au3"
 #include "Farm_WornBelts.au3"
-#include "Farm_CharrBossFarm.au3"
 #include "Farm_GargoyleSkull.au3"
 #include "Farm_EnchLodes.au3"
 #include "Farm_IcyLodes.au3"
@@ -17,15 +16,14 @@
 #include "Farm_NickExchange.au3"
 #include "Farm_NickFarm_Exchange.au3"
 #include "Farm_SkaleAlt.au3"
-#include "Farm_CharrBossFarmLoop.au3"
+#include "Farm_CharrBossFarm.au3"
 
-Global $g_a_Farms[20][2] = [ _
+Global $g_a_Farms[19][2] = [ _
     ["", ""], _
     ["Charr at the Gate", "Farm_CharrAtTheGate"], _
     ["Farmer Hamnet", "Farm_Hamnet"], _
     ["Run To Outposts", "Farm_RunToOutposts"], _
     ["Charr Boss Farm", "Farm_CharrBossFarm"], _
-    ["Charr Boss Farm Loop", "Farm_CharrBossFarmLoop"], _
     ["Red Iris Run", "Farm_RedIris"], _
     ["Unnatural Seeds", "Farm_UnnaturalSeeds"], _
     ["Worn Belts", "Farm_WornBelts"], _

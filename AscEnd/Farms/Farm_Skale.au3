@@ -84,8 +84,8 @@ Func Farm_Skale()
             
             Skale()
 
-            If SurvivorMode() Then
-                LogError("Survivor mode activated!")
+            If GetPartyDead() Or SurvivorMode() Then
+                LogError("Run failed. Restarting...")
                 ExitLoop
             EndIf
         WEnd
@@ -111,19 +111,26 @@ Func SkaleSetup()
     Sleep(1000)
 
     LogInfo("Did you hear what Prince Rurik got for Lady Althea?")
+
     RunTo($SkaleSetup)
+
     LogInfo("He went fishing and gave her a codpiece.")
     
     Sleep(500)
-
-    Map_Move(4545, -19766)
-    Map_WaitMapLoading(162, 1)
-    Sleep(1000)
 EndFunc
 
 Func Skale()
+    If GetPartyDead() Or SurvivorMode() Then Return
+
+    Map_InitMapIsLoaded()
+    Map_Move(4545, -19766)
+    Map_WaitMapIsLoaded()
+
+    Sleep(1000)
+
+    Map_InitMapIsLoaded()
     Map_Move(-17382, 17060)
-    Map_WaitMapLoading(146, 1)
+    Map_WaitMapIsLoaded()
 
     Sleep(1000)
 
@@ -134,35 +141,45 @@ Func Skale()
     UseSummoningStone()
     
     RunTo($SkalePath1)
+
+    If GetPartyDead() Or SurvivorMode() Then Return
+
     LogInfo("These skales really weigh on me.")
     
     RunToSkale($SkaleFarm1)
+
+    If GetPartyDead() Or SurvivorMode() Then Return
+
     LogInfo("Searing? Never heard of her.")
     
     RunTo($SkalePath2)
+
+    If GetPartyDead() Or SurvivorMode() Then Return
+
     LogInfo("Oops! I did it again..")
     
     RunToSkale($SkaleFarm2)
+
+    If GetPartyDead() Or SurvivorMode() Then Return
+
     LogInfo("One skale at a time before the sky turns red.")
 
     RunTo($SkalePath3)
+
+    If GetPartyDead() Or SurvivorMode() Then Return
+
     LogInfo("Nice day for fishing, aint it?")
 
     Other_RndSleep(250)
     
     LogInfo("Run complete. Restarting...")
     UpdateStats()
-    If SurvivorMode() Then Return
-    Sleep(1000)
-    Map_Move(4545, -19766)
-    Map_WaitMapLoading(162, 1)
-    Sleep(1000)
 EndFunc
 
 Func RunToSkale($g_ai2_RunPath)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
         AggroMoveSmartFilter($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 1400, 1400, $SkaleFilter, True)
-        If SurvivorMode() Then Return
+        If GetPartyDead() Or SurvivorMode() Then Return
         Sleep(100)
     Next
 EndFunc
