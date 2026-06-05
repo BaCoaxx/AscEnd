@@ -1682,9 +1682,9 @@ Func GetBonus()
     RndTravel($GC_I_MAP_ID_ASCALON_CITY_OUTPOST)
     Sleep(1000)
 
-    If $CharrBossFarm = False Then
+    ;If $CharrBossFarm = False Then
         ;RemoveErrorSCSkill()
-    EndIf
+    ;EndIf
     
     Sleep(250)
     LogWarn("Caching the Skill Bar...")
