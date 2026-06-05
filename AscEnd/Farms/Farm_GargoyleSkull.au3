@@ -80,12 +80,12 @@ Func GargoyleSkullSetup()
         LogInfo("We are in Barradin Estate. Starting the Gargoyle Skull farm...")
     ElseIf Map_GetMapID() <> 163 And Map_IsMapUnlocked(163) Then
         LogInfo("We are not in Barradin Estate. Teleporting to Barradin Estate...")
-        Map_RndTravel(163)
+        RndTravel(163)
         Sleep(2000)
     ElseIf Not Map_IsMapUnlocked(163) Then
         LogWarn("Barradin Estate is not unlocked on this character, lets try to run there...")
         While Not UnlockBarradin()
-            LogError("Failed to unlock Barradin Estate.  Retrying...")
+            LogError("Failed to unlock Barradin Estate. Retrying...")
             Sleep(2000)
         WEnd
     EndIf

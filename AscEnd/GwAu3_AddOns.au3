@@ -60,15 +60,7 @@ EndFunc   ;==> CalculateFastestTime
 
 #Region Travel
 Func RndTravel($aMapID)
-    Local $UseDistricts = 7 ; 7=eu, 8=eu+int, 11=all(incl. asia)
-    ; Region/Language order: eu-en, eu-fr, eu-ge, eu-it, eu-sp, eu-po, eu-ru, int, asia-ko, asia-ch, asia-ja
-    Local $Region[11]   = [2, 2, 2, 2, 2, 2, 2, -2, 1, 3, 4]
-    Local $Language[11] = [0, 2, 3, 4, 5, 9, 10, 0, 0, 0, 0]
-    Local $Random = Random(0, $UseDistricts - 1, 1)
-    ;MoveMap($aMapID, $Region[$Random], 0, $Language[$Random])
-    Map_MoveMap($aMapID, $Region[$Random], 0, $Language[5])
-    Map_WaitMapLoading($aMapID, 0)
-    Sleep(1000)
+    Map_RndTravel($aMapID, True, True, 3)
 EndFunc   ;==>RndTravel
 #EndRegion Travel
 
@@ -1499,7 +1491,7 @@ EndFunc   ;==>GetGoldStorage
 
 Func InventoryPre()
     LogInfo("Travelling to Ascalon City (Pre-Searing)")
-    Map_RndTravel($GC_I_MAP_ID_ASCALON_CITY_OUTPOST)
+    RndTravel($GC_I_MAP_ID_ASCALON_CITY_OUTPOST)
     
     Sleep(3000)
     
@@ -1513,6 +1505,11 @@ Func InventoryPre()
             PreSell($i)
             If GetGoldCharacter() >= 100 And CountSlots() >= 1 Then ExitLoop
         Next
+    EndIf
+
+    If CountSlots() < 1 Then
+        DanceParty()
+        Return
     EndIf
     
     If GetGoldCharacter() >= 100 Then
@@ -1533,8 +1530,28 @@ Func InventoryPre()
     UpdateStats()
     
     LogWarn("Inventory management complete!")
+
+    If CountSlots() <= 1 Then
+        DanceParty()
+        Return
+    EndIf
+
     Sleep(500)
 EndFunc   ;==>InventoryPre
+
+Func DanceParty()
+    LogWarn("## INveNtoRy hAs reACHeD MAx CAtERPIlLArs! ## NOw SHuT uP AND DAnCe BAbY! ##")
+
+    Local $DanceSpots[4][2] = [[7595.43, 6957.02], [8780.70, 5798.01], [9878.40, 4910.21], [9205.81, 5175.33]]
+    Local $i = Rand(0, 3, 1)
+
+    MoveTo($DanceSpots[$i][0], $DanceSpots[$i][1], 100)
+    Sleep(1000)
+    Chat_SendChat("dance", "/")
+    Sleep(250)
+    
+    $BotRunning = False
+EndFunc
 
 Func MerchantAscalonPre()
     Local $spX = Agent_GetAgentInfo(-2, "X")
@@ -1662,7 +1679,7 @@ Func IsErrorSkill($skillID)
 EndFunc
 
 Func GetBonus()
-    Map_RndTravel($GC_I_MAP_ID_ASCALON_CITY_OUTPOST)
+    RndTravel($GC_I_MAP_ID_ASCALON_CITY_OUTPOST)
     Sleep(1000)
 
     If $CharrBossFarm = False Then
@@ -3092,6 +3109,10 @@ Func IsRareMod($aItem)
     Local $SCharr9  = StringInStr($ModStruct, "09014821", 0, 1)
     Local $SCharr10 = StringInStr($ModStruct, "0A014821", 0, 1)
 
+    Local $SCharr = StringInStr($ModStruct, "00018080", 0, 1)
+
+
+
     If $Stance10 > 0 Or $Stance11 > 0 Or $Stance12 > 0 Or $Stance13 > 0 Or $Stance14 > 0 Or $Stance15 > 0 Then
         Return True
     ElseIf $HP5010 > 0 Or $HP5011 > 0 Or $HP5012 > 0 Or $HP5013 > 0 Or $HP5014 > 0 Or $HP5015 > 0 Then
@@ -3102,7 +3123,7 @@ Func IsRareMod($aItem)
         Return True
     ElseIf $Dom15 > 0 Or $Dom16 > 0 Or $Dom17 > 0 Or $Dom18 > 0 Or $Dom19 > 0 Or $Dom20 > 0 Then
         Return True
-    ElseIf $SCharr5 > 0 Or $SCharr6 > 0 Or $SCharr7 > 0 Or $SCharr8 > 0 Or $SCharr9 > 0 Or $SCharr10 > 0 Then
+    ElseIf $SCharr5 > 0 Or $SCharr6 > 0 Or $SCharr7 > 0 Or $SCharr8 > 0 Or $SCharr9 > 0 Or $SCharr10 > 0 Or $SCharr > 0 Then
         Return True
     Else
         Return False

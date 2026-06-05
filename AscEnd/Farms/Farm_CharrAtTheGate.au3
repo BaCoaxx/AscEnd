@@ -52,7 +52,7 @@ Func CheckQuest()
             LogInfo("We are not in the greatest city of all. Teleporting to Ascalon...")
             $hasRun = True
         EndIf
-        Map_RndTravel(148)
+        RndTravel(148)
     EndIf
 
     Sleep(2000)

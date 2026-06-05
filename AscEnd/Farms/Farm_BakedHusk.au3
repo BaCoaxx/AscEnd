@@ -51,12 +51,12 @@ Func BakedHuskSetup()
         LogInfo("We are in Ashford Abbey. Starting the Baked Husks farm...")
     ElseIf Map_GetMapID() <> 164 And Map_IsMapUnlocked(164) Then
         LogInfo("We are not in Ashford Abbey. Teleporting to Ashford...")
-        Map_RndTravel(164)
+        RndTravel(164)
         Sleep(2000)
     ElseIf Not Map_IsMapUnlocked(164) Then
         LogWarn("Ashford Abbey is not unlocked on this character, lets try to run there...")
         While Not UnlockAshford()
-            LogError("Failed to unlock Ashford Abbey.  Retrying...")
+            LogError("Failed to unlock Ashford Abbey. Retrying...")
             Sleep(2000)
         WEnd
     EndIf
@@ -64,7 +64,7 @@ EndFunc
 
 Func BakedHusk()
     If Map_GetMapID() <> 164 Then
-        Map_RndTravel(164)
+        RndTravel(164)
     EndIf
 
     ExitAshford()

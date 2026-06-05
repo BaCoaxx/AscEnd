@@ -68,7 +68,7 @@ Func Farm_CharrBossFarm()
             EndIf
             
             If Map_GetMapID() <> 148 Then
-                Map_RndTravel(148)
+                RndTravel(148)
             EndIf
 
             RunToGate()
@@ -121,6 +121,8 @@ Func OpenGate() ; Pull lever until we get to the Northlands
 EndFunc
 
 Func CharrCombatLoop() ; Combat loop for charr bosses
+    If Not $BotRunning Then Return False
+    
     OpenGate()
     
     If Map_GetMapID() <> 147 Then Return False ; Keep track of where we are - Failsafe(Should be in the Northlands)
@@ -204,7 +206,7 @@ Func InitialSetup()
     EndIf
 
     If Map_GetInstanceInfo("Type") <> 0 Then
-        Map_RndTravel(148)
+        RndTravel(148)
     EndIf
 
     Sleep(1000)

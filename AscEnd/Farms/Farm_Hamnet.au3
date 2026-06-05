@@ -50,12 +50,12 @@ Func HamnetSetup()
         LogInfo("We are in Foible's Fair. Starting the bandit farm...")
     ElseIf Map_GetMapID() <> 165 And Map_IsMapUnlocked(165) Then
         LogInfo("We are not in Foible's Fair. Teleporting to Foible's Fair...")
-        Map_RndTravel(165)
+        RndTravel(165)
         Sleep(2000)
     ElseIf Not Map_IsMapUnlocked(165) Then
         LogWarn("Foible's Fair is not unlocked on this character, lets try to run there...")
         While Not UnlockFoibles()
-            LogError("Failed to unlock Foible's Fair.  Retrying...")
+            LogError("Failed to unlock Foible's Fair. Retrying...")
             Sleep(2000)
         WEnd
     EndIf
@@ -85,7 +85,7 @@ EndFunc
 
 Func Hamnet()
     If Map_GetMapID() <> 165 Then
-        Map_RndTravel(165)
+        RndTravel(165)
     EndIf
 
     $currLevel = Agent_GetAgentInfo(-2, "Level")

@@ -51,12 +51,12 @@ Func SkaleAltSetup()
         LogInfo("We are in Fort Ranik. Starting the Skale Alt farm...")
     ElseIf Map_GetMapID() <> 166 And Map_IsMapUnlocked(166) Then
         LogInfo("We are not in Fort Ranik. Teleporting to Fort Ranik...")
-        Map_RndTravel(166)
+        RndTravel(166)
         Sleep(2000)
     ElseIf Not Map_IsMapUnlocked(166) Then
         LogWarn("Fort Ranik is not unlocked on this character, lets try to run there...")
         While Not UnlockRanik()
-            LogError("Failed to unlock Fort Ranik.  Retrying...")
+            LogError("Failed to unlock Fort Ranik. Retrying...")
             Sleep(2000)
         WEnd
     EndIf

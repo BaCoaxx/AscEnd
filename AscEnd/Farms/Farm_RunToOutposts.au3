@@ -195,7 +195,7 @@ Func UnlockAshford()
     EndIf
     
     LogInfo("Heading to Ashford Abbey..")
-    If Map_GetMapID() <> 148 Then Map_RndTravel(148)
+    If Map_GetMapID() <> 148 Then RndTravel(148)
     ExitAscalon()
     $RunTime = TimerInit()
     UseSummoningStone()
@@ -223,7 +223,7 @@ Func UnlockBarradin()
     EndIf
     
     LogInfo("Heading to Barradin Estate..")
-    If Map_GetMapID() <> 148 Then Map_RndTravel(148)
+    If Map_GetMapID() <> 148 Then RndTravel(148)
     ExitAscalon()
     $RunTime = TimerInit()
     UseSummoningStone()
@@ -259,7 +259,7 @@ Func UnlockRanik()
     EndIf
     
     LogInfo("Heading to Fort Ranik..")
-    If Map_GetMapID() <> 148 Then Map_RndTravel(148)
+    If Map_GetMapID() <> 148 Then RndTravel(148)
     ExitAscalon()
     $RunTime = TimerInit()
     UseSummoningStone()
@@ -294,7 +294,7 @@ Func UnlockFoibles()
     EndIf
     
     LogInfo("Heading to Foibles Fair..")
-    If Map_GetMapID() <> 164 Then Map_RndTravel(164)
+    If Map_GetMapID() <> 164 Then RndTravel(164)
     ExitAshford()
     $RunTime = TimerInit()
     UseSummoningStone()
