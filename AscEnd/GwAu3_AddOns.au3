@@ -178,11 +178,11 @@ Func MoveUpkeepEx($aX, $aY, $aUpkeepSkills = 0, $aOrderedSkills = 0, $bCastInOrd
             EndIf
         Else
             If IsArray($aUpkeepSkills) Then
-                Local $IsQueued[UBound($gUpkeepSkills)]
+                Local $IsQueued[UBound($aUpkeepSkills)]
                 
-                For $i = 0 To UBound($gUpkeepSkills) - 1
+                For $i = 0 To UBound($aUpkeepSkills) - 1
 
-                    Local $slot = $gUpkeepSkills[$i]
+                    Local $slot = $aUpkeepSkills[$i]
                     Local $aSkill = Skill_GetSkillBarInfo($slot, "SkillID")
 
                     Local $hasEffect = Agent_GetAgentEffectInfo(-2, $aSkill, "HasEffect")
@@ -209,7 +209,7 @@ Func MoveUpkeepEx($aX, $aY, $aUpkeepSkills = 0, $aOrderedSkills = 0, $bCastInOrd
                 For $j = 0 To UBound($PendingSkills) - 1 ; Reapply any missed skills here
 
                     Local $i = $PendingSkills[$j]
-                    Local $slot = $gUpkeepSkills[$i]
+                    Local $slot = $aUpkeepSkills[$i]
 
                     If IsRecharged($slot) Then
                         UseSkillEx($slot, -2)
@@ -656,7 +656,7 @@ Func FightExFilter($AggroRange, $filterFunc = "EnemyFilter")
                             If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
                             If TimerDiff($TimerToKill) > 180000 Then Exitloop
                             
-                            For $i = 0 To 7
+                            For $i = 1 To 8
                                 If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
                                 If TimerDiff($TimerToKill) > 180000 Then Exitloop
                                 If GetPartyDead() Then Exitloop
@@ -664,7 +664,7 @@ Func FightExFilter($AggroRange, $filterFunc = "EnemyFilter")
                                 If Agent_GetAgentInfo($target, 'IsDead') Then ExitLoop
                                 
                                 ; Get skill ID for current slot
-                                Local $currentSkillID = Skill_GetSkillbarInfo($i+1, "SkillID")
+                                Local $currentSkillID = Skill_GetSkillbarInfo($i, "SkillID")
 
                                 ; Skip healing skills - they're handled separately
                                 If IsHealingSkill($currentSkillID) Then ContinueLoop
@@ -676,13 +676,13 @@ Func FightExFilter($AggroRange, $filterFunc = "EnemyFilter")
                                 
                                 ; Deal with adrenaline skills
                                 If IsAdrenal($currentSkillID) Then
-                                    If Skill_GetSkillbarInfo($i+1, "Adrenaline") < Skill_GetSkillInfo($currentSkillID, "Adrenaline") Then ContinueLoop
+                                    If Skill_GetSkillbarInfo($i, "Adrenaline") < Skill_GetSkillInfo($currentSkillID, "Adrenaline") Then ContinueLoop
                                 EndIf
                                 
-                                If IsRecharged($i+1) And $energy >= Skill_GetSkillInfo(Skill_GetSkillbarInfo($i+1, "SkillID"), "EnergyCost") And Not GetPartyDead() Then
+                                If IsRecharged($i) And $energy >= Skill_GetSkillInfo(Skill_GetSkillbarInfo($i, "SkillID"), "EnergyCost") And Not GetPartyDead() Then
                                     If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
                                     If TimerDiff($TimerToKill) > 180000 Then Exitloop
-                                    $useSkill = $i + 1
+                                    $useSkill = $i
                                     
                                     UseSkillEx($useSkill, $target)
                                     Other_RndSleep(150)
@@ -695,7 +695,7 @@ Func FightExFilter($AggroRange, $filterFunc = "EnemyFilter")
                                 If NeedHeal(95) Then UseHeal()
 
                                 If TimerDiff($TimerToKill) > 180000 Then Exitloop
-                                If $i = 7 Then $i = -1 ; change -1
+                                If $i = 8 Then $i = 0
                                 If GetPartyDead() Then Exitloop
                                 If SurvivorMode() Then Return
                             Next
@@ -1682,9 +1682,9 @@ Func GetBonus()
     RndTravel($GC_I_MAP_ID_ASCALON_CITY_OUTPOST)
     Sleep(1000)
 
-    ;If $CharrBossFarm = False Then
-        ;RemoveErrorSCSkill()
-    ;EndIf
+    ;~ If $CharrBossFarm = False Then
+    ;~     RemoveErrorSCSkill()
+    ;~ EndIf
     
     Sleep(250)
     LogWarn("Caching the Skill Bar...")
