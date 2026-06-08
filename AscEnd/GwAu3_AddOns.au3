@@ -60,7 +60,7 @@ EndFunc   ;==> CalculateFastestTime
 
 #Region Travel
 Func RndTravel($aMapID)
-    Map_RndTravel($aMapID, True, True, 3)
+    Map_RndTravel($aMapID, True, True, GetSelectedRegion())
 EndFunc   ;==>RndTravel
 #EndRegion Travel
 
@@ -1680,12 +1680,7 @@ EndFunc
 
 Func GetBonus()
     RndTravel($GC_I_MAP_ID_ASCALON_CITY_OUTPOST)
-    Sleep(1000)
-
-    ;~ If $CharrBossFarm = False Then
-    ;~     RemoveErrorSCSkill()
-    ;~ EndIf
-    
+   
     Sleep(250)
     LogWarn("Caching the Skill Bar...")
     Sleep(250)
@@ -3100,15 +3095,8 @@ Func IsRareMod($aItem)
     Local $Dom20 = StringInStr($ModStruct, "14021824", 0, 1)
 
     ; =========================
-    ; SHIELD – vs Charr
+    ; vs Charr
     ; =========================
-    Local $SCharr5  = StringInStr($ModStruct, "05014821", 0, 1)
-    Local $SCharr6  = StringInStr($ModStruct, "06014821", 0, 1)
-    Local $SCharr7  = StringInStr($ModStruct, "07014821", 0, 1)
-    Local $SCharr8  = StringInStr($ModStruct, "08014821", 0, 1)
-    Local $SCharr9  = StringInStr($ModStruct, "09014821", 0, 1)
-    Local $SCharr10 = StringInStr($ModStruct, "0A014821", 0, 1)
-
     Local $SCharr = StringInStr($ModStruct, "00018080", 0, 1)
 
 
@@ -3123,7 +3111,7 @@ Func IsRareMod($aItem)
         Return True
     ElseIf $Dom15 > 0 Or $Dom16 > 0 Or $Dom17 > 0 Or $Dom18 > 0 Or $Dom19 > 0 Or $Dom20 > 0 Then
         Return True
-    ElseIf $SCharr5 > 0 Or $SCharr6 > 0 Or $SCharr7 > 0 Or $SCharr8 > 0 Or $SCharr9 > 0 Or $SCharr10 > 0 Or $SCharr > 0 Then
+    ElseIf $SCharr > 0 Then
         Return True
     Else
         Return False

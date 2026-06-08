@@ -161,11 +161,16 @@ Func _NowUTC()
 EndFunc
 
 ; Main Form
-$MainGui = GUICreate($BotTitle, 496, 411, 449, 181, -1, BitOR($WS_EX_TOPMOST,$WS_EX_WINDOWEDGE))
+$MainGui = GUICreate($BotTitle, 496, 434, 237, 185, -1, BitOR($WS_EX_TOPMOST,$WS_EX_WINDOWEDGE))
 
 ; Combo Boxes For Character Selection & Farms
-$Group3 = GUICtrlCreateGroup("", 8, 7, 480, 395, -1,  $WS_EX_TRANSPARENT)
+$Group3 = GUICtrlCreateGroup("", 8, 7, 480, 419, -1,  $WS_EX_TRANSPARENT)
 $Group1 = GUICtrlCreateGroup("Select Your Character", 16, 24, 193, 49)
+
+Global $GUIRegionCombo = GUICtrlCreateCombo("", 335, 400, 145, 25, $CBS_DROPDOWNLIST)
+GUICtrlSetData($GUIRegionCombo, "All Regions|Europe|America|Asia", "All Regions")
+
+$Label31 = GUICtrlCreateLabel("Region:", 294, 403, 41, 17)
 
 Global $GUINameCombo
 If $doLoadLoggedChars Then
@@ -189,6 +194,10 @@ GUICtrlCreateGroup("", -99, -99, 1, 1)
 ; Survivor Mode, 19 Stop
 Global Const $OPT_SURVIVOR  = 1
 Global Const $OPT_19STOP    = 8
+
+Global $chkToggleRendering = GUICtrlCreateCheckbox("Rendering?", 14, 403, 121, 17)
+GUICtrlSetOnEvent($chkToggleRendering, "GuiButtonHandler")
+GUICtrlSetState($chkToggleRendering, $GUI_DISABLE)
 
 $Group4 = GUICtrlCreateGroup("Loot Config", 16, 129, 86, 57)
 $GUISettingsButton = GUICtrlCreateButton("Settings", 31, 146, 57, 33)
@@ -343,6 +352,8 @@ Func GuiButtonHandler()
                 GUICtrlSetState($GUI_CBSurvivor, $GUI_DISABLE)
                 GUICtrlSetState($GUI_CB19Stop, $GUI_DISABLE)
                 GUICtrlSetState($GUISettingsButton, $GUI_DISABLE)
+                GUICtrlSetState($chkToggleRendering, $GUI_ENABLE)
+                GUICtrlSetState($GUIRegionCombo, $GUI_DISABLE)
 
                 $Survivor = BitAND($options, $OPT_SURVIVOR)
                 LogStatus($Survivor ? "Survivor mode enabled." : "Survivor mode disabled.")
@@ -358,6 +369,7 @@ Func GuiButtonHandler()
                 GUICtrlSetState($GUI_CBSurvivor, $GUI_ENABLE)
                 GUICtrlSetState($GUI_CB19Stop, $GUI_ENABLE)
                 GUICtrlSetState($GUISettingsButton, $GUI_ENABLE)
+                GUICtrlSetState($GUIRegionCombo, $GUI_ENABLE)
                 
                 GUICTrlSetState($GUIStartButton, $GUI_DISABLE)
                 GUICtrlSetData($GUIStartButton, "Pausing...")
@@ -374,6 +386,9 @@ Func GuiButtonHandler()
                 InitLootSettingsGUI()
             EndIf
             ShowLootSettings()
+
+        Case $chkToggleRendering
+            Ui_ToggleRendering()
 
         Case $GUI_EVENT_CLOSE
             Exit
@@ -445,10 +460,27 @@ Func ResetStart()
     GUICtrlSetState($GUI_CBSurvivor, $GUI_ENABLE)
     GUICtrlSetState($GUI_CB19Stop, $GUI_ENABLE)
     GUICtrlSetState($GUISettingsButton, $GUI_ENABLE)
+    GUICtrlSetState($GUIRegionCombo, $GUI_ENABLE)
     GUICtrlSetData($GUIStartButton, "Start")
     $CharrBossPickup = True
     $hasBonus = False
     $NickRun = False
     LogStatus("Bot paused.")
     Sleep(500)
+EndFunc
+
+Func GetSelectedRegion()
+    Switch GUICtrlRead($GUIRegionCombo)
+        Case "Europe"
+            Return 1
+
+        Case "America"
+            Return 2
+
+        Case "Asia"
+            Return 3
+
+        Case Else ; All Regions
+            Return 0
+    EndSwitch
 EndFunc
