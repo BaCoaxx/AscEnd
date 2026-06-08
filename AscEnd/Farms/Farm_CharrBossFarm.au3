@@ -73,7 +73,7 @@ Func Farm_CharrBossFarm()
 
             RunToGate()
 
-            While True
+            While CountSlots() > 1
                 If $NickRun Then
                     Local $currentCount = GetItemCountByModelID($NickItem[0])
                     If $currentCount >= 25 Then
