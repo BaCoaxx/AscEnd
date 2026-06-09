@@ -18,20 +18,22 @@ Global $NormalGatePathLoop[3][2] = [ _
 ]
 
 ; Pathing from (Ascalon -> gate lever)
-Global $CharrGatePathLoop[4][2] = [ _
+Global $CharrGatePathLoop[5][2] = [ _
     [3118, 6530], _
     [36, 6952], _
     [-3215, 12159], _
-    [-5413, 12808] _
+    [-4820, 12844], _
+    [-5386, 12815] _
 ]
 
 ; If gate lever pull failed, path back up
-Global $retrypathLoop[5][2] = [ _
+Global $retrypathLoop[6][2] = [ _
     [-5321, 11802], _
     [-3690, 11398], _
     [-3296, 11764], _
     [-3663, 12426], _
-    [-5408, 12806] _
+    [-4820, 12844], _
+    [-5386, 12815] _
 ]
 
 ; From gate lever -> through portal
@@ -105,7 +107,7 @@ Func OpenGate() ; Pull lever until we get to the Northlands
         Sleep(250)
 
         LogInfo("Moving to the Charr portal...")
-        RunTo($CharrPortalPathLoop)
+        RunTo($CharrPortalPathLoop, 0)
         Map_InitMapIsLoaded()
         Map_Move(-5598, 14178)
         Map_WaitMapIsLoaded()
@@ -114,7 +116,7 @@ Func OpenGate() ; Pull lever until we get to the Northlands
             LogError("Failed to arrive in the Northlands...")
             Sleep(1000)
             LogWarn("Retrying the lever...")
-            RunTo($retrypathLoop)
+            RunTo($retrypathLoop, 0)
         EndIf
     Until Map_GetMapID() = 147
 

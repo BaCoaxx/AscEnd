@@ -84,9 +84,9 @@ EndFunc   ;==>GetEnergyPercent
 #EndRegion
 
 #Region Movement
-Func RunTo($g_ai2_RunPath, $aFightBack = False)
+Func RunTo($g_ai2_RunPath, $aRandom = 50, $aFightBack = False)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
-        MoveTo($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 50, $aFightBack)
+        MoveTo($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], $aRandom, $aFightBack)
         If SurvivorMode(40) Or GetPartyDead() Then Return
     Next
 EndFunc   ;==>RunTo
