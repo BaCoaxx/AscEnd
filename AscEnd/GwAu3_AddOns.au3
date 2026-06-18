@@ -299,6 +299,7 @@ Global $g_aErrorSkills[4] = [ _
 
 Func AggroMoveSmartFilter($aX, $aY, $AggroRange = 1320, $maxdistance = 3500, $filterArray = 0, $KO = False, $LootRange = 0)
 
+    Cache_SkillBar()
     If GetPartyDead() Then Return
     $TimerToKill = TimerInit()
     Local $iBlocked = 0
@@ -1680,12 +1681,7 @@ EndFunc
 
 Func GetBonus()
     RndTravel($GC_I_MAP_ID_ASCALON_CITY_OUTPOST)
-   
-    Sleep(250)
-    LogWarn("Caching the Skill Bar...")
-    Sleep(250)
-    Cache_SkillBar()
-
+ 
     If FindSummoningStone() Then
         LogInfo("Summoning stone found!")
         Sleep(1000)
