@@ -358,7 +358,10 @@ Func AggroMoveSmartFilter($aX, $aY, $AggroRange = 1320, $maxdistance = 3500, $fi
     Until ComputeDistance($coords[0], $coords[1], $aX, $aY) < 250 Or $iBlocked > 20 Or GetPartyDead() Or TimerDiff($TimerToKill) > 180000
 EndFunc   ;==>AggroMoveSmartFilter
 
-Func _UAI_Fight($a_f_x, $a_f_y, $a_f_AggroRange = 1320, $a_f_MaxDistanceToXY = 3500, $a_i_FightMode = $g_i_FinisherMode, $a_b_SwitchWeaponSets = False, $a_v_PlayerNumber = 0, $a_b_KillOnly = False, $a_s_ExitCallback = "", $a_i_CallTargetMode = $GC_UAI_TARGET_MODE_CALL)
+Func _UAI_Fight($a_f_x, $a_f_y, $a_f_AggroRange = 1320, $a_f_MaxDistanceToXY = 3500, _
+        $a_i_FightMode = $g_i_FinisherMode, $a_b_SwitchWeaponSets = False, _
+        $a_v_PlayerNumber = 0, $a_b_KillOnly = False, _
+        $a_s_ExitCallback = "", $a_i_CallTargetMode = $GC_UAI_TARGET_MODE_CALL)
 
         $g_i_BestTarget = 0
         $g_i_ForceTarget = 0
@@ -402,12 +405,12 @@ Func _UAI_Fight($a_f_x, $a_f_y, $a_f_AggroRange = 1320, $a_f_MaxDistanceToXY = 3
         Local $l_b_HasPriority = IsArray($l_v_PriorityTargets) Or $l_v_PriorityTargets <> 0
 
         If $l_b_HasPriority Then
-                UAI_UpdateCache($a_f_AggroRange)
+                UAI_UpdateAgentCache($a_f_AggroRange)
                 $g_i_ForceTarget = UAI_FindAgentByPlayerNumber($l_v_PriorityTargets, -2, $a_f_AggroRange, "UAI_Filter_IsLivingEnemy")
                 If $g_i_ForceTarget = 0 And $a_b_KillOnly Then Return True
         EndIf
 
-        If $g_b_CacheWeaponSet Then UAI_DeterminateWeaponSets()
+        If $g_b_CacheWeaponSet Then UAI_DetermineWeaponSets()
 
         Do
                 If SurvivorMode() Then Return
@@ -420,70 +423,60 @@ Func _UAI_Fight($a_f_x, $a_f_y, $a_f_AggroRange = 1320, $a_f_MaxDistanceToXY = 3
                         Local $l_i_FollowTarget = UAI_GetPartyCalledTarget()
                         If $l_i_FollowTarget <> 0 Then $g_i_ForceTarget = $l_i_FollowTarget
                 EndIf
-                UAI_UseSkills($a_f_x, $a_f_y, $a_f_AggroRange, $a_f_MaxDistanceToXY)
-                Sleep(128)
+                _UAI_UseSkills($a_f_x, $a_f_y, $a_f_AggroRange, $a_f_MaxDistanceToXY)
         Until UAI_CountEnemyInPartyAggroRange($a_f_AggroRange) = 0 Or Agent_GetAgentInfo(-2, "IsDead") Or Party_IsWiped() Or Map_GetMapID() <> $l_i_MyOldMap Or Map_GetInstanceInfo("Type") <> $l_i_MapLoadingOld Or ($a_s_ExitCallback <> "" And Call($a_s_ExitCallback))
 EndFunc   ;==>_UAI_Fight
 
 Func _UAI_UseSkills($a_f_x, $a_f_y, $a_f_AggroRange = 1320, $a_f_MaxDistanceToXY = 3500)
         For $skillSlot = 1 To 8
                 If UAI_GetStaticSkillInfo($skillSlot, $GC_UAI_STATIC_SKILL_SkillID) = 0 Then ContinueLoop
-
                 If SurvivorMode() Then Return
-
-;~         UPDATE CACHE FIRST
-                UAI_UpdateCache($a_f_AggroRange)
-                If Not UAI_IsEnemyInPartyAggroRange($a_f_AggroRange) Then ExitLoop
-                If $g_b_CacheWeaponSet Then UAI_ShouldSwitchWeaponSet()
-
-;~         CHECK PARTY
-                If UAI_GetPlayerInfo($GC_UAI_AGENT_IsDead) Or SurvivorMode() Or Party_IsWiped() = 1 Or Map_GetInstanceInfo("Type") <> $GC_I_MAP_TYPE_EXPLORABLE Or UAI_GetPlayerInfo($GC_UAI_AGENT_IsKnockedDown) Then Return
 
                 If $g_b_SkillChanged = True And Cache_EndFormChangeBuild($skillSlot) Then $g_b_SkillChanged = False
 
-;~         MOVE TOWARD HERO AGGRO TARGET
-                ; If no enemy is in the player's range but a hero has aggro on one, move toward it.
-                ; Only chase while the player is still within aggro range of the fight origin.
-                If Not UAI_IsAgentInRange(-2, $a_f_AggroRange, "UAI_Filter_IsLivingEnemy|UAI_Filter_IsNotAvoided") _
-                        And Agent_GetDistanceToXY($a_f_x, $a_f_y) <= $a_f_AggroRange Then
+;~         UPDATE CACHE FIRST
+                UAI_UpdateAgentCache($a_f_AggroRange)
 
+                If Not UAI_IsEnemyInPartyAggroRange($a_f_AggroRange) Then ExitLoop
+                If UAI_GetPlayerInfo($GC_UAI_AGENT_IsDead) Or UAI_GetPlayerInfo($GC_UAI_AGENT_IsKnockedDown) Or Map_GetInstanceInfo("Type") <> $GC_I_MAP_TYPE_EXPLORABLE Then ExitLoop
+                If SurvivorMode() Then Return
+
+;~ DISTANCE CHECKS
+                If $a_f_MaxDistanceToXY <> 0 And Agent_GetDistanceToXY($a_f_x, $a_f_y) > $a_f_MaxDistanceToXY Then ExitLoop
+
+                ; If no enemy is in the player's range but a hero has aggro on one, move toward it. Only chase while the player is still within aggro range of the fight origin.
+                If Not UAI_IsAgentInRange(-2, $a_f_AggroRange, "UAI_Filter_IsLivingEnemy|UAI_Filter_IsNotAvoided") _
+                                And Agent_GetDistanceToXY($a_f_x, $a_f_y) <= $a_f_AggroRange Then
                         Local $l_i_PartyRangeEnemy = UAI_GetNearestEnemyInPartyRange($a_f_AggroRange)
                         If $l_i_PartyRangeEnemy <> 0 Then
                                 Local $l_f_EnemyX = UAI_GetAgentInfoByID($l_i_PartyRangeEnemy, $GC_UAI_AGENT_X)
                                 Local $l_f_EnemyY = UAI_GetAgentInfoByID($l_i_PartyRangeEnemy, $GC_UAI_AGENT_Y)
                                 Map_Move($l_f_EnemyX, $l_f_EnemyY, 0)
                                 Sleep(500)
-                                ExitLoop
                         EndIf
+                        ExitLoop ; Next call handles the remainder
                 EndIf
 
-                If SurvivorMode() Then Return
+;~ WEAPON CHECK
+                If $g_b_CacheWeaponSet Then UAI_ShouldSwitchWeaponSet()
 
 ;~         AUTO ATTACK
                 If UAI_CanAutoAttack() Then
-                        Local $l_i_AttackTarget = 0
-
-                        If $g_i_ForceTarget <> 0 Then
-                                $l_i_AttackTarget = $g_i_ForceTarget
-                        ElseIf $g_i_AttackTarget <> 0 And Not UAI_GetAgentInfoByID($g_i_AttackTarget, $GC_UAI_AGENT_IsDead) Then
-                                $l_i_AttackTarget = $g_i_AttackTarget
-                        Else
-                                $l_i_AttackTarget = UAI_GetNearestAgent(-2, $a_f_AggroRange, "UAI_Filter_IsLivingEnemy|UAI_Filter_IsNotAvoided")
-                        EndIf
-
-                        If $l_i_AttackTarget <> 0 Then Agent_Attack($l_i_AttackTarget, False)
-                        $g_i_AttackTarget = $l_i_AttackTarget
-
-                        If $g_i_LastCalledTarget = 0 And $g_i_TargetMode = $GC_UAI_TARGET_MODE_CALL Then
-                                Agent_CallTarget($l_i_AttackTarget)
-                                $g_i_LastCalledTarget = $l_i_AttackTarget
-                        EndIf
+                        UAI_AutoAttack($a_f_AggroRange)
                 Else
                         If UAI_GetPlayerInfo($GC_UAI_AGENT_IsAttacking) Then Core_ControlAction($GC_I_CONTROL_ACTION_CANCEL_ACTION)
                 EndIf
+                If SurvivorMode() Then Return
 
 ;~         PRIORITY SKILLS
-                UAI_PrioritySkills($a_f_AggroRange)
+                If UAI_PrioritySkills($a_f_AggroRange) Then
+                        Local $l_i_UsedSlot = @extended
+                        If $l_i_UsedSlot = $skillSlot Then
+                                Sleep(128)
+                                ContinueLoop
+                        EndIf
+                        UAI_UpdateAgentCache($a_f_AggroRange)
+                EndIf
                 If SurvivorMode() Then Return
 
 ;~         BUNDLE TO DROP
@@ -492,11 +485,7 @@ Func _UAI_UseSkills($a_f_x, $a_f_y, $a_f_AggroRange = 1320, $a_f_MaxDistanceToXY
 
 ;~         NORMAL SKILLS
                 UAI_TryUseSkill($skillSlot, $a_f_AggroRange)
-
                 If SurvivorMode() Then Return
-
-;~         MOVE IF TOO FAR
-                If $a_f_MaxDistanceToXY <> 0 And Agent_GetDistanceToXY($a_f_x, $a_f_y) > $a_f_MaxDistanceToXY Then ExitLoop
 
                 Sleep(128)
         Next
