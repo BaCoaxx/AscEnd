@@ -1527,7 +1527,7 @@ Func DanceParty()
     LogWarn("## INveNtoRy hAs reACHeD MAx CAtERPIlLArs! ## NOw SHuT uP AND DAnCe BAbY! ##")
 
     Local $DanceSpots[4][2] = [[7595.43, 6957.02], [8780.70, 5798.01], [9878.40, 4910.21], [9205.81, 5175.33]]
-    Local $i = Rand(0, 3, 1)
+    Local $i = Random(0, 3, 1)
 
     MoveTo($DanceSpots[$i][0], $DanceSpots[$i][1], 100)
     Sleep(1000)
