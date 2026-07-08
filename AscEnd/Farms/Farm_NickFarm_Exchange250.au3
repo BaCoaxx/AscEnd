@@ -6,11 +6,11 @@
      Author:         Coaxx
 
      Script Function:
-        Nicholas Sandford Farm & Exchange
+        Nicholas Sandford Farm & Exchange 250
 
 #ce ----------------------------------------------------------------------------
 
-Func Farm_NickFarm()
+Func Farm_NickFarm250()
     Local $NickID = $NickItem[0]
     Local $NickName = $NickItem[1]
     
@@ -21,7 +21,7 @@ Func Farm_NickFarm()
             Local $sFarmFunc = $g_aNicholasFarmMap[$i][1]
 
             $NickRun = True
-            $TwoFiddy = False
+            $TwoFiddy = True
             Call($sFarmFunc)
             
             ; After farming is complete, exchange with Nicholas

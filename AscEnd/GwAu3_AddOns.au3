@@ -3662,6 +3662,7 @@ Global $spawn[2] = [0, 0]
 Global $hasBonus = False
 Global $CharrBossFarm = False
 Global $NickRun = False
+Global $TwoFiddy
 
 Global $timer = TimerInit()
 Global $enemyKillTime = 120000

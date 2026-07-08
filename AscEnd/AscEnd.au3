@@ -21,7 +21,6 @@ Global Const $BotTitle = "AscEnd"
 Global $BotRunning = False
 Global $Bot_Core_Initialized = False
 
-
 $g_bAutoStart = False  ; Flag for auto-start
 $g_s_MainCharName  = ""
 
