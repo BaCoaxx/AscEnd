@@ -6,36 +6,41 @@
      Author:         Coaxx
 
      Script Function:
-        Nicholas Sandford Farm & Exchange 250
+        Fat Stack TwoFiddy
 
 #ce ----------------------------------------------------------------------------
 
-Func Farm_FarmMats250()
-    Local $NickID = $NickItem[0]
-    Local $NickName = $NickItem[1]
-    
-    LogInfo("Starting Nicholas farm for: " & $NickName)
-    
-    For $i = 0 To UBound($g_aNicholasFarmMap) - 1 ; We get the current nick item, take the id, check out the other array and run the corresponding farm function :)
-        If $g_aNicholasFarmMap[$i][0] = $NickID Then
-            Local $sFarmFunc = $g_aNicholasFarmMap[$i][1]
+Func Farm_FatStackTwoFiddy()
 
-            $TwoFiddy = True
-            Call($sFarmFunc)
+    LogInfo("Starting the Fat Stack TwoFiddy!!!)
+    $TwoFiddy = True
+    
+    For $i = 0 To UBound($g_aNicholasFarmMap) - 1
+      Local $sFarmFunc = $g_aNicholasFarmMap[$i][1]
 
-            If Not $BotRunning Then
-              ResetStart()
-              Return
-            EndIf
-            
-            ; After farming is complete, exchange with Nicholas
-            LogInfo("Farm complete, proceeding to Nicholas exchange...")
-            Call("Farm_NickExchange")
-        EndIf
+      Call($sFarmFunc)
+
+      If Not $BotRunning Then
+        ResetStart()
+        Return
+      EndIf
+      
+      ; After farming is complete, slap a ho ho ho.
+      If $i >= UBound($g_aNicholasFarmMap) - 1 Then
+        LogInfo("Farm complete!")
+        LogStatus("Bot will now pause...")
+        $BotRunning = False
+      Else
+        LogInfo("Onto the next one...")
+      EndIf
     Next
     
-    LogError("No farm available for " & $NickName)
-    LogStatus("Bot will now pause...")
-    $BotRunning = False
+    If $BotRunning Then
+      LogError("No farm available for " & $NickName)
+      LogStatus("Bot will now pause...")
+      $BotRunning = False
+    EndIf
+
+    ResetStart()
     Return
 EndFunc
