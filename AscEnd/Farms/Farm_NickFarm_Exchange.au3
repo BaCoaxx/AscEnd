@@ -21,8 +21,12 @@ Func Farm_NickFarm()
             Local $sFarmFunc = $g_aNicholasFarmMap[$i][1]
 
             $NickRun = True
-            $TwoFiddy = False
             Call($sFarmFunc)
+            
+            If Not $BotRunning Then
+              ResetStart()
+              Return
+            EndIf
             
             ; After farming is complete, exchange with Nicholas
             LogInfo("Farm complete, proceeding to Nicholas exchange...")
