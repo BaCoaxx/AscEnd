@@ -10,7 +10,7 @@
 
 #ce ----------------------------------------------------------------------------
 
-Func Farm_NickFarm250()
+Func Farm_FarmMats250()
     Local $NickID = $NickItem[0]
     Local $NickName = $NickItem[1]
     
@@ -20,9 +20,13 @@ Func Farm_NickFarm250()
         If $g_aNicholasFarmMap[$i][0] = $NickID Then
             Local $sFarmFunc = $g_aNicholasFarmMap[$i][1]
 
-            $NickRun = True
             $TwoFiddy = True
             Call($sFarmFunc)
+
+            If Not $BotRunning Then
+              ResetStart()
+              Return
+            EndIf
             
             ; After farming is complete, exchange with Nicholas
             LogInfo("Farm complete, proceeding to Nicholas exchange...")
