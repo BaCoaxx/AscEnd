@@ -15,7 +15,7 @@
 #include "Farm_GrawlNecklace.au3"
 #include "Farm_NickExchange.au3"
 #include "Farm_NickFarm_Exchange.au3"
-#include "Farm_NickFarm_Exchange250.au3"
+#include "Farm_FatStackTwoFiddy.au3"
 #include "Farm_SkaleAlt.au3"
 #include "Farm_CharrBossFarm.au3"
 

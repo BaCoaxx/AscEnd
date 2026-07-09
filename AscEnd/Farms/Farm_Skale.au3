@@ -62,6 +62,7 @@ Global $SkalePath3[4][2] = [ _
 ]
 
 Func Farm_Skale()
+    Local $Skale[1][2] = [[429, "Skale Fins"]] 
     While 1
         If CountSlots() < 4 Then InventoryPre()
         If Not $hasBonus Then GetBonus()
@@ -77,7 +78,7 @@ Func Farm_Skale()
             EndIf
 
             If $NickRun Or $TwoFiddy Then
-              Local $currentCount = GetItemCountByModelID($NickItem[0])
+              Local $currentCount = GetItemCountByModelID($Skale[0][0])
               Local $targetCount, $msg
 
               If $NickRun Then
@@ -89,7 +90,7 @@ Func Farm_Skale()
               EndIf
 
               If $currentCount >= $targetCount Then
-                LogInfo($msg & "Collected " & $currentCount & " " & $NickItem[1])
+                LogInfo($msg & "Collected " & $currentCount & " " & $Skale[0][1])
                 Return
               EndIf
             EndIf

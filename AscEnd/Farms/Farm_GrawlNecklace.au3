@@ -43,6 +43,8 @@ Global $GrawlNecklaceFarm[17][2] = [ _
 ]
 
 Func Farm_GrawlNecklace()
+    Local $GrawlNecklace[1][2] = [[432, "Grawl Necklaces"]] 
+
     While 1
         If CountSlots() < 4 Then InventoryPre()
         If Not $hasBonus Then GetBonus()
@@ -58,7 +60,7 @@ Func Farm_GrawlNecklace()
             EndIf
 
             If $NickRun Or $TwoFiddy Then
-              Local $currentCount = GetItemCountByModelID($NickItem[0])
+              Local $currentCount = GetItemCountByModelID($GrawlNecklace[0][0])
               Local $targetCount, $msg
 
               If $NickRun Then
@@ -70,7 +72,7 @@ Func Farm_GrawlNecklace()
               EndIf
 
               If $currentCount >= $targetCount Then
-                LogInfo($msg & "Collected " & $currentCount & " " & $NickItem[1])
+                LogInfo($msg & "Collected " & $currentCount & " " & $GrawlNecklace[0][1])
                 Return
               EndIf
             EndIf

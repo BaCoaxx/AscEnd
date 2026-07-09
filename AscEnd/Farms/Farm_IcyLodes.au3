@@ -35,6 +35,8 @@ Global $IcyLodesPath[21][2] = [ _
 ]
 
 Func Farm_IcyLodes()
+    Local $IcyLodes[1][2] = [[424, "Icy Lodestones"]] 
+    
     While 1
         If CountSlots() < 4 Then InventoryPre()
         If Not $hasBonus Then GetBonus()
@@ -50,7 +52,7 @@ Func Farm_IcyLodes()
             EndIf
 
             If $NickRun Or $TwoFiddy Then
-              Local $currentCount = GetItemCountByModelID($NickItem[0])
+              Local $currentCount = GetItemCountByModelID($IcyLodes[0][0])
               Local $targetCount, $msg
 
               If $NickRun Then
@@ -62,7 +64,7 @@ Func Farm_IcyLodes()
               EndIf
 
               If $currentCount >= $targetCount Then
-                LogInfo($msg & "Collected " & $currentCount & " " & $NickItem[1])
+                LogInfo($msg & "Collected " & $currentCount & " " & $IcyLodes[0][1])
                 Return
               EndIf
             EndIf

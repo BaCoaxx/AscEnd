@@ -16,6 +16,8 @@ Global $IrisPath[2][3] = [ _
 ]
 
 Func Farm_RedIris()
+    Local $RedIris[1][2] = [[2994, "Red Iris"]] 
+    
     While 1
         If CountSlots() < 4 Then InventoryPre()
         If Not $hasBonus Then GetBonus()
@@ -31,7 +33,7 @@ Func Farm_RedIris()
             EndIf
 
             If $NickRun Or $TwoFiddy Then
-              Local $currentCount = GetItemCountByModelID($NickItem[0])
+              Local $currentCount = GetItemCountByModelID($RedIris[0][0])
               Local $targetCount, $msg
 
               If $NickRun Then
@@ -43,7 +45,7 @@ Func Farm_RedIris()
               EndIf
 
               If $currentCount >= $targetCount Then
-                LogInfo($msg & "Collected " & $currentCount & " " & $NickItem[1])
+                LogInfo($msg & "Collected " & $currentCount & " " & $RedIris[0][1])
                 Return
               EndIf
             EndIf

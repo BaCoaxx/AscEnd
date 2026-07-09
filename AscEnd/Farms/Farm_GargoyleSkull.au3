@@ -45,6 +45,8 @@ Global $aGargPhrases[6] = [ _ ; Let's liven up a very mundane slow farm
 Global $GargPhrase = 0
 
 Func Farm_GargoyleSkull()
+    Local $GargoyleSkull[1][2] = [[426, "Gargoyle Skulls"]] 
+    
     While 1
         If CountSlots() < 4 Then InventoryPre()
         If Not $hasBonus Then GetBonus()
@@ -60,7 +62,7 @@ Func Farm_GargoyleSkull()
             EndIf
 
             If $NickRun Or $TwoFiddy Then
-              Local $currentCount = GetItemCountByModelID($NickItem[0])
+              Local $currentCount = GetItemCountByModelID($GargoyleSkull[0][0])
               Local $targetCount, $msg
 
               If $NickRun Then
@@ -72,7 +74,7 @@ Func Farm_GargoyleSkull()
               EndIf
 
               If $currentCount >= $targetCount Then
-                LogInfo($msg & "Collected " & $currentCount & " " & $NickItem[1])
+                LogInfo($msg & "Collected " & $currentCount & " " & $GargoyleSkull[0][1])
                 Return
               EndIf
             EndIf

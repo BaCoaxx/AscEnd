@@ -34,6 +34,8 @@ Global $SeedsFoePath[12][2] = [ _
 ]
 
 Func Farm_UnnaturalSeeds()
+    Local $UnnaturalSeeds[1][2] = [[432, "Unnatural Seeds"]] 
+
     While 1
         If CountSlots() < 4 Then InventoryPre()
         If Not $hasBonus Then GetBonus()
@@ -49,7 +51,7 @@ Func Farm_UnnaturalSeeds()
             EndIf
 
             If $NickRun Or $TwoFiddy Then
-              Local $currentCount = GetItemCountByModelID($NickItem[0])
+              Local $currentCount = GetItemCountByModelID($UnnaturalSeeds[0][0])
               Local $targetCount, $msg
 
               If $NickRun Then
@@ -61,7 +63,7 @@ Func Farm_UnnaturalSeeds()
               EndIf
 
               If $currentCount >= $targetCount Then
-                LogInfo($msg & "Collected " & $currentCount & " " & $NickItem[1])
+                LogInfo($msg & "Collected " & $currentCount & " " & $UnnaturalSeeds[0][1])
                 Return
               EndIf
             EndIf
