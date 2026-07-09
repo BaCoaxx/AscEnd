@@ -15,12 +15,12 @@ Func Farm_NickFarm()
     Local $NickName = $NickItem[1]
     
     LogInfo("Starting Nicholas farm for: " & $NickName)
+    $NickRun = True
     
     For $i = 0 To UBound($g_aNicholasFarmMap) - 1 ; We get the current nick item, take the id, check out the other array and run the corresponding farm function :)
         If $g_aNicholasFarmMap[$i][0] = $NickID Then
             Local $sFarmFunc = $g_aNicholasFarmMap[$i][1]
 
-            $NickRun = True
             Call($sFarmFunc)
             
             If Not $BotRunning Then
@@ -36,9 +36,10 @@ Func Farm_NickFarm()
     
     If $BotRunning Then
       LogError("No farm available for " & $NickName)
+      LogStatus("Bot will now pause...")
+      $BotRunning = False
     EndIf
     
-    LogStatus("Bot will now pause...")
-    $BotRunning = False
+    ResetStart()
     Return
 EndFunc
