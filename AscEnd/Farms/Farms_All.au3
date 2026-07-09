@@ -39,5 +39,5 @@ Global $g_a_Farms[20][2] = [ _
     ["Grawl Necklace", "Farm_GrawlNecklace"], _
     ["Nick Exchange", "Farm_NickExchange"], _
     ["Nick Farm & Exchange", "Farm_NickFarm"], _
-    ["Fat Stack TwoFiddy", "Farm_FarmMats250"] _
+    ["Fat Stack TwoFiddy", "Farm_FatStackTwoFiddy"] _
 ]
