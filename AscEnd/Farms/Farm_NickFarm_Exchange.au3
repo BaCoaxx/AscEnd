@@ -34,8 +34,10 @@ Func Farm_NickFarm()
         EndIf
     Next
     
-    LogError("No farm available for " & $NickName)
-    LogStatus("Bot will now pause...")
+    If $BotRunning Then
+      LogError("No farm available for " & $NickName)
+      LogStatus("Bot will now pause...")
+    EndIf
     $BotRunning = False
     Return
 EndFunc
