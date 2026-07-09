@@ -19,7 +19,7 @@
 #include "Farm_SkaleAlt.au3"
 #include "Farm_CharrBossFarm.au3"
 
-Global $g_a_Farms[19][2] = [ _
+Global $g_a_Farms[20][2] = [ _
     ["", ""], _
     ["Charr at the Gate", "Farm_CharrAtTheGate"], _
     ["Farmer Hamnet", "Farm_Hamnet"], _
