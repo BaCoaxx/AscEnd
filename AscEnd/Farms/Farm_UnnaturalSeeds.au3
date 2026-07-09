@@ -42,23 +42,28 @@ Func Farm_UnnaturalSeeds()
 
         While CountSlots() > 1
             If Not $BotRunning Then
+              If Not $NickRun And Not $TwoFiddy Then
                 ResetStart()
-                Return
+              EndIf
+              Return
             EndIf
 
-            If $NickRun Then
-                Local $currentCount = GetItemCountByModelID($NickItem[0])
-                If Not $TwoFiddy Then
-                    If $currentCount >= 25 Then
-                        LogInfo("Nicholas farm goal reached! Collected " & $currentCount & " " & $NickItem[1])
-                        Return
-                    EndIf
-                Else
-                    If $currentCount >= 250 Then
-                        LogInfo("Nicholas farm goal reached! Collected " & $currentCount & " " & $NickItem[1])
-                        Return
-                    EndIf
-                EndIf
+            If $NickRun Or $TwoFiddy Then
+              Local $currentCount = GetItemCountByModelID($NickItem[0])
+              Local $targetCount, $msg
+
+              If $NickRun Then
+                $targetCount = 25
+                $msg = "Nicholas farm goal reached! "
+              ElseIf $TwoFiddy Then
+                $targetCount = 250
+                $msg = "You got that mad stack brother! "
+              EndIf
+
+              If $currentCount >= $targetCount Then
+                LogInfo($msg & "Collected " & $currentCount & " " & $NickItem[1])
+                Return
+              EndIf
             EndIf
 
             UnnaturalSeed()
