@@ -131,7 +131,7 @@ EndFunc
 Func RunToSkelly($g_ai2_RunPath)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
         AggroMoveSmartFilter($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 1800, 1800, $SkellyFilter, True, 1800)
-        If Survivor() Or GetPartyDead() Then
+        If SurvivorMode() Or GetPartyDead() Then
             LogError("Run failed. Restarting...")
             Return
         EndIf
