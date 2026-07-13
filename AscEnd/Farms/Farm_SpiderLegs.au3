@@ -6,7 +6,7 @@
      Author:         Coaxx
 
      Script Function:
-        Unnatural Seed Farm (Also Spider Legs) - Pre Searing
+        Spider Legs Farm (Also Unnatural Seeds) - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
@@ -33,14 +33,14 @@ Global $SeedsFoePath[12][2] = [ _
     [21225, -11664] _
 ]
 
-Func Farm_UnnaturalSeeds()
-    Local $UnnaturalSeeds[1][2] = [[428, "Unnatural Seeds"]] 
+Func Farm_SpiderLegs()
+    Local $SpiderLegs[1][2] = [[422, "Spider Legs"]] 
 
     While 1
         If CountSlots() < 4 Then InventoryPre()
         If Not $hasBonus Then GetBonus()
         
-        UnnaturalSeedSetup()
+        SpiderLegsSetup()
 
         While CountSlots() > 1
             If Not $BotRunning Then
@@ -51,7 +51,7 @@ Func Farm_UnnaturalSeeds()
             EndIf
 
             If $NickRun Or $TwoFiddy Then
-              Local $currentCount = GetItemCountByModelID($UnnaturalSeeds[0][0])
+              Local $currentCount = GetItemCountByModelID($SpiderLegs[0][0])
               Local $targetCount, $msg
 
               If $NickRun Then
@@ -63,19 +63,19 @@ Func Farm_UnnaturalSeeds()
               EndIf
 
               If $currentCount >= $targetCount Then
-                LogInfo($msg & "Collected " & $currentCount & " " & $UnnaturalSeeds[0][1])
+                LogInfo($msg & "Collected " & $currentCount & " " & $SpiderLegs[0][1])
                 Return
               EndIf
             EndIf
 
-            UnnaturalSeed()
+            SpiderLegs()
         WEnd
     WEnd
 EndFunc
 
-Func UnnaturalSeedSetup()
+Func SpiderLegsSetup()
     If Map_GetMapID() = 166 Then
-        LogInfo("We are in Fort Ranik. Starting the Unnatural Seeds farm...")
+        LogInfo("We are in Fort Ranik. Starting the Spider Legs farm...")
     ElseIf Map_GetMapID() <> 166 And Map_IsMapUnlocked(166) Then
         LogInfo("We are not in Fort Ranik. Teleporting to Fort Ranik...")
         RndTravel(166)
@@ -89,7 +89,7 @@ Func UnnaturalSeedSetup()
     EndIf
 EndFunc
 
-Func UnnaturalSeed()
+Func SpiderLegs()
     If Map_GetMapID() <> 166 Then
         RndTravel(166)
     EndIf
@@ -115,7 +115,7 @@ Func UnnaturalSeed()
     Other_RndSleep(250)
 EndFunc
 
-Func RunToSeeds($g_ai2_RunPath)
+Func RunToLegs($g_ai2_RunPath)
     For $i = 0 To UBound($g_ai2_RunPath, 1) - 1
         AggroMoveSmartFilter($g_ai2_RunPath[$i][0], $g_ai2_RunPath[$i][1], 1200, 1200, $SpiderAloeFilter, True, 1000)
         If SurvivorMode() Or GetPartyDead() Then

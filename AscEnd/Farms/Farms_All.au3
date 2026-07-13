@@ -18,8 +18,11 @@
 #include "Farm_FatStackTwoFiddy.au3"
 #include "Farm_SkaleAlt.au3"
 #include "Farm_CharrBossFarm.au3"
+#include "Farm_SpiderLegs.au3"
 
-Global $g_a_Farms[20][2] = [ _
+
+
+Global $g_a_Farms[21][2] = [ _
     ["", ""], _
     ["Charr at the Gate", "Farm_CharrAtTheGate"], _
     ["Farmer Hamnet", "Farm_Hamnet"], _
@@ -33,6 +36,7 @@ Global $g_a_Farms[20][2] = [ _
     ["Icy Lodes", "Farm_IcyLodes"], _
     ["Baked Husks", "Farm_BakedHusk"], _
     ["Skeleton Limbs", "Farm_SkeletonLimbs"], _
+    ["Spider Legs", "Farm_SpiderLegs"], _
     ["Skale Fins", "Farm_Skale"], _
     ["Skale Fins Alt", "Farm_SkaleAlt"], _
     ["Dull Carapace", "Farm_Carapace"], _

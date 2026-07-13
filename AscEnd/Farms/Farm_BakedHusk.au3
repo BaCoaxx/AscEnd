@@ -81,6 +81,8 @@ Func BakedHusk()
         RndTravel(164)
     EndIf
 
+    Sleep(1000)
+
     ExitAshford()
 
     Sleep(1000)
