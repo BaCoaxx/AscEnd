@@ -55,7 +55,7 @@ Global $RunBackPath[5][2] = [ _
 ]
 
 Func Farm_CharrBossFarm()
-    Local $CharrBossFarm[1][2] = [[423, "Charr Carvings"]] 
+    Local $CharrCarvings[1][2] = [[423, "Charr Carvings"]] 
     
     $CharrBossFarm = True ; Set this to 'True' if you only want to farm charr bosses, if 'False' will pickup all collectibles.
     InitialSetup()
@@ -80,7 +80,7 @@ Func Farm_CharrBossFarm()
 
             While CountSlots() > 1
                 If $NickRun Or $TwoFiddy Then
-                  Local $currentCount = GetItemCountByModelID($CharrBossFarm[0][0])
+                  Local $currentCount = GetItemCountByModelID($CharrCarvings[0][0])
                   Local $targetCount, $msg
     
                   If $NickRun Then
