@@ -92,7 +92,7 @@ Func Farm_CharrBossFarm()
                   EndIf
     
                   If $currentCount >= $targetCount Then
-                    LogInfo($msg & "Collected " & $currentCount & " " & $CharrBossFarm[0][1])
+                    LogInfo($msg & "Collected " & $currentCount & " " & $CharrCarvings[0][1])
                     Return
                   EndIf
                 EndIf
