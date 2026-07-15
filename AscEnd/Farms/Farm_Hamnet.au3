@@ -110,6 +110,7 @@ Func Hamnet()
     MoveTo(709, 7115)
     LogInfo("Got imps? ")
     UseSummoningStone()
+    Cache_SkillsBar()
 
     Sleep(250)
     RunTo($HamnetPath)
