@@ -291,7 +291,6 @@ EndFunc
 #Region Fighting
 Func AggroMoveSmartFilter($aX, $aY, $AggroRange = 1320, $maxdistance = 3500, $filterArray = 0, $KO = False, $LootRange = 0)
 
-    Cache_SkillBar()
     If GetPartyDead() Then Return
     $TimerToKill = TimerInit()
     Local $iBlocked = 0
