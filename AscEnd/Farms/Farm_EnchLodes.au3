@@ -108,6 +108,7 @@ Func EnchLodes()
     
     LogInfo("I'm going to turn you into hardcore!")
     UseSummoningStone()
+    Cache_SkillBar()
     RunToElodes($ELodePath2)
     
     If SurvivorMode() Or GetPartyDead() Then Return
