@@ -112,6 +112,7 @@ Func SkeletonLimbs()
     Sleep(1000)
 
     UseSummoningStone()
+    Cache_SkillsBar()
 
     RunToSkelly($SkeleFarm1)
     
