@@ -122,6 +122,7 @@ Func WornBeltsFarm()
     If GetPartyDead() Or SurvivorMode() Then Return
 
     UseSummoningStone()
+    Cache_SkillsBar()
     RunToWB($BeltFarmBattle)
 
     If GetPartyDead() Or SurvivorMode() Then Return
