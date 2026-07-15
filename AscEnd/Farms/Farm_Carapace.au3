@@ -145,6 +145,7 @@ Func Carapace()
     LogInfo("I wish I could hold onto this moment, like a leaf clinging to a branch.")
     
     UseSummoningStone()
+    Cache_SkillBar()
     
     RunTo($CarapacePath1)
     LogInfo("Crunchy underfoot. I should probably tread lighter.")
