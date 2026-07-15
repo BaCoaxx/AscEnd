@@ -107,7 +107,7 @@ Func GargoyleSkullSetup()
     ExitBarradin()
 
     Sleep(1000)
-    Cache_SkillsBar()
+    Cache_SkillBar()
 
     RunTo($GargPath1)
     LogInfo("Who dares to toil, with the gargoyle? ME!")
