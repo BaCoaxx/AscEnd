@@ -152,7 +152,7 @@ Func Skale()
     LogInfo("Skale hunting season never ends!")
     
     UseSummoningStone()
-    Cache_SkillsBar()
+    Cache_SkillBar()
     
     RunTo($SkalePath1)
 
