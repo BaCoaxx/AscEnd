@@ -110,6 +110,7 @@ Func IcyLodes()
     $RunTime = TimerInit()
 
     UseSummoningStone()
+    Cache_SkillsBar()
     LogInfo("I scream. You scream. We all scream for ICE CREAM!!")
     RunToIlodes($IcyLodesPath)
 
