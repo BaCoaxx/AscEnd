@@ -91,6 +91,7 @@ Func BakedHusk()
 
     LogInfo("Ooo get your wurms out. Ohh baby, baby!!")
     UseSummoningStone()
+    Cache_SkillBar()
     RunToWurms($WurmPath)
     
     If GetPartyDead() Or SurvivorMode() Then
