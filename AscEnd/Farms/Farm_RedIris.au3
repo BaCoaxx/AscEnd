@@ -85,7 +85,7 @@ Func IrisFarm()
     $RunTime = TimerInit()
 
     UseSummoningStone()
-    Cache_SkillsBar()
+    Cache_SkillBar()
     RunToIris($IrisPath)
 
     If SurvivorMode() Or GetPartyDead() Then Return
