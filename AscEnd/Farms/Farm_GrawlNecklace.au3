@@ -118,6 +118,7 @@ Func GrawlNecklace()
     
     LogInfo("I'm running on rage and caffeine. Mostly rage.")
     UseSummoningStone()
+    Cache_SkillsBar()
     RunToGrawlNecklaces($GrawlNecklaceFarm)
 
     If GetPartyDead() Or SurvivorMode() Then Return
