@@ -97,7 +97,8 @@ Func SkaleAlt()
 
     $RunTime = TimerInit()
 
-    ;UseSummoningStone()  
+    ;UseSummoningStone()
+    Cache_SkillBar()
     RunTo($SkaleFarmAlt)
     Sleep(500)
     AggroMoveSmartFilter(17662, 1539, 1100, 1100, $SkaleFilter, True, 1300)
