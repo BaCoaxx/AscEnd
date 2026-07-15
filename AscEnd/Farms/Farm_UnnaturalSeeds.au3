@@ -101,7 +101,7 @@ Func UnnaturalSeed()
     $RunTime = TimerInit()
 
     UseSummoningStone()
-    Cache_SkillsBar()
+    Cache_SkillBar()
     RunTo($SeedsPath)
 
     If GetPartyDead() Or SurvivorMode() Then Return
