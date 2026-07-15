@@ -112,6 +112,7 @@ Func NickExchange()
     $RunTime = TimerInit()
 
     UseSummoningStone()
+    Cache_SkillsBar()
 
     RunTo($NickPath)
 
