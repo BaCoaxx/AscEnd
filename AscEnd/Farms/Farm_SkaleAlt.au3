@@ -31,6 +31,11 @@ Global $SkaleFarmAlt[15][2] = [ _
 Func Farm_SkaleAlt()
     While 1
         If CountSlots() < 4 Then InventoryPre()
+        If Not $BotRunning Then
+            ResetStart()
+            Return
+        EndIf
+        
         If Not $hasBonus Then GetBonus()
         
         SkaleAltSetup()
