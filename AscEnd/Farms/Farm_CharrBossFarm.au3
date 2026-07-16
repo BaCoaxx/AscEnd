@@ -64,7 +64,7 @@ Func Farm_CharrBossFarm()
         If CountSlots() < 4 Then InventoryPre()
         If Not $hasBonus Then GetBonus()
  
-        While CountSlots() > 1
+        While CountSlots() >= 4
             If Not $BotRunning Then
               If Not $NickRun And Not $TwoFiddy Then
                 ResetStart()
@@ -78,7 +78,7 @@ Func Farm_CharrBossFarm()
 
             RunToGate()
 
-            While CountSlots() > 1
+            While CountSlots() >= 4
                 If $NickRun Or $TwoFiddy Then
                   Local $currentCount = GetItemCountByModelID($CharrCarvings[0][0])
                   Local $targetCount, $msg
@@ -171,6 +171,12 @@ Func CharrCombatLoop() ; Combat loop for charr bosses
         Return False
     EndIf
 
+    If CountSlots() < 4 Then
+        LogInfo("Let's clear some room in our inventory before proceeding..")
+        UpdateStats()
+        Return False
+    EndIf
+    
     LogInfo("Run complete. Running back to portal...")
     UpdateStats()
 
