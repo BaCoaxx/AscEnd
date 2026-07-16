@@ -20,6 +20,11 @@ Func Farm_RedIris()
     
     While 1
         If CountSlots() < 4 Then InventoryPre()
+        If Not $BotRunning Then
+            ResetStart()
+            Return
+        EndIf
+        
         If Not $hasBonus Then GetBonus()
 
         IrisSetup()
