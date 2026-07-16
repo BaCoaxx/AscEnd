@@ -1805,19 +1805,19 @@ Func CanSell($aItem)
 
     Switch $IsBlue
     Case True
-        If $IsRareMod Or $IsRareRunePre Then Return False
+        If $IsRareMod Or $IsRareRunePre Or $IsInsignia Then Return False
         Return $isBlueSell ; Is blue
     EndSwitch
 
     Switch $IsPurple
     Case True
-        If $IsRareMod Or $IsRareRunePre Then Return False
+        If $IsRareMod Or $IsRareRunePre Or $IsInsignia Then Return False
         Return $isPurpleSell ; Is purple
     EndSwitch
 
     Switch $IsGold
     Case True
-        If $IsRareMod Or $IsRareRunePre Or $IsSpecial Then Return False
+        If $IsRareMod Or $IsRareRunePre Or $IsInsignia Or $IsSpecial Then Return False
         Return $isGoldSell ; Is gold
     EndSwitch
     
