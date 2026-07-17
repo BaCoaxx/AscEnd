@@ -1500,7 +1500,7 @@ Func InventoryPre()
         For $i = 1 To 4
             Sell($i)
         Next
-    ElseIf GetGoldCharacter() <= 100 Then
+    ElseIf GetGoldCharacter() < 100 Then
         LogError("Not enough gold to buy ID kit, returning...")
         Return
     EndIf
