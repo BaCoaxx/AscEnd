@@ -1503,9 +1503,6 @@ Func InventoryPre()
     ElseIf GetGoldCharacter() <= 100 Then
         LogError("Not enough gold to buy ID kit, returning...")
         Return
-    ElseIf CountSlots() <= 1 Then
-        DanceParty()
-        Return
     EndIf
 
     If CountSlots() <= 4 Then
