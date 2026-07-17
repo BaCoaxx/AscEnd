@@ -1489,13 +1489,8 @@ Func InventoryPre()
             If GetGoldCharacter() >= 100 And CountSlots() >= 1 Then ExitLoop
         Next
     EndIf
-
-    If CountSlots() <= 1 Then
-        DanceParty()
-        Return
-    EndIf
     
-    If GetGoldCharacter() >= 100 Then
+    If GetGoldCharacter() >= 100 And CountSlots() >= 1 Then
         LogInfo("Identifying items..")
         For $i = 1 To 4
             Ident($i)
@@ -1505,19 +1500,17 @@ Func InventoryPre()
         For $i = 1 To 4
             Sell($i)
         Next
-    Else
+    ElseIf GetGoldCharacter() <= 100 Then
         LogError("Not enough gold to buy ID kit, returning...")
+        Return
+    ElseIf CountSlots() <= 1 Then
+        DanceParty()
         Return
     EndIf
 
     UpdateStats()
     
     LogWarn("Inventory management complete!")
-
-    If CountSlots() <= 1 Then
-        DanceParty()
-        Return
-    EndIf
 
     Sleep(500)
 EndFunc   ;==>InventoryPre
