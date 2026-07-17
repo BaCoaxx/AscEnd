@@ -1508,6 +1508,11 @@ Func InventoryPre()
         Return
     EndIf
 
+    If CountSlots() <= 4 Then
+        DanceParty()
+        Return
+    EndIf
+
     UpdateStats()
     
     LogWarn("Inventory management complete!")
