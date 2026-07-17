@@ -1489,6 +1489,11 @@ Func InventoryPre()
             If GetGoldCharacter() >= 100 And CountSlots() >= 1 Then ExitLoop
         Next
     EndIf
+
+    If CountSlots() <= 1 Then
+        DanceParty()
+        Return
+    EndIf
     
     If GetGoldCharacter() >= 100 Then
         LogInfo("Identifying items..")
