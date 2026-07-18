@@ -36,7 +36,7 @@ Func Farm_EnchLodes()
     Local $EnchLodes[1][2] = [[431, "Enchanted Lodestones"]] 
 
     While 1
-        If CountSlots() < 4 Then InventoryPre()
+        If CountSlots() < $invCheck Then InventoryPre()
         If Not $BotRunning Then
             ResetStart()
             Return
@@ -46,7 +46,7 @@ Func Farm_EnchLodes()
         
         EnchLodesSetup()
 
-        While CountSlotS() > 1
+        While CountSlotS() >= $minRegSlots
             If Not $BotRunning Then
               If Not $NickRun And Not $TwoFiddy Then
                 ResetStart()
