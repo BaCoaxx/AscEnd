@@ -14,7 +14,7 @@ Func Farm_SpiderLegs()
     Local $SpiderLegs[1][2] = [[422, "Spider Legs"]] 
 
     While 1
-        If CountSlots() < 4 Then InventoryPre()
+        If CountSlots() < $invCheck Then InventoryPre()
         If Not $BotRunning Then
             ResetStart()
             Return
@@ -24,7 +24,7 @@ Func Farm_SpiderLegs()
         
         SpiderLegsSetup()
 
-        While CountSlots() > 1
+        While CountSlots() >= $minRegSlots
             If Not $BotRunning Then
               If Not $NickRun And Not $TwoFiddy Then
                 ResetStart()
