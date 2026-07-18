@@ -19,7 +19,7 @@ Func Farm_RedIris()
     Local $RedIris[1][2] = [[2994, "Red Iris"]] 
     
     While 1
-        If CountSlots() < 4 Then InventoryPre()
+        If CountSlots() < $invCheck Then InventoryPre()
         If Not $BotRunning Then
             ResetStart()
             Return
@@ -29,7 +29,7 @@ Func Farm_RedIris()
 
         IrisSetup()
 
-        While CountSlots() > 1
+        While CountSlots() >= $minRegSlots
             If Not $BotRunning Then
               If Not $NickRun And Not $TwoFiddy Then
                 ResetStart()
