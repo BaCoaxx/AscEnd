@@ -38,7 +38,7 @@ Func Farm_SkeletonLimbs()
     Local $SkeletonLimbs[1][2] = [[430, "Skeleton Limbs"]] 
 
     While 1
-        If CountSlots() < 4 Then InventoryPre()
+        If CountSlots() < $invCheck Then InventoryPre()
         If Not $BotRunning Then
             ResetStart()
             Return
@@ -48,7 +48,7 @@ Func Farm_SkeletonLimbs()
 
         SkeletonSetup()
 
-        While CountSlotS() > 1
+        While CountSlotS() >= $minRegSlots
             If Not $BotRunning Then
               If Not $NickRun And Not $TwoFiddy Then
                 ResetStart()
