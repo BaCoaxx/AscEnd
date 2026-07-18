@@ -30,7 +30,7 @@ Global $SkaleFarmAlt[15][2] = [ _
 
 Func Farm_SkaleAlt()
     While 1
-        If CountSlots() < 4 Then InventoryPre()
+        If CountSlots() < $invCheck Then InventoryPre()
         If Not $BotRunning Then
             ResetStart()
             Return
@@ -40,7 +40,7 @@ Func Farm_SkaleAlt()
         
         SkaleAltSetup()
 
-        While CountSlots() > 1
+        While CountSlots() >= $minRegSlots
             If Not $BotRunning Then
                 ResetStart()
                 Return
