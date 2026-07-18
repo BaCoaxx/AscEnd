@@ -24,7 +24,7 @@ Global $desiredDistance = 980
 Global $hasRun = False
 
 Func Farm_CharrAtTheGate()
-    If CountSlots() < 4 Then InventoryPre()
+    If CountSlots() < $invCheck Then InventoryPre()
     If Not $hasBonus Then GetBonus()
 
     While 1
