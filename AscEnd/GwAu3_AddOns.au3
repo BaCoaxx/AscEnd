@@ -1505,8 +1505,13 @@ Func InventoryPre()
         Return
     EndIf
 
-    If CountSlots() <= 4 Then
+    If CountSlots() < $minCharrSlots And $CharrBossFarm Then
         DanceParty()
+        UpdateStats()
+        Return
+    ElseIf CountSlots() < $minRegSlots And Not $CharrBossFarm Then
+        DanceParty()
+        UpdateStats()
         Return
     EndIf
 
@@ -3657,6 +3662,11 @@ Global $hasBonus = False
 Global $CharrBossFarm = False
 Global $NickRun = False
 Global $TwoFiddy = False
+
+;~ Inventory - FreeSlots
+Global $invCheck = 4
+Global $minCharrSlots = 4
+Global $minRegSlots = 1
 
 Global $timer = TimerInit()
 Global $enemyKillTime = 120000
