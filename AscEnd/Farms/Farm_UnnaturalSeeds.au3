@@ -37,7 +37,7 @@ Func Farm_UnnaturalSeeds()
     Local $UnnaturalSeeds[1][2] = [[428, "Unnatural Seeds"]] 
 
     While 1
-        If CountSlots() < 4 Then InventoryPre()
+        If CountSlots() < $invCheck Then InventoryPre()
         If Not $BotRunning Then
             ResetStart()
             Return
@@ -47,7 +47,7 @@ Func Farm_UnnaturalSeeds()
         
         UnnaturalSeedSetup()
 
-        While CountSlots() > 1
+        While CountSlots() >= $minRegSlots
             If Not $BotRunning Then
               If Not $NickRun And Not $TwoFiddy Then
                 ResetStart()
