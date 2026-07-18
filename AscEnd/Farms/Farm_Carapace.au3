@@ -65,7 +65,7 @@ Func Farm_Carapace()
     Local $Carapace[1][2] = [[425, "Dull Carapaces"]] 
     
     While 1
-        If CountSlots() < 4 Then InventoryPre()
+        If CountSlots() < $invCheck Then InventoryPre()
         If Not $BotRunning Then
             ResetStart()
             Return
@@ -75,7 +75,7 @@ Func Farm_Carapace()
         
         CarapaceSetup()
 
-        While CountSlotS() > 1
+        While CountSlotS() >= $minRegSlots
             If Not $BotRunning Then
               If Not $NickRun And Not $TwoFiddy Then
                 ResetStart()
