@@ -31,7 +31,7 @@ Func Farm_WornBelts()
     Local $WornBelts[1][2] = [[427, "Worn Belts"]] 
 
     While 1
-        If CountSlots() < 4 Then InventoryPre()
+        If CountSlots() < $invCheck Then InventoryPre()
         If Not $BotRunning Then
             ResetStart()
             Return
@@ -41,7 +41,7 @@ Func Farm_WornBelts()
 
         WornBeltsSetup()
 
-        While CountSlots() > 1
+        While CountSlots() >= $minRegSlots
             If Not $BotRunning Then
               If Not $NickRun And Not $TwoFiddy Then
                 ResetStart()
