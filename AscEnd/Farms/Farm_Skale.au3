@@ -64,7 +64,7 @@ Global $SkalePath3[4][2] = [ _
 Func Farm_Skale()
     Local $Skale[1][2] = [[429, "Skale Fins"]] 
     While 1
-        If CountSlots() < 4 Then InventoryPre()
+        If CountSlots() < $invCheck Then InventoryPre()
         If Not $BotRunning Then
             ResetStart()
             Return
@@ -74,7 +74,7 @@ Func Farm_Skale()
         
         SkaleSetup()
 
-        While CountSlotS() > 1
+        While CountSlotS() >= $minRegSlots
             If Not $BotRunning Then
               If Not $NickRun And Not $TwoFiddy Then
                 ResetStart()
