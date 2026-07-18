@@ -48,7 +48,7 @@ Func Farm_GargoyleSkull()
     Local $GargoyleSkull[1][2] = [[426, "Gargoyle Skulls"]] 
     
     While 1
-        If CountSlots() < 4 Then InventoryPre()
+        If CountSlots() < $invCheck Then InventoryPre()
         If Not $BotRunning Then
             ResetStart()
             Return
@@ -58,7 +58,7 @@ Func Farm_GargoyleSkull()
         
         GargoyleSkullSetup()
 
-        While CountSlotS() > 1
+        While CountSlotS() >= $minRegSlots
             If Not $BotRunning Then
               If Not $NickRun And Not $TwoFiddy Then
                 ResetStart()
