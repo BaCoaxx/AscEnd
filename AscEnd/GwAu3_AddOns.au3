@@ -1389,7 +1389,11 @@ Func CanPickUp($aItemPtr)
         If $aExtraID == $GC_I_EXTRAID_DYE_WHITE Then Return $isWhitePickup ; Only pick White and Black ones
         Return $isOtherPickup ; Pick all dyes
     ElseIf $lRarity == $RARITY_Gold Then ; Gold items
-        Return $isGoldPickup
+        If $lModelID == 38614 Or $lModelID == 38613 Then ; Compass & Rations
+            Return True
+        Else
+            Return $isGoldPickup
+        EndIf
     ElseIf $lRarity == $RARITY_Purple Then ; Purple items
         Return $isPurplePickup
     ElseIf $lRarity == $RARITY_Blue Then ; Blue items
@@ -2336,6 +2340,8 @@ Func IsSpecialItem($aItem)
         Return True ; Djinn Essences
     Case 31149
         Return True ;Gifts of the Huntsman
+    Case 38614, 38613
+        Return True ; Compass & Rations
     EndSwitch
     Return False
 EndFunc   ;==> IsSpecialItem
