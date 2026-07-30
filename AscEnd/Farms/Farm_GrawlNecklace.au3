@@ -129,6 +129,7 @@ Func GrawlNecklace()
     If GetPartyDead() Or SurvivorMode() Then Return
     
     LogInfo("That's for the last patrol you ambushed, you filthy beasts.")
+    
     Other_RndSleep(250)
     LogInfo("Run complete. Restarting...")
     UpdateStats()

@@ -190,9 +190,9 @@ Func Skale()
     LogInfo("Nice day for fishing, aint it?")
 
     Other_RndSleep(250)
-    
     LogInfo("Run complete. Restarting...")
     UpdateStats()
+    Other_RndSleep(250)
 EndFunc
 
 Func RunToSkale($g_ai2_RunPath)

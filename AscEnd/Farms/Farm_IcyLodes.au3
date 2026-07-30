@@ -122,6 +122,7 @@ Func IcyLodes()
     If GetPartyDead() Or SurvivorMode() Then Return
 
     LogInfo("Brr! It's so cold up here, I'll bring a dolyak lined fleece next time.")
+    
     Other_RndSleep(250)
     LogInfo("Run complete. Restarting...")
     UpdateStats()
