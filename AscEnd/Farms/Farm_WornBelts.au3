@@ -103,11 +103,6 @@ Func WornBeltsSetup()
             Sleep(2000)
         WEnd
     EndIf
-
-    ExitAshford() ; Gate trick setup
-    Map_Move(-11100, -6200)
-    Map_WaitMapLoading(164, 0)
-    Sleep(2000)
 EndFunc
 
 Func WornBeltsFarm()
