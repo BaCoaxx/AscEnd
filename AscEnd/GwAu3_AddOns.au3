@@ -1388,16 +1388,6 @@ Func CanPickUp($aItemPtr)
         If $aExtraID == $GC_I_EXTRAID_DYE_BLACK Then Return $isBlackPickup
         If $aExtraID == $GC_I_EXTRAID_DYE_WHITE Then Return $isWhitePickup ; Only pick White and Black ones
         Return $isOtherPickup ; Pick all dyes
-    ElseIf $lRarity == $RARITY_Gold Then ; Gold items
-        If $lModelID == 38614 Or $lModelID == 38613 Then ; Compass & Rations
-            Return True
-        Else
-            Return $isGoldPickup
-        EndIf
-    ElseIf $lRarity == $RARITY_Purple Then ; Purple items
-        Return $isPurplePickup
-    ElseIf $lRarity == $RARITY_Blue Then ; Blue items
-        Return $isBluePickup
     ElseIf $lModelID == $ITEM_ID_Lockpicks Then
         Return True
     ElseIf $lModelID == 22269 Then	; Cupcakes
@@ -1426,6 +1416,16 @@ Func CanPickUp($aItemPtr)
         Return $isCSalvPickup
     ElseIf $lModelID == 16453 Then
         Return $isCBagPickup
+    ElseIf $lRarity == $RARITY_Gold Then ; Gold items
+        If $lModelID == 38614 Or $lModelID == 38613 Then ; Compass & Rations
+            Return True
+        Else
+            Return $isGoldPickup
+        EndIf
+    ElseIf $lRarity == $RARITY_Purple Then ; Purple items
+        Return $isPurplePickup
+    ElseIf $lRarity == $RARITY_Blue Then ; Blue items
+        Return $isBluePickup
     Else
         Return False
     EndIf
@@ -1806,24 +1806,6 @@ Func CanSell($aItem)
     Local $IsAnyCampAnniSkin = IsAnyCampAnniSkin($aItem)
 
     Local $type = Item_GetItemInfoByPtr($aItem, "ItemType")
-
-    Switch $IsBlue
-    Case True
-        If $IsRareMod Or $IsRareRunePre Or $IsInsignia Then Return False
-        Return $isBlueSell ; Is blue
-    EndSwitch
-
-    Switch $IsPurple
-    Case True
-        If $IsRareMod Or $IsRareRunePre Or $IsInsignia Then Return False
-        Return $isPurpleSell ; Is purple
-    EndSwitch
-
-    Switch $IsGold
-    Case True
-        If $IsRareMod Or $IsRareRunePre Or $IsInsignia Or $IsSpecial Then Return False
-        Return $isGoldSell ; Is gold
-    EndSwitch
     
     Switch $IsDye
         Case $GC_I_EXTRAID_DYE_BLACK
@@ -1889,6 +1871,11 @@ Func CanSell($aItem)
        Return False
     EndSwitch
 
+    Switch $IsRareMod
+    Case True
+       Return False
+    EndSwitch
+
     Switch $IsTome
     Case True
        Return False
@@ -1927,6 +1914,21 @@ Func CanSell($aItem)
     Switch $IsAnyCampAnniSkin
     Case True
        Return True
+    EndSwitch
+
+    Switch $IsBlue
+    Case True
+        Return $isBlueSell ; Is blue
+    EndSwitch
+
+    Switch $IsPurple
+    Case True
+        Return $isPurpleSell ; Is purple
+    EndSwitch
+
+    Switch $IsGold
+    Case True
+        Return $isGoldSell ; Is gold
     EndSwitch
  
     Return True
