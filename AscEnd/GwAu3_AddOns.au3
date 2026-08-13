@@ -1788,22 +1788,11 @@ Func CanSell($aItem)
     Local $IsPurple = IsPurple($aItem)
     Local $IsGold = IsGold($aItem)
     Local $IsPreCollectable = IsPreCollectable($aItem)
-    Local $RareSkin = IsRareSkin($aItem)
     Local $Pcon = IsPcon($aItem)
     Local $Material = IsRareMaterial($aItem)
     Local $IsSpecial = IsSpecialItem($aItem)
-    Local $IsCaster = IsPerfectCaster($aItem)
-    Local $IsStaff = IsPerfectStaff($aItem)
-    Local $IsShield = IsPerfectShield($aItem)
-    Local $IsReq8 = IsReq8Max($aItem)
-    Local $IsReq7 = IsReq7Max($aItem)
     Local $IsTome = IsRegularTome($aItem)
     Local $IsEliteTome = IsEliteTome($aItem)
-    Local $IsTyriaAnniSkin = IsTyriaAnniSkin($aItem)
-    Local $IsCanthaAnniSkin = IsCanthaAnniSkin($aItem)
-    Local $IsElonaAnniSkin = IsElonaAnniSkin($aItem)
-    Local $IsEotnAnniSkin = IsEotnAnniSkin($aItem)
-    Local $IsAnyCampAnniSkin = IsAnyCampAnniSkin($aItem)
 
     Local $type = Item_GetItemInfoByPtr($aItem, "ItemType")
     
@@ -1845,21 +1834,6 @@ Func CanSell($aItem)
     Case True
        Return False ; Is rare material
     EndSwitch
- 
-    Switch $IsShield
-    Case True
-       Return False ; Is perfect shield
-    EndSwitch
- 
-    Switch $IsReq8
-    Case True
-       Return False ; Is req8 max
-    EndSwitch
- 
-    Switch $IsReq7
-    Case True
-       Return False ; Is req7 max (15armor)
-    EndSwitch
 
     Switch $IsInsignia
     Case True
@@ -1884,36 +1858,6 @@ Func CanSell($aItem)
     Switch $IsEliteTome
     Case True
        Return False
-    EndSwitch
- 
-    Switch $RareSkin
-    Case True
-       Return True
-    EndSwitch
-
-    Switch $IsTyriaAnniSkin
-    Case True
-       Return True
-    EndSwitch
-
-    Switch $IsCanthaAnniSkin
-    Case True
-       Return True
-    EndSwitch
-
-    Switch $IsElonaAnniSkin
-    Case True
-       Return True
-    EndSwitch
-
-    Switch $IsEotnAnniSkin
-    Case True
-       Return True
-    EndSwitch
-
-    Switch $IsAnyCampAnniSkin
-    Case True
-       Return True
     EndSwitch
 
     Switch $IsBlue
