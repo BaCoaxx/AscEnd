@@ -21,24 +21,35 @@ AscEnd currently includes the following Pre-Searing farms:
 - **Charr at the Gate**
 - **Farmer Hamnet**
 - **Run to Outposts** *- Excluding Piken Square*
+- **Charr Boss Farm** *- Set up for E/Mo & N/R; tested on a level 18, all skills unlocked*
 - **Red Iris Run**
-- **Unnatural Seeds Farm/Spider Legs Farm** *- Why not kill two Norn with the same Dwarf?*
+- **Unnatural Seeds Farm**
+- **Spider Legs Farm**
 - **Worn Belts Farm**
-- **Charr Boss Farm** *- This is currently set up for an E/Mo & N/R, tested on a level 18, all skills unlocked*
 - **Gargoyle Skulls Farm**
 - **Enchanted Lodes Farm**
 - **Icy Lodes Farm**
 - **Baked Husks Farm**
 - **Skeleton Limbs Farm**
 - **Skale Fins Farm**
-- **Skale Fins Alt Farm** *- Credit to BareBuns69 (Testing Phase)
+- **Skale Fins Alt Farm** *- Credit to BareBuns69 (Testing Phase)*
 - **Dull Carapace Farm**
 - **Grawl Necklace Farm**
-- **Nick Exchange/Nick Farm + Exchange**
+- **Nick Exchange** *- Exchanges the items you have for Nicholas if farmed yourself*
+- **Nick Farm & Exchange** *- Farms the current item for today and exchanges when you have enough for five items*
+- **Fat Stack TwoFiddy** *- Runs the full Nicholas farm rotation in sequence*
 
 Each farm is modular and designed to plug directly into the AscEnd hub.
 
-**UPDATE** - Improved Loot Configuration now that will save once applied, and settings will be found lootconfig.ini
+Improved Loot Configuration that saves once applied; settings are stored in `lootconfig.ini`.
+
+**Also includes:**
+- **Survivor mode** — Pulls you out of the current farming run when HP drops too low (title-safe)
+- **Stop at 19** — Optional; Farmer Hamnet only
+- **XP progress bar** — Tracks progress toward LDoA
+- **Collector counters** — Session totals for Nicholas items
+- **Nicholas Sandford tracker** — Today's and tomorrow's requested item
+- **Vanguard quest tracker** — Current and next daily quest
 
 ---
 
