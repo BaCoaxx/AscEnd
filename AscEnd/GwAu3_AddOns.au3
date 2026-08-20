@@ -1771,8 +1771,10 @@ EndFunc   ;==> Sell
 Func CanPreSell($aItemPtr)
     Local $lRarity = Item_GetItemInfoByPtr($aItemPtr, "Rarity")
     Local $lIsIdentified = Item_GetItemInfoByPtr($aItemPtr, "IsIdentified")
+    Local $IsPreCollectable = IsPreCollectable($aItemPtr)
     
-    ; Only sell white and blue items to get enough money or free slots
+    ; Only sell white and blue items to get enough money or free slots, we don't want to sell pre-collectable items however.
+    If $IsPreCollectable Then Return False
     If $lRarity <> $RARITY_White And $lRarity <> $RARITY_Blue Then Return False
 
     Return True
