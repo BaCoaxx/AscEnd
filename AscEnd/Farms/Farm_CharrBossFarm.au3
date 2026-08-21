@@ -121,13 +121,9 @@ Func OpenGate() ; Pull lever until we get to the Northlands
 
     Do
         LogInfo("Opening the gate lever...")
-        Do
-            Local $lever = GetNearestGadgetToAgent(-2)
-            Agent_GoSignpost($lever)
-            Sleep(750)
-            Local $leverState = Agent_GetAgentInfo($lever, 'NameProperties')
-            Sleep(500)
-        Until BitAND($leverState, 0xFF00) = 0x8000
+        Local $lever = GetNearestGadgetToAgent(-2)
+        Agent_GoSignpost($lever)
+        Sleep(250)
 
         LogInfo("Moving to the Charr portal...")
         RunTo($CharrPortalPathLoop, 0)
