@@ -1799,22 +1799,22 @@ Func CanSell($aItem)
     Local $type = Item_GetItemInfoByPtr($aItem, "ItemType")
     
     Switch $IsBlue
-        Case True
-            If $IsRareMod Or $IsRareRunePre Or $IsInsignia  Or $IsSpecial Then Return False
-            Return $isBlueSell ; Is blue
-        EndSwitch
+      Case True
+        If $IsRareMod Or $IsRareRunePre Or $IsInsignia  Or $IsSpecial Then Return False
+        Return $isBlueSell ; Is blue
+    EndSwitch
     
     Switch $IsPurple
-        Case True
-            If $IsRareMod Or $IsRareRunePre Or $IsInsignia  Or $IsSpecial Then Return False
-            Return $isPurpleSell ; Is purple
-        EndSwitch
+      Case True
+        If $IsRareMod Or $IsRareRunePre Or $IsInsignia  Or $IsSpecial Then Return False
+        Return $isPurpleSell ; Is purple
+    EndSwitch
     
     Switch $IsGold
-        Case True
-            If $IsRareMod Or $IsRareRunePre Or $IsInsignia Or $IsSpecial Then Return False
-            Return $isGoldSell ; Is gold
-        EndSwitch
+      Case True
+        If $IsRareMod Or $IsRareRunePre Or $IsInsignia Or $IsSpecial Then Return False
+        Return $isGoldSell ; Is gold
+    EndSwitch
 
     Switch $IsDye
         Case $GC_I_EXTRAID_DYE_BLACK
