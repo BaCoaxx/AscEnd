@@ -1799,6 +1799,7 @@ Func CanSell($aItem)
     Local $type = Item_GetItemInfoByPtr($aItem, "ItemType")
 
     Switch $IsBlue
+<<<<<<< HEAD
         Case True
             If $IsRareMod Or $IsRareRunePre Or $IsInsignia  Or $IsSpecial Then Return False
             Return $isBlueSell ; Is blue
@@ -1814,6 +1815,23 @@ Func CanSell($aItem)
         Case True
             If $IsRareMod Or $IsRareRunePre Or $IsInsignia Or $IsSpecial Then Return False
             Return $isGoldSell ; Is gold
+=======
+      Case True
+        If $IsRareMod Or $IsRareRunePre Or $IsInsignia  Or $IsSpecial Then Return False
+        Return $isBlueSell ; Is blue
+    EndSwitch
+    
+    Switch $IsPurple
+      Case True
+        If $IsRareMod Or $IsRareRunePre Or $IsInsignia  Or $IsSpecial Then Return False
+        Return $isPurpleSell ; Is purple
+    EndSwitch
+    
+    Switch $IsGold
+      Case True
+        If $IsRareMod Or $IsRareRunePre Or $IsInsignia Or $IsSpecial Then Return False
+        Return $isGoldSell ; Is gold
+>>>>>>> d0b6ae269d670b7394575d8d736e5c305e6cd011
     EndSwitch
 
     Switch $IsDye
