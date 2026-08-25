@@ -13,6 +13,7 @@ Global $g_sRareModsIni = @ScriptDir & "\modconfig.ini"
 Global $g_hModSelectorGui = 0
 Global $g_idModSelectorApply = 0
 Global $g_idModSelectorClose = 0
+Global $g_idModSelectorClear = 0
 
 Global $g_aRareMods[109][6] = [ _
     ["IsRareMod", "Stance10", "0A00A822", "10%", 1, 0], _
@@ -274,6 +275,8 @@ Func InitModSelectorGUI()
     GUICtrlSetOnEvent($g_idModSelectorApply, "ModSelector_Apply")
     $g_idModSelectorClose = GUICtrlCreateButton("Close", 96, 351, 73, 33)
     GUICtrlSetOnEvent($g_idModSelectorClose, "ModSelector_Close")
+    $g_idModSelectorClear = GUICtrlCreateButton("Clear", 471, 351, 73, 33)
+    GUICtrlSetOnEvent($g_idModSelectorClear, "ModSelector_Clear")
 
     _ModSelector_ApplyCheckboxStates()
 EndFunc
@@ -287,6 +290,14 @@ EndFunc
 
 Func ModSelector_Close()
     GUISetState(@SW_HIDE, $g_hModSelectorGui)
+EndFunc
+
+Func ModSelector_Clear()
+    Local $i
+    For $i = 0 To UBound($g_aRareMods) - 1
+        If $g_aRareMods[$i][5] = 0 Then ContinueLoop
+        GUICtrlSetState($g_aRareMods[$i][5], $GUI_UNCHECKED)
+    Next
 EndFunc
 
 Func ModSelector_Apply()
