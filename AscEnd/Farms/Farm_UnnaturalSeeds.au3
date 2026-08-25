@@ -2,11 +2,11 @@
 
 #cs ----------------------------------------------------------------------------
 
-     AutoIt Version: 3.3.18.0
-     Author:         Coaxx
+    AutoIt Version: 3.3.18.0
+    Author:         Coaxx
 
-     Script Function:
-        Unnatural Seed Farm (Also Spider Legs) - Pre Searing
+    Script Function:
+    Unnatural Seed Farm (Also Spider Legs) - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
@@ -16,7 +16,7 @@ Global $SeedsPath[5][2] = [ _
     [20471, 2644], _
     [19902, 1954], _
     [18979, 342] _
-]
+    ]
 
 Global $SeedsFoePath[12][2] = [ _
     [18459, -1404], _
@@ -31,10 +31,10 @@ Global $SeedsFoePath[12][2] = [ _
     [18616, -12186], _
     [20373, -12225], _
     [21225, -11664] _
-]
+    ]
 
 Func Farm_UnnaturalSeeds()
-    Local $UnnaturalSeeds[1][2] = [[428, "Unnatural Seeds"]] 
+    Local $UnnaturalSeeds[1][2] = [[428, "Unnatural Seeds"]]
 
     While 1
         If CountSlots() < $invCheck Then InventoryPre()
@@ -42,35 +42,35 @@ Func Farm_UnnaturalSeeds()
             ResetStart()
             Return
         EndIf
-        
+
         If Not $hasBonus Then GetBonus()
-        
+
         UnnaturalSeedSetup()
 
         While CountSlots() >= $minRegSlots
             If Not $BotRunning Then
-              If Not $NickRun And Not $TwoFiddy Then
-                ResetStart()
-              EndIf
-              Return
+                If Not $NickRun And Not $TwoFiddy Then
+                    ResetStart()
+                EndIf
+                Return
             EndIf
 
             If $NickRun Or $TwoFiddy Then
-              Local $currentCount = GetItemCountByModelID($UnnaturalSeeds[0][0])
-              Local $targetCount, $msg
+                Local $currentCount = GetItemCountByModelID($UnnaturalSeeds[0][0])
+                Local $targetCount, $msg
 
-              If $NickRun Then
-                $targetCount = 25
-                $msg = "Nicholas farm goal reached! "
-              ElseIf $TwoFiddy Then
-                $targetCount = 250
-                $msg = "You got that mad stack brother! "
-              EndIf
+                If $NickRun Then
+                    $targetCount = 25
+                    $msg = "Nicholas farm goal reached! "
+                ElseIf $TwoFiddy Then
+                    $targetCount = 250
+                    $msg = "You got that mad stack brother! "
+                EndIf
 
-              If $currentCount >= $targetCount Then
-                LogInfo($msg & "Collected " & $currentCount & " " & $UnnaturalSeeds[0][1])
-                Return
-              EndIf
+                If $currentCount >= $targetCount Then
+                    LogInfo($msg & "Collected " & $currentCount & " " & $UnnaturalSeeds[0][1])
+                    Return
+                EndIf
             EndIf
 
             UnnaturalSeed()
@@ -110,7 +110,7 @@ Func UnnaturalSeed()
     RunTo($SeedsPath)
 
     If GetPartyDead() Or SurvivorMode() Then Return
-    
+
     RunToSeeds($SeedsFoePath)
 
     If GetPartyDead() Or SurvivorMode() Then Return

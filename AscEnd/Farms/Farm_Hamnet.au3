@@ -2,11 +2,11 @@
 
 #cs ----------------------------------------------------------------------------
 
-     AutoIt Version: 3.3.18.0
-     Author:         Coaxx
+    AutoIt Version: 3.3.18.0
+    Author:         Coaxx
 
-     Script Function:
-        Farmer Hamnet - Pre Searing
+    Script Function:
+    Farmer Hamnet - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
@@ -16,12 +16,12 @@ Global $HamnetPath[5][2] = [ _
     [2615, 4486], _
     [2292, 4856], _
     [2377, 5398] _
-]
+    ]
 
 Global $HamnetLeavePath[2][2] = [ _
     [93, 8574], _
     [357, 7858] _
-]
+    ]
 
 Global $currLevel = 0
 Global $oldLevel = 0
@@ -31,7 +31,7 @@ Func Farm_Hamnet()
     While 1
         If CountSlots() < $invCheck Then InventoryPre()
         If Not $hasBonus Then GetBonus()
-        
+
         HamnetSetup()
 
         While CountSlotS() >= $minRegSlots
@@ -120,7 +120,7 @@ Func Hamnet()
     If SurvivorMode() Or GetPartyDead() Then
         LogError("Run failed. Restarting...")
     EndIf
-    
+
     LogInfo("Run complete. Restarting...")
     UpdateStats()
     Sleep(250)

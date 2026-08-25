@@ -2,11 +2,11 @@
 
 #cs ----------------------------------------------------------------------------
 
-     AutoIt Version: 3.3.18.0
-     Author:         Coaxx
+    AutoIt Version: 3.3.18.0
+    Author:         Coaxx
 
-     Script Function:
-        Grawl Necklace Farm - Pre Searing
+    Script Function:
+    Grawl Necklace Farm - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
@@ -20,7 +20,7 @@ Global $GrawlNecklacePath[9][2] = [ _
     [-118, 301], _
     [1411, 1123], _
     [3160, 2538] _
-]
+    ]
 
 Global $GrawlNecklaceFarm[17][2] = [ _
     [3649, 4199], _
@@ -40,10 +40,10 @@ Global $GrawlNecklaceFarm[17][2] = [ _
     [8830, 11890], _
     [7450, 11645], _
     [5659, 12696] _
-]
+    ]
 
 Func Farm_GrawlNecklace()
-    Local $GrawlNecklace[1][2] = [[432, "Grawl Necklaces"]] 
+    Local $GrawlNecklace[1][2] = [[432, "Grawl Necklaces"]]
 
     While 1
         If CountSlots() < $invCheck Then InventoryPre()
@@ -51,35 +51,35 @@ Func Farm_GrawlNecklace()
             ResetStart()
             Return
         EndIf
-        
+
         If Not $hasBonus Then GetBonus()
-        
+
         GrawlNecklaceSetup()
 
         While CountSlotS() >= $minRegSlots
             If Not $BotRunning Then
-              If Not $NickRun And Not $TwoFiddy Then
-                ResetStart()
-              EndIf
-              Return
+                If Not $NickRun And Not $TwoFiddy Then
+                    ResetStart()
+                EndIf
+                Return
             EndIf
 
             If $NickRun Or $TwoFiddy Then
-              Local $currentCount = GetItemCountByModelID($GrawlNecklace[0][0])
-              Local $targetCount, $msg
+                Local $currentCount = GetItemCountByModelID($GrawlNecklace[0][0])
+                Local $targetCount, $msg
 
-              If $NickRun Then
-                $targetCount = 25
-                $msg = "Nicholas farm goal reached! "
-              ElseIf $TwoFiddy Then
-                $targetCount = 250
-                $msg = "You got that mad stack brother! "
-              EndIf
+                If $NickRun Then
+                    $targetCount = 25
+                    $msg = "Nicholas farm goal reached! "
+                ElseIf $TwoFiddy Then
+                    $targetCount = 250
+                    $msg = "You got that mad stack brother! "
+                EndIf
 
-              If $currentCount >= $targetCount Then
-                LogInfo($msg & "Collected " & $currentCount & " " & $GrawlNecklace[0][1])
-                Return
-              EndIf
+                If $currentCount >= $targetCount Then
+                    LogInfo($msg & "Collected " & $currentCount & " " & $GrawlNecklace[0][1])
+                    Return
+                EndIf
             EndIf
 
             GrawlNecklace()
@@ -113,23 +113,23 @@ Func GrawlNecklace()
     ExitBarradin()
 
     Sleep(1000)
-    
+
     $RunTime = TimerInit()
 
     LogInfo("The Grawl aren't the only monsters in Ascalon. I see mine in the mirror.")
     RunTo($GrawlNecklacePath)
 
     If GetPartyDead() Or SurvivorMode() Then Return
-    
+
     LogInfo("I'm running on rage and caffeine. Mostly rage.")
     UseSummoningStone()
     Cache_SkillBar()
     RunToGrawlNecklaces($GrawlNecklaceFarm)
 
     If GetPartyDead() Or SurvivorMode() Then Return
-    
+
     LogInfo("That's for the last patrol you ambushed, you filthy beasts.")
-    
+
     Other_RndSleep(250)
     LogInfo("Run complete. Restarting...")
     UpdateStats()

@@ -2,11 +2,11 @@
 
 #cs ----------------------------------------------------------------------------
 
-     AutoIt Version: 3.3.18.0
-     Author:         Coaxx
+    AutoIt Version: 3.3.18.0
+    Author:         Coaxx
 
-     Script Function:
-        Baked Husk Farm - Pre Searing
+    Script Function:
+    Baked Husk Farm - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
@@ -18,46 +18,46 @@ Global $WurmPath[7][2] = [ _
     [-9694, -2073], _
     [-9695, -969], _
     [-9699, -168] _
-]
+    ]
 
 Func Farm_BakedHusk()
-    Local $BakedHusk[1][2] = [[433, "Baked Husks"]] 
-    
+    Local $BakedHusk[1][2] = [[433, "Baked Husks"]]
+
     While 1
         If CountSlots() < $invCheck Then InventoryPre()
         If Not $BotRunning Then
             ResetStart()
             Return
         EndIf
-        
+
         If Not $hasBonus Then GetBonus()
-        
+
         BakedHuskSetup()
 
         While CountSlotS() >= $minRegSlots
             If Not $BotRunning Then
-              If Not $NickRun And Not $TwoFiddy Then
-                ResetStart()
-              EndIf
-              Return
+                If Not $NickRun And Not $TwoFiddy Then
+                    ResetStart()
+                EndIf
+                Return
             EndIf
 
             If $NickRun Or $TwoFiddy Then
-              Local $currentCount = GetItemCountByModelID($BakedHusk[0][0])
-              Local $targetCount, $msg
+                Local $currentCount = GetItemCountByModelID($BakedHusk[0][0])
+                Local $targetCount, $msg
 
-              If $NickRun Then
-                $targetCount = 25
-                $msg = "Nicholas farm goal reached! "
-              ElseIf $TwoFiddy Then
-                $targetCount = 250
-                $msg = "You got that mad stack brother! "
-              EndIf
+                If $NickRun Then
+                    $targetCount = 25
+                    $msg = "Nicholas farm goal reached! "
+                ElseIf $TwoFiddy Then
+                    $targetCount = 250
+                    $msg = "You got that mad stack brother! "
+                EndIf
 
-              If $currentCount >= $targetCount Then
-                LogInfo($msg & "Collected " & $currentCount & " " & $BakedHusk[0][1])
-                Return
-              EndIf
+                If $currentCount >= $targetCount Then
+                    LogInfo($msg & "Collected " & $currentCount & " " & $BakedHusk[0][1])
+                    Return
+                EndIf
             EndIf
 
             BakedHusk()
@@ -98,14 +98,14 @@ Func BakedHusk()
     UseSummoningStone()
     Cache_SkillBar()
     RunToWurms($WurmPath)
-    
+
     If GetPartyDead() Or SurvivorMode() Then
         LogError("Run failed. Restarting...")
         Return
     EndIf
-    
+
     LogInfo("Just call me the Wurminat0r 3000..")
-    
+
     Other_RndSleep(250)
     LogInfo("Run complete. Restarting...")
     UpdateStats()

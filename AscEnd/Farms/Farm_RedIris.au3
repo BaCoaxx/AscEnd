@@ -2,57 +2,57 @@
 
 #cs ----------------------------------------------------------------------------
 
-     AutoIt Version: 3.3.18.0
-     Author:         Coaxx
+    AutoIt Version: 3.3.18.0
+    Author:         Coaxx
 
-     Script Function:
-        Red Iris Farm - Pre Searing
+    Script Function:
+    Red Iris Farm - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
 Global $IrisPath[2][3] = [ _
     [-10784.77, -5936.46, ""], _
     [-9838.80, -4794.23, "RedIris"] _
-]
+    ]
 
 Func Farm_RedIris()
-    Local $RedIris[1][2] = [[2994, "Red Iris"]] 
-    
+    Local $RedIris[1][2] = [[2994, "Red Iris"]]
+
     While 1
         If CountSlots() < $invCheck Then InventoryPre()
         If Not $BotRunning Then
             ResetStart()
             Return
         EndIf
-        
+
         If Not $hasBonus Then GetBonus()
 
         IrisSetup()
 
         While CountSlots() >= $minRegSlots
             If Not $BotRunning Then
-              If Not $NickRun And Not $TwoFiddy Then
-                ResetStart()
-              EndIf
-              Return
+                If Not $NickRun And Not $TwoFiddy Then
+                    ResetStart()
+                EndIf
+                Return
             EndIf
 
             If $NickRun Or $TwoFiddy Then
-              Local $currentCount = GetItemCountByModelID($RedIris[0][0])
-              Local $targetCount, $msg
+                Local $currentCount = GetItemCountByModelID($RedIris[0][0])
+                Local $targetCount, $msg
 
-              If $NickRun Then
-                $targetCount = 25
-                $msg = "Nicholas farm goal reached! "
-              ElseIf $TwoFiddy Then
-                $targetCount = 250
-                $msg = "You got that mad stack brother! "
-              EndIf
+                If $NickRun Then
+                    $targetCount = 25
+                    $msg = "Nicholas farm goal reached! "
+                ElseIf $TwoFiddy Then
+                    $targetCount = 250
+                    $msg = "You got that mad stack brother! "
+                EndIf
 
-              If $currentCount >= $targetCount Then
-                LogInfo($msg & "Collected " & $currentCount & " " & $RedIris[0][1])
-                Return
-              EndIf
+                If $currentCount >= $targetCount Then
+                    LogInfo($msg & "Collected " & $currentCount & " " & $RedIris[0][1])
+                    Return
+                EndIf
             EndIf
 
             IrisFarm()
@@ -94,7 +94,7 @@ Func IrisFarm()
     RunToIris($IrisPath)
 
     If SurvivorMode() Or GetPartyDead() Then Return
-    
+
     Other_RndSleep(250)
     LogInfo("Iris farming run complete. Restarting...")
     UpdateStats()
@@ -102,20 +102,20 @@ Func IrisFarm()
 EndFunc
 
 Func IrisPickup()
-    
+
     Local $lAgentArray = Item_GetItemArray()
     Local $maxitems = $lAgentArray[0]
-    
+
     For $i = 1 To $maxitems
         Local $aItemPtr = $lAgentArray[$i]
         Local $aItemAgentID = Item_GetItemInfoByPtr($aItemPtr, "AgentID")
-        
+
         If $aItemAgentID = 0 Then ContinueLoop
-        
+
         ; Is it an Iris?
         Local $lModelID = Item_GetItemInfoByPtr($aItemPtr, "ModelID")
         If $lModelID <> $GC_I_MODELID_RED_IRIS_FLOWER Then ContinueLoop
-        
+
         If CanPickup($aItemPtr) Then
             MoveTo(Agent_GetAgentInfo($aItemAgentID, "X"), Agent_GetAgentInfo($aItemAgentID, "Y"), 25)
             Sleep(250)
@@ -126,12 +126,12 @@ Func IrisPickup()
                 If GetPartyDead() Then ExitLoop
                 If TimerDiff($lDeadlock) > 5000 Then ExitLoop
             WEnd
-            
+
             LogInfo("Red Iris collected!")
             Return True
         EndIf
     Next
-    
+
     LogWarn("Who needs a Red Iris anyway? Not I-ris.")
     Return False
 EndFunc
@@ -139,7 +139,7 @@ EndFunc
 Func RunToIris($g_a_RunPath)
     For $i = 0 To UBound($g_a_RunPath) - 1
         MoveTo($g_a_RunPath[$i][0], $g_a_RunPath[$i][1], 50)
-        
+
         If SurvivorMode() Or GetPartyDead() Then
             LogError("Run failed. Restarting...")
             Return

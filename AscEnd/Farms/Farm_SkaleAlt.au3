@@ -2,11 +2,11 @@
 
 #cs ----------------------------------------------------------------------------
 
-     AutoIt Version: 3.3.18.0
-     Author:         BareBuns69 #ImissGWA2
+    AutoIt Version: 3.3.18.0
+    Author:         BareBuns69 #ImissGWA2
 
-     Script Function:
-        Skale Alt Farm - Pre Searing
+    Script Function:
+    Skale Alt Farm - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
@@ -26,7 +26,7 @@ Global $SkaleFarmAlt[15][2] = [ _
     [15611, 501], _  ; start balling them up
     [16665, 698], _
     [17662, 1539] _ ; nuke spot
-]
+    ]
 
 Func Farm_SkaleAlt()
     While 1
@@ -35,9 +35,9 @@ Func Farm_SkaleAlt()
             ResetStart()
             Return
         EndIf
-        
+
         If Not $hasBonus Then GetBonus()
-        
+
         SkaleAltSetup()
 
         While CountSlots() >= $minRegSlots
@@ -69,7 +69,7 @@ Func SkaleAltSetup()
     $spawn[0] = Agent_GetAgentInfo(-2, "X")
     $spawn[1] = Agent_GetAgentInfo(-2, "Y")
     Local $sp1 = ComputeDistance(23020, 10125, $spawn[0], $spawn[1])
-        
+
     Select
         Case $sp1 <= 2400
             LogInfo("I heard you like your buns bare?")
@@ -108,7 +108,7 @@ Func SkaleAlt()
     Sleep(500)
     AggroMoveSmartFilter(17662, 1539, 1100, 1100, $SkaleFilter, True, 1300)
     Other_RndSleep(250)
-	
+
     LogInfo("Run complete. Restarting...")
     UpdateStats()
     Other_RndSleep(250)

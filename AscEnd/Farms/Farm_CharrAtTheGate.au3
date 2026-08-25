@@ -2,11 +2,11 @@
 
 #cs ----------------------------------------------------------------------------
 
-     AutoIt Version: 3.3.18.0
-     Author:         Coaxx
+    AutoIt Version: 3.3.18.0
+    Author:         Coaxx
 
-     Script Function:
-        Charr at the Gate - Pre Searing
+    Script Function:
+    Charr at the Gate - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
@@ -17,7 +17,7 @@ Global $CharrPath[6][2] = [ _
     [-221, 7057], _
     [-2353, 8856], _
     [-2869, 9117] _
-]
+    ]
 
 Global $CharrState
 Global $desiredDistance = 980
@@ -34,7 +34,7 @@ Func Farm_CharrAtTheGate()
             ResetStart()
             Return
         EndIf
-            
+
         ExitAscalon()
         CharrAtGate()
         Sleep(250)
@@ -67,11 +67,11 @@ Func CheckQuest()
     Else
         Quest_AbandonQuest(0x2E)
         Sleep(500)
-        
+
         $spawn[0] = Agent_GetAgentInfo(-2, "X")
         $spawn[1] = Agent_GetAgentInfo(-2, "Y")
         Local $sp1 = ComputeDistance(5677, 10660, $spawn[0], $spawn[1])
-        
+
         Select
             Case $sp1 <= 5000
                 LogInfo("Ohh no step-prince!")
@@ -82,19 +82,19 @@ Func CheckQuest()
                 MoveTo(7921, 6497)
                 MoveTo(7416, 10497)
                 MoveTo(5677, 10660)
-             Case $sp1 > 5800 And $sp1 <= 7200
+            Case $sp1 > 5800 And $sp1 <= 7200
                 LogInfo("I won't tell Althea, if you don't.")
                 MoveTo(8328, 5684)
                 MoveTo(7921, 6497)
                 MoveTo(7416, 10497)
                 MoveTo(5677, 10660)
         EndSelect
-        
+
         Other_RndSleep(1000)
         Agent_GoNPC(GetNearestNPCToAgent(-2))
         Other_RndSleep(500)
         Ui_Dialog(0x802E01)
-        
+
         Sleep(1000)
 
         QuestActive(0x2E)
@@ -109,7 +109,7 @@ Func CheckQuest()
             $BotRunning = False
             Return
         EndIf
-        
+
         MoveTo(7416, 10497)
         MoveTo(7921, 6497)
         LogInfo("Heading out to say furr-well to the charr!")
@@ -126,7 +126,7 @@ Func CharrAtGate()
     LogInfo("Come here you furry bastards!")
     Sleep(250)
     MoveTo(-3460, 11320)
-    
+
     Local $targetAgent, $currentDistance, $targetX, $targetY
     Local $myX, $myY, $angle, $newX, $newY
 
@@ -155,12 +155,12 @@ Func CharrAtGate()
 
         $targetAgent = Agent_TargetNearestEnemy(2800)
         $currentDistance = GetDistance($targetAgent, -2)
-        
+
         If Abs($currentDistance - $desiredDistance) > $tolerance Then
-            
+
             $targetX = Agent_GetAgentInfo($targetAgent, "X")
             $targetY = Agent_GetAgentInfo($targetAgent, "Y")
-            
+
             $myX = Agent_GetAgentInfo(-2, "X")
             $myY = Agent_GetAgentInfo(-2, "Y")
 
@@ -173,7 +173,7 @@ Func CharrAtGate()
 
             $newX = $myX + ($newX - $myX) * $adjustFactor
             $newY = $myY + ($newY - $myY) * $adjustFactor
-            
+
             Map_Move($newX, $newY)
         EndIf
         Other_RndSleep(250)

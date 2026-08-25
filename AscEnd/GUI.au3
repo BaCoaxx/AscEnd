@@ -16,7 +16,7 @@ Global $g_aLevelXP[20] = [ _
     26600, 32800, 39600, 47000, 55000, 63600, _
     72800, 82600, 93000, 104000, 115600, _
     127800, 140600 _
-]
+    ]
 
 Global $aVanguardQuests[9][2] = [ _
     [0, "V Bounty - Blazefiend Griefblade"], _; ANCHOR
@@ -28,18 +28,18 @@ Global $aVanguardQuests[9][2] = [ _
     [6, "V Bounty - Utini Wupwup"], _
     [7, "V Rescue - Save the Ascalonian Noble"], _
     [8, "V Annihilation - Undead"] _
-]
+    ]
 
 ; Based off wiki data, if it's wrong blame them lol =]
 Global $aNicholasItems[52][2] = [ _
-    [432, "Grawl Necklaces"], _      ; Day 0 
+    [432, "Grawl Necklaces"], _      ; Day 0
     [433, "Baked Husks"], _          ; Day 1
     [430, "Skeletal Limbs"], _       ; Day 2
     [428, "Unnatural Seeds"], _      ; Day 3
     [431, "Enchanted Lodestones"], _ ; Day 4
     [429, "Skale Fins"], _           ; Day 5
     [424, "Icy Lodestones"], _       ; Day 6 ANCHOR
-    [426, "Gargoyle Skulls"], _      ; Day 7 
+    [426, "Gargoyle Skulls"], _      ; Day 7
     [425, "Dull Carapaces"], _       ; Day 8
     [433, "Baked Husks"], _          ; Day 9
     [2994, "Red Iris Flowers"], _    ; Day 10
@@ -84,7 +84,7 @@ Global $aNicholasItems[52][2] = [ _
     [2994, "Red Iris Flowers"], _    ; Day 49
     [427, "Worn Belts"], _           ; Day 50
     [425, "Dull Carapaces"] _        ; Day 51
-]
+    ]
 
 Global $g_aNicholasFarmMap[13][2] = [ _
     [432, "Farm_GrawlNecklace"], _
@@ -100,7 +100,7 @@ Global $g_aNicholasFarmMap[13][2] = [ _
     [422, "Farm_SpiderLegs"], _
     [423, "Farm_CharrBossFarm"], _
     [427, "Farm_WornBelts"] _
-]
+    ]
 
 Global Const $NICHOLAS_EPOCH = "2026/03/25 07:00:00"
 Global Const $NICHOLAS_EPOCH_INDEX = 6
@@ -108,25 +108,25 @@ Global Const $VANGUARD_EPOCH = "2026/01/14 16:01:00"
 
 Func _GetNicholasItemByOffset($iDayOffset)
     Local $iItemCount = UBound($aNicholasItems)
-    
+
     ; Current UTC timestamp
     Local $tNowUTC = _DateDiff("s", "1970/01/01 00:00:00", _NowUTC())
-    
+
     ; Reference point (Icy Lodestone @ March 25, 2026 07:00:00 UTC)
     Local $tRefUTC = _DateDiff("s", "1970/01/01 00:00:00", $NICHOLAS_EPOCH)
-    
+
     ; Days since reference (changes daily at 07:00 UTC)
     Local $iDaysPassed = Int(($tNowUTC - $tRefUTC) / 86400)
-    
+
     ; Apply offset (0=today, 1=tomorrow, -1=yesterday, etc)
     Local $iIndex = Mod($NICHOLAS_EPOCH_INDEX + $iDaysPassed + $iDayOffset, $iItemCount)
     If $iIndex < 0 Then $iIndex += $iItemCount
-    
+
     ; Return array with [ModelID, ItemName]
     Local $aResult[2]
     $aResult[0] = $aNicholasItems[$iIndex][0]
     $aResult[1] = $aNicholasItems[$iIndex][1]
-    
+
     Return $aResult
 EndFunc
 
@@ -199,14 +199,16 @@ Global $chkToggleRendering = GUICtrlCreateCheckbox("Rendering?", 14, 403, 121, 1
 GUICtrlSetOnEvent($chkToggleRendering, "GuiButtonHandler")
 GUICtrlSetState($chkToggleRendering, $GUI_DISABLE)
 
-$Group4 = GUICtrlCreateGroup("Loot Config", 16, 129, 86, 57)
-$GUISettingsButton = GUICtrlCreateButton("Settings", 31, 146, 57, 33)
+$Group4 = GUICtrlCreateGroup("Loot Config", 16, 129, 102, 57)
+$GUISettingsButton = GUICtrlCreateButton("Settings", 20, 146, 50, 33)
 GUICtrlSetOnEvent($GUISettingsButton, "GuiButtonHandler")
+Global $GUIModSelectorButton = GUICtrlCreateButton("Mods", 70, 146, 44, 33)
+GUICtrlSetOnEvent($GUIModSelectorButton, "GuiButtonHandler")
 GUICtrlCreateGroup("", -99, -99, 1, 1)
 
-$Config = GUICtrlCreateGroup("Config", 108, 129, 101, 57)
-$GUI_CBSurvivor = GUICtrlCreateCheckbox("Survivor?", 116, 145, 73, 17, BitOR($GUI_SS_DEFAULT_CHECKBOX,$BS_LEFT))
-$GUI_CB19Stop = GUICtrlCreateCheckbox("Stop at 19?", 116, 162, 73, 17, BitOR($GUI_SS_DEFAULT_CHECKBOX,$BS_LEFT))
+$Config = GUICtrlCreateGroup("Config", 122, 129, 87, 57)
+$GUI_CBSurvivor = GUICtrlCreateCheckbox("Survivor?", 129, 145, 72, 17, BitOR($GUI_SS_DEFAULT_CHECKBOX,$BS_LEFT))
+$GUI_CB19Stop = GUICtrlCreateCheckbox("Stop at 19?", 129, 162, 72, 17, BitOR($GUI_SS_DEFAULT_CHECKBOX,$BS_LEFT))
 GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 Func GetSelectedOptions()
@@ -352,6 +354,7 @@ Func GuiButtonHandler()
                 GUICtrlSetState($GUI_CBSurvivor, $GUI_DISABLE)
                 GUICtrlSetState($GUI_CB19Stop, $GUI_DISABLE)
                 GUICtrlSetState($GUISettingsButton, $GUI_DISABLE)
+                GUICtrlSetState($GUIModSelectorButton, $GUI_DISABLE)
                 GUICtrlSetState($chkToggleRendering, $GUI_ENABLE)
                 GUICtrlSetState($GUIRegionCombo, $GUI_DISABLE)
 
@@ -369,8 +372,9 @@ Func GuiButtonHandler()
                 GUICtrlSetState($GUI_CBSurvivor, $GUI_ENABLE)
                 GUICtrlSetState($GUI_CB19Stop, $GUI_ENABLE)
                 GUICtrlSetState($GUISettingsButton, $GUI_ENABLE)
+                GUICtrlSetState($GUIModSelectorButton, $GUI_ENABLE)
                 GUICtrlSetState($GUIRegionCombo, $GUI_ENABLE)
-                
+
                 GUICTrlSetState($GUIStartButton, $GUI_DISABLE)
                 GUICtrlSetData($GUIStartButton, "Pausing...")
                 LogStatus("Bot will pause, please wait..")
@@ -386,6 +390,12 @@ Func GuiButtonHandler()
                 InitLootSettingsGUI()
             EndIf
             ShowLootSettings()
+
+        Case $GUIModSelectorButton
+            If Not IsHWnd($g_hModSelectorGui) Then
+                InitModSelectorGUI()
+            EndIf
+            ShowModSelector()
 
         Case $chkToggleRendering
             Ui_ToggleRendering()
@@ -460,6 +470,7 @@ Func ResetStart()
     GUICtrlSetState($GUI_CBSurvivor, $GUI_ENABLE)
     GUICtrlSetState($GUI_CB19Stop, $GUI_ENABLE)
     GUICtrlSetState($GUISettingsButton, $GUI_ENABLE)
+    GUICtrlSetState($GUIModSelectorButton, $GUI_ENABLE)
     GUICtrlSetState($GUIRegionCombo, $GUI_ENABLE)
     GUICtrlSetData($GUIStartButton, "Start")
     $CharrBossFarm = False

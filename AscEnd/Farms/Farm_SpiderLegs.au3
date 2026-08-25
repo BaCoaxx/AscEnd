@@ -2,16 +2,16 @@
 
 #cs ----------------------------------------------------------------------------
 
-     AutoIt Version: 3.3.18.0
-     Author:         Coaxx
+    AutoIt Version: 3.3.18.0
+    Author:         Coaxx
 
-     Script Function:
-        Spider Legs Farm (Also Unnatural Seeds) - Pre Searing
+    Script Function:
+    Spider Legs Farm (Also Unnatural Seeds) - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
 Func Farm_SpiderLegs()
-    Local $SpiderLegs[1][2] = [[422, "Spider Legs"]] 
+    Local $SpiderLegs[1][2] = [[422, "Spider Legs"]]
 
     While 1
         If CountSlots() < $invCheck Then InventoryPre()
@@ -19,35 +19,35 @@ Func Farm_SpiderLegs()
             ResetStart()
             Return
         EndIf
-        
+
         If Not $hasBonus Then GetBonus()
-        
+
         SpiderLegsSetup()
 
         While CountSlots() >= $minRegSlots
             If Not $BotRunning Then
-              If Not $NickRun And Not $TwoFiddy Then
-                ResetStart()
-              EndIf
-              Return
+                If Not $NickRun And Not $TwoFiddy Then
+                    ResetStart()
+                EndIf
+                Return
             EndIf
 
             If $NickRun Or $TwoFiddy Then
-              Local $currentCount = GetItemCountByModelID($SpiderLegs[0][0])
-              Local $targetCount, $msg
+                Local $currentCount = GetItemCountByModelID($SpiderLegs[0][0])
+                Local $targetCount, $msg
 
-              If $NickRun Then
-                $targetCount = 25
-                $msg = "Nicholas farm goal reached! "
-              ElseIf $TwoFiddy Then
-                $targetCount = 250
-                $msg = "You got that mad stack brother! "
-              EndIf
+                If $NickRun Then
+                    $targetCount = 25
+                    $msg = "Nicholas farm goal reached! "
+                ElseIf $TwoFiddy Then
+                    $targetCount = 250
+                    $msg = "You got that mad stack brother! "
+                EndIf
 
-              If $currentCount >= $targetCount Then
-                LogInfo($msg & "Collected " & $currentCount & " " & $SpiderLegs[0][1])
-                Return
-              EndIf
+                If $currentCount >= $targetCount Then
+                    LogInfo($msg & "Collected " & $currentCount & " " & $SpiderLegs[0][1])
+                    Return
+                EndIf
             EndIf
 
             SpiderLegs()
@@ -87,7 +87,7 @@ Func SpiderLegs()
     RunTo($SeedsPath)
 
     If GetPartyDead() Or SurvivorMode() Then Return
-    
+
     RunToSeeds($SeedsFoePath)
 
     If GetPartyDead() Or SurvivorMode() Then Return

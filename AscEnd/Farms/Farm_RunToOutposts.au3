@@ -2,11 +2,11 @@
 
 #cs ----------------------------------------------------------------------------
 
-     AutoIt Version: 3.3.18.0
-     Author:         Coaxx
+    AutoIt Version: 3.3.18.0
+    Author:         Coaxx
 
-     Script Function:
-        RunToOutposts
+    Script Function:
+    RunToOutposts
 
 #ce ----------------------------------------------------------------------------
 
@@ -20,7 +20,7 @@ Global $Ashford[9][2] = [ _
     [-5919, -6860], _
     [-8193, -6325], _
     [-10800, -6213] _
-]
+    ]
 
 Global $Foibles1[10][2] = [ _
     [-11081, -7924], _
@@ -33,7 +33,7 @@ Global $Foibles1[10][2] = [ _
     [-11552, -18787], _
     [-10713, -19145], _
     [-12617, -20123] _
-]
+    ]
 
 Global $Foibles2[10][2] = [ _
     [8468, 17712], _
@@ -46,7 +46,7 @@ Global $Foibles2[10][2] = [ _
     [1748, 7755], _
     [1109, 6779], _
     [620, 7311] _
-]
+    ]
 
 Global $Ranik1[17][2] = [ _
     [6002, 2568], _
@@ -66,7 +66,7 @@ Global $Ranik1[17][2] = [ _
     [4219, -17012], _
     [4009, -19226], _
     [4157, -19693] _
-]
+    ]
 
 Global $Ranik2[25][2] = [ _
     [-14552, 15990], _
@@ -94,7 +94,7 @@ Global $Ranik2[25][2] = [ _
     [22044, 3655], _
     [22535, 4732], _
     [22610, 6887] _
-]
+    ]
 
 Global $Barradin1[11][2] = [ _
     [4343, 5631], _
@@ -108,7 +108,7 @@ Global $Barradin1[11][2] = [ _
     [-11047, 7611], _
     [-12431, 8422], _
     [-13356, 10012] _
-]
+    ]
 
 Global $Barradin2[27][2] = [ _
     [21175, 13361], _
@@ -138,12 +138,12 @@ Global $Barradin2[27][2] = [ _
     [-7890, 879], _
     [-7910, 1415], _
     [-7531, 1424] _
-]
+    ]
 
 Func Farm_RunToOutposts()
     If CountSlots() < 4 Then InventoryPre()
     If Not $hasBonus Then GetBonus()
-    
+
     Sleep(2000)
     LogInfo("Running to outposts.")
     RunOutpost()
@@ -155,7 +155,7 @@ EndFunc
 
 Func RunOutpost()
     LogInfo("Let's go for a stroll.")
-    
+
     ; Run each outpost until we get there
     Local $outposts = ["Ashford", "Barradin", "Ranik", "Foibles"]
     For $outpost In $outposts
@@ -177,14 +177,14 @@ Func RunOutpost()
                 Case "Foibles"
                     $success = UnlockFoibles()
             EndSwitch
-            
+
             If Not $success Then
                 LogError("Failed to unlock " & $outpost & ". Retrying...")
                 Sleep(2000)
             EndIf
         WEnd
     Next
-    
+
     LogWarn("All outposts, brutally unlocked!!")
 EndFunc
 
@@ -193,26 +193,26 @@ Func UnlockAshford()
         LogError("Ashford Abbey is already unlocked.")
         Return True
     EndIf
-    
+
     LogInfo("Heading to Ashford Abbey..")
     If Map_GetMapID() <> 148 Then RndTravel(148)
     ExitAscalon()
     $RunTime = TimerInit()
     UseSummoningStone()
-    
+
     If Not RunToMove($Ashford) Then Return False
-    
+
     UpdateStats()
     Map_InitMapIsLoaded()
     Map_Move(-11250, -6200)
     Map_WaitMapIsLoaded()
     Sleep(1000)
-    
+
     If Map_GetMapID() = 164 Then
         LogWarn("Ashford Abbey unlocked.")
         Return True
     EndIf
-    
+
     Return False
 EndFunc
 
@@ -221,34 +221,34 @@ Func UnlockBarradin()
         LogError("Barradin Estate is already unlocked.")
         Return True
     EndIf
-    
+
     LogInfo("Heading to Barradin Estate..")
     If Map_GetMapID() <> 148 Then RndTravel(148)
     ExitAscalon()
     $RunTime = TimerInit()
     UseSummoningStone()
-    
+
     If Not RunToMove($Barradin1) Then Return False
-    
+
     Map_InitMapIsLoaded()
     Map_Move(-14650, 10030)
     Map_WaitMapIsLoaded()
     Sleep(1000)
     UseSummoningStone()
-    
+
     If Not RunToMove($Barradin2) Then Return False
-    
+
     UpdateStats()
     Map_InitMapIsLoaded()
     Map_Move(-7200, 1427)
     Map_WaitMapIsLoaded()
     Sleep(1000)
-    
+
     If Map_GetMapID() = 163 Then
         LogWarn("Barradin Estate unlocked.")
         Return True
     EndIf
-    
+
     Return False
 EndFunc
 
@@ -257,33 +257,33 @@ Func UnlockRanik()
         LogError("Fort Ranik is already unlocked.")
         Return True
     EndIf
-    
+
     LogInfo("Heading to Fort Ranik..")
     If Map_GetMapID() <> 148 Then RndTravel(148)
     ExitAscalon()
     $RunTime = TimerInit()
     UseSummoningStone()
-    
+
     If Not RunToMove($Ranik1) Then Return False
-    
+
     Map_InitMapIsLoaded()
     Map_Move(4300, -19900)
     Map_WaitMapIsLoaded()
     UseSummoningStone()
-    
+
     If Not RunToMove($Ranik2) Then Return False
-    
+
     UpdateStats()
     Map_InitMapIsLoaded()
     Map_Move(22600, 7250)
     Map_WaitMapIsLoaded()
     Sleep(1000)
-    
+
     If Map_GetMapID() = 166 Then
         LogWarn("Fort Ranik unlocked.")
         Return True
     EndIf
-    
+
     Return False
 EndFunc
 
@@ -292,34 +292,34 @@ Func UnlockFoibles()
         LogError("Foibles Fair is already unlocked.")
         Return True
     EndIf
-    
+
     LogInfo("Heading to Foibles Fair..")
     If Map_GetMapID() <> 164 Then RndTravel(164)
     ExitAshford()
     $RunTime = TimerInit()
     UseSummoningStone()
-    
+
     If Not RunToMove($Foibles1) Then Return False
-    
+
     Map_InitMapIsLoaded()
     Map_Move(-14000, -20200)
     Map_WaitMapIsLoaded()
     Sleep(1000)
     UseSummoningStone()
-    
+
     If Not RunToMove($Foibles2) Then Return False
-    
+
     UpdateStats()
     Map_InitMapIsLoaded()
     Map_Move(300, 7700)
     Map_WaitMapIsLoaded()
     Sleep(1000)
-    
+
     If Map_GetMapID() = 165 Then
         LogWarn("Foibles Fair unlocked.")
         Return True
     EndIf
-    
+
     Return False
 EndFunc
 
@@ -345,7 +345,7 @@ Func ExitAshford()
             MoveTo(-12536.56, -6758.55)
             MoveTo(-11457.08, -6238.37)
     EndSelect
-    
+
     Map_InitMapIsLoaded()
     Map_Move(-11089, -6250)
     Map_WaitMapIsLoaded()
@@ -364,7 +364,7 @@ Func ExitRanik()
     $spawn[0] = Agent_GetAgentInfo(-2, "X")
     $spawn[1] = Agent_GetAgentInfo(-2, "Y")
     Local $sp1 = ComputeDistance(23020, 10125, $spawn[0], $spawn[1])
-        
+
     Select
         Case $sp1 <= 2400
             LogInfo("Little high, little low.")

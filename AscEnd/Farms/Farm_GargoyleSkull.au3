@@ -2,11 +2,11 @@
 
 #cs ----------------------------------------------------------------------------
 
-     AutoIt Version: 3.3.18.0
-     Author:         Incognito
+    AutoIt Version: 3.3.18.0
+    Author:         Incognito
 
-     Script Function:
-        Gargoyle Skull Farm - Pre Searing
+    Script Function:
+    Gargoyle Skull Farm - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
@@ -19,19 +19,19 @@ Global $GargPath1[8][2] = [ _ ; Barradin to entrance
     [-4137, 4612], _
     [-4177, 6637], _
     [-4142, 8031] _
-]
+    ]
 
 Global $GargPath2[2][2] = [ _ ; Inside catacombs, move closer
     [-8467, 15243], _
     [-7552, 15349] _
-]
+    ]
 
 Global $GargPath3[4][2] = [ _ ; Reset coords
     [-7508, 15363], _
     [-9068, 15338], _
     [-10349, 15744], _
     [-11297, 16216] _
-]
+    ]
 
 Global $aGargPhrases[6] = [ _ ; Let's liven up a very mundane slow farm
     "The gargoyle lunges. You introduce it to the floor. Permanently.", _
@@ -40,48 +40,48 @@ Global $aGargPhrases[6] = [ _ ; Let's liven up a very mundane slow farm
     "Another gruesome nightmare put out of its misery. The catacombs smell worse than it did.", _
     "It took three swings and your last shred of patience, but the gargoyle won't be anyone's problem anymore.", _
     "Can you hear that Mr Gargoyle? That's the sound of inevitability..." _
-]
+    ]
 
 Global $GargPhrase = 0
 
 Func Farm_GargoyleSkull()
-    Local $GargoyleSkull[1][2] = [[426, "Gargoyle Skulls"]] 
-    
+    Local $GargoyleSkull[1][2] = [[426, "Gargoyle Skulls"]]
+
     While 1
         If CountSlots() < $invCheck Then InventoryPre()
         If Not $BotRunning Then
             ResetStart()
             Return
         EndIf
-        
+
         If Not $hasBonus Then GetBonus()
-        
+
         GargoyleSkullSetup()
 
         While CountSlotS() >= $minRegSlots
             If Not $BotRunning Then
-              If Not $NickRun And Not $TwoFiddy Then
-                ResetStart()
-              EndIf
-              Return
+                If Not $NickRun And Not $TwoFiddy Then
+                    ResetStart()
+                EndIf
+                Return
             EndIf
 
             If $NickRun Or $TwoFiddy Then
-              Local $currentCount = GetItemCountByModelID($GargoyleSkull[0][0])
-              Local $targetCount, $msg
+                Local $currentCount = GetItemCountByModelID($GargoyleSkull[0][0])
+                Local $targetCount, $msg
 
-              If $NickRun Then
-                $targetCount = 25
-                $msg = "Nicholas farm goal reached! "
-              ElseIf $TwoFiddy Then
-                $targetCount = 250
-                $msg = "You got that mad stack brother! "
-              EndIf
+                If $NickRun Then
+                    $targetCount = 25
+                    $msg = "Nicholas farm goal reached! "
+                ElseIf $TwoFiddy Then
+                    $targetCount = 250
+                    $msg = "You got that mad stack brother! "
+                EndIf
 
-              If $currentCount >= $targetCount Then
-                LogInfo($msg & "Collected " & $currentCount & " " & $GargoyleSkull[0][1])
-                Return
-              EndIf
+                If $currentCount >= $targetCount Then
+                    LogInfo($msg & "Collected " & $currentCount & " " & $GargoyleSkull[0][1])
+                    Return
+                EndIf
             EndIf
 
             GargoyleSkull()
@@ -122,14 +122,14 @@ EndFunc
 
 Func GargoyleSkull()
     If GetPartyDead() Or SurvivorMode() Then Return
-    
+
     MoveTo(-3579, 9052)
     Map_InitMapIsLoaded()
     Map_Move(-2862, 9414)
     Map_WaitMapIsLoaded()
-    
+
     Sleep(1000)
-    
+
     $RunTime = TimerInit()
 
     RunTo($GargPath2)

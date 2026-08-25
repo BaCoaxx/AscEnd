@@ -2,11 +2,11 @@
 
 #cs ----------------------------------------------------------------------------
 
-     AutoIt Version: 3.3.18.0
-     Author:         Incognito
+    AutoIt Version: 3.3.18.0
+    Author:         Incognito
 
-     Script Function:
-        Worn Belts Farm - Pre Searing
+    Script Function:
+    Worn Belts Farm - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
@@ -16,18 +16,18 @@ Global $BeltFarmPath[5][2] = [ _
     [-7251, -4203], _
     [-6897, -3153], _
     [-6593, -2865] _
-]
+    ]
 
 Global $BeltFarmBattle[3][2] = [ _
     [-6338, -2849], _
     [-6124, -2085], _
     [-6314, -1282] _
-]
+    ]
 
 Global $BeltFarmState
 
 Func Farm_WornBelts()
-    Local $WornBelts[1][2] = [[427, "Worn Belts"]] 
+    Local $WornBelts[1][2] = [[427, "Worn Belts"]]
 
     While 1
         If CountSlots() < $invCheck Then InventoryPre()
@@ -35,35 +35,35 @@ Func Farm_WornBelts()
             ResetStart()
             Return
         EndIf
-        
+
         If Not $hasBonus Then GetBonus()
 
         WornBeltsSetup()
 
         While CountSlots() >= $minRegSlots
             If Not $BotRunning Then
-              If Not $NickRun And Not $TwoFiddy Then
-                ResetStart()
-              EndIf
-              Return
+                If Not $NickRun And Not $TwoFiddy Then
+                    ResetStart()
+                EndIf
+                Return
             EndIf
 
             If $NickRun Or $TwoFiddy Then
-              Local $currentCount = GetItemCountByModelID($WornBelts[0][0])
-              Local $targetCount, $msg
+                Local $currentCount = GetItemCountByModelID($WornBelts[0][0])
+                Local $targetCount, $msg
 
-              If $NickRun Then
-                $targetCount = 25
-                $msg = "Nicholas farm goal reached! "
-              ElseIf $TwoFiddy Then
-                $targetCount = 250
-                $msg = "You got that mad stack brother! "
-              EndIf
+                If $NickRun Then
+                    $targetCount = 25
+                    $msg = "Nicholas farm goal reached! "
+                ElseIf $TwoFiddy Then
+                    $targetCount = 250
+                    $msg = "You got that mad stack brother! "
+                EndIf
 
-              If $currentCount >= $targetCount Then
-                LogInfo($msg & "Collected " & $currentCount & " " & $WornBelts[0][1])
-                Return
-              EndIf
+                If $currentCount >= $targetCount Then
+                    LogInfo($msg & "Collected " & $currentCount & " " & $WornBelts[0][1])
+                    Return
+                EndIf
             EndIf
 
             WornBeltsFarm()

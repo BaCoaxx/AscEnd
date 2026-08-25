@@ -221,7 +221,7 @@ Func LootSettings_Apply()
     $isCBagPickup   = (BitAND(GUICtrlRead($CBagPickup), $GUI_CHECKED) == $GUI_CHECKED)
     $isCSalvPickup  = (BitAND(GUICtrlRead($CSalvPickup), $GUI_CHECKED) == $GUI_CHECKED)
     $isCollPickup   = (BitAND(GUICtrlRead($CollectorPickup), $GUI_CHECKED) == $GUI_CHECKED)
-    
+
     ; 2. Read Sells
     $isPurpleSell   = (BitAND(GUICtrlRead($Radio4), $GUI_CHECKED) == $GUI_CHECKED)
     $isGoldSell     = (BitAND(GUICtrlRead($Radio2), $GUI_CHECKED) == $GUI_CHECKED)
@@ -256,7 +256,7 @@ Func LootSettings_Apply()
     IniWrite($sIniFile, "Pickup", "Coll", $isCollPickup ? "1" : "0")
     IniWrite($sIniFile, "Sell",   "Coll", $isCollSell ? "1" : "0")
 
-    If IsDeclared("LogStatus") Then LogStatus("Loot configuration applied and saved.")
+    LogStatus("Loot configuration applied and saved.")
 
     GUISetState(@SW_HIDE, $LootGui)
 EndFunc

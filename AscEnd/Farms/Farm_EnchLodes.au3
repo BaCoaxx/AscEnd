@@ -2,11 +2,11 @@
 
 #cs ----------------------------------------------------------------------------
 
-     AutoIt Version: 3.3.18.0
-     Author:         Coaxx
+    AutoIt Version: 3.3.18.0
+    Author:         Coaxx
 
-     Script Function:
-        Enchanted Lodestones Farm - Pre Searing
+    Script Function:
+    Enchanted Lodestones Farm - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
@@ -16,7 +16,7 @@ Global $EnchLodesPath1[5][2] = [ _ ; Barradin to Elode path
     [-11775, 2709], _
     [-12306, 3467], _
     [-11963, 4448] _
-]
+    ]
 
 Global $ELodePath2[11][2] = [ _ ; Stone Elementals path
     [-10999, 5376], _
@@ -30,10 +30,10 @@ Global $ELodePath2[11][2] = [ _ ; Stone Elementals path
     [-19963, 12555], _
     [-19770, 11666], _
     [-18961, 10906] _
-]
+    ]
 
 Func Farm_EnchLodes()
-    Local $EnchLodes[1][2] = [[431, "Enchanted Lodestones"]] 
+    Local $EnchLodes[1][2] = [[431, "Enchanted Lodestones"]]
 
     While 1
         If CountSlots() < $invCheck Then InventoryPre()
@@ -41,35 +41,35 @@ Func Farm_EnchLodes()
             ResetStart()
             Return
         EndIf
-        
+
         If Not $hasBonus Then GetBonus()
-        
+
         EnchLodesSetup()
 
         While CountSlotS() >= $minRegSlots
             If Not $BotRunning Then
-              If Not $NickRun And Not $TwoFiddy Then
-                ResetStart()
-              EndIf
-              Return
+                If Not $NickRun And Not $TwoFiddy Then
+                    ResetStart()
+                EndIf
+                Return
             EndIf
 
             If $NickRun Or $TwoFiddy Then
-              Local $currentCount = GetItemCountByModelID($EnchLodes[0][0])
-              Local $targetCount, $msg
+                Local $currentCount = GetItemCountByModelID($EnchLodes[0][0])
+                Local $targetCount, $msg
 
-              If $NickRun Then
-                $targetCount = 25
-                $msg = "Nicholas farm goal reached! "
-              ElseIf $TwoFiddy Then
-                $targetCount = 250
-                $msg = "You got that mad stack brother! "
-              EndIf
+                If $NickRun Then
+                    $targetCount = 25
+                    $msg = "Nicholas farm goal reached! "
+                ElseIf $TwoFiddy Then
+                    $targetCount = 250
+                    $msg = "You got that mad stack brother! "
+                EndIf
 
-              If $currentCount >= $targetCount Then
-                LogInfo($msg & "Collected " & $currentCount & " " & $EnchLodes[0][1])
-                Return
-              EndIf
+                If $currentCount >= $targetCount Then
+                    LogInfo($msg & "Collected " & $currentCount & " " & $EnchLodes[0][1])
+                    Return
+                EndIf
             EndIf
 
             EnchLodes()
@@ -103,19 +103,19 @@ Func EnchLodes()
     ExitBarradin()
 
     Sleep(1000)
-    
+
     $RunTime = TimerInit()
 
     LogInfo("I smell trouble, so let there be rubble! Come here Stone Elementals!")
     RunTo($EnchLodesPath1)
 
     If SurvivorMode() Or GetPartyDead() Then Return
-    
+
     LogInfo("I'm going to turn you into hardcore!")
     UseSummoningStone()
     Cache_SkillBar()
     RunToElodes($ELodePath2)
-    
+
     If SurvivorMode() Or GetPartyDead() Then Return
 
     Other_RndSleep(250)

@@ -2,11 +2,11 @@
 
 #cs ----------------------------------------------------------------------------
 
-     AutoIt Version: 3.3.18.0
-     Author:         Coaxx
+    AutoIt Version: 3.3.18.0
+    Author:         Coaxx
 
-     Script Function:
-        Nicholas Sandford Exchange
+    Script Function:
+    Nicholas Sandford Exchange
 
 #ce ----------------------------------------------------------------------------
 
@@ -28,25 +28,25 @@ Global $NickPath[17][2] = [ _
     [14269, 13921], _
     [15082, 15039], _
     [15253, 16440] _
-]
+    ]
 
 Func Farm_NickExchange()
-        If CountSlots() < 1 Then
-            LogWarn("We don't have any free slots for the exchange.")
-            LogInfo("Please make sure you have at least 1 free slot.")
-            LogStatus("Bot will now pause...")
-            $BotRunning = False
+    If CountSlots() < 1 Then
+        LogWarn("We don't have any free slots for the exchange.")
+        LogInfo("Please make sure you have at least 1 free slot.")
+        LogStatus("Bot will now pause...")
+        $BotRunning = False
+        Return
+    EndIf
+
+    While 1
+        If Not $BotRunning Then
+            ResetStart()
             Return
         EndIf
 
-        While 1
-            If Not $BotRunning Then
-                ResetStart()
-                Return
-            EndIf
-
-            NickExchange()
-        WEnd
+        NickExchange()
+    WEnd
 EndFunc
 
 Func NickExchange()
@@ -87,7 +87,7 @@ Func NickExchange()
     $spawn[0] = Agent_GetAgentInfo(-2, "X")
     $spawn[1] = Agent_GetAgentInfo(-2, "Y")
     Local $sp1 = ComputeDistance(23020, 10125, $spawn[0], $spawn[1])
-        
+
     Select
         Case $sp1 <= 2400
             LogInfo("A hero's worth is measured in spoils, not titles.")
@@ -106,7 +106,7 @@ Func NickExchange()
     Map_InitMapIsLoaded()
     Map_Move(22530, 7300)
     Map_WaitMapIsLoaded()
-    
+
     Sleep(1000)
 
     $RunTime = TimerInit()

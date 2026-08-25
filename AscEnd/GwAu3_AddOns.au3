@@ -179,7 +179,7 @@ Func MoveUpkeepEx($aX, $aY, $aUpkeepSkills = 0, $aOrderedSkills = 0, $bCastInOrd
         Else
             If IsArray($aUpkeepSkills) Then
                 Local $IsQueued[UBound($aUpkeepSkills)]
-                
+
                 For $i = 0 To UBound($aUpkeepSkills) - 1
 
                     Local $slot = $aUpkeepSkills[$i]
@@ -236,7 +236,7 @@ Global $g_aHealingSkills[8] = [ _
     $GC_I_SKILL_ID_REVERSAL_OF_FORTUNE, _
     $GC_I_SKILL_ID_HEALING_SPRING, _
     $GC_I_SKILL_ID_TROLL_UNGUENT  _
-]
+    ]
 
 ; Check if skill ID is a healing skill
 Func IsHealingSkill($skillID)
@@ -271,19 +271,19 @@ EndFunc
 Func UseHeal()
     Local $healSlot = GetHealOnBar()
     If $healSlot = 0 Then Return False
-    
+
     Local $skillID = Skill_GetSkillbarInfo($healSlot, "SkillID")
     Local $skillName = Skill_GetSkillInfo($skillID, "SkillName")
     Local $energyCost = Skill_GetSkillInfo($skillID, "EnergyCost")
-    
+
     Do
         Sleep(250)
     Until GetEnergy(-2) >= $energyCost
 
     LogWarn("Using healing skill: " & $skillName)
-    
+
     UseSkillEx($healSlot, -2)
-    
+
     Return True
 EndFunc
 #EndRegion
@@ -300,7 +300,7 @@ Func AggroMoveSmartFilter($aX, $aY, $AggroRange = 1320, $maxdistance = 3500, $fi
     Map_Move($aX, $aY)
     $coords[0] = Agent_GetAgentInfo(-2, 'X')
     $coords[1] = Agent_GetAgentInfo(-2, 'Y')
-    
+
     Do
         If GetPartyDead() Then ExitLoop
         Other_RndSleep(250)
@@ -314,19 +314,19 @@ Func AggroMoveSmartFilter($aX, $aY, $AggroRange = 1320, $maxdistance = 3500, $fi
 
         If GetNumberOfFoesInRangeOfAgent(-2, $AggroRange, $GC_I_AGENT_TYPE_LIVING, 1, "EnemyFilter") > 0 Then
             If GetPartyDead() Then ExitLoop
-            
+
             $Enemy = GetNearestEnemyToAgent(-2, $AggroRange, $GC_I_AGENT_TYPE_LIVING, 1, "EnemyFilter")
             If GetPartyDead() Then ExitLoop
             $Distance = ComputeDistance(Agent_GetAgentInfo($Enemy, 'X'), Agent_GetAgentInfo($Enemy, 'Y'), Agent_GetAgentInfo(-2, 'X'), Agent_GetAgentInfo(-2, 'Y'))
             If $Distance < $AggroRange And $Enemy <> 0 And Not GetPartyDead() Then
-            
+
 
                 _UAI_Fight($CurX, $CurY, $AggroRange, $maxdistance, $g_i_FinisherMode, 0, $filterArray, $KO)
 
                 If SurvivorMode() Then Return
 
                 Other_RndSleep(250)
-                
+
                 ; Check for healing after combat
                 If NeedHeal(50) Then UseHeal()
 
@@ -358,138 +358,138 @@ Func AggroMoveSmartFilter($aX, $aY, $AggroRange = 1320, $maxdistance = 3500, $fi
 EndFunc   ;==>AggroMoveSmartFilter
 
 Func _UAI_Fight($a_f_x, $a_f_y, $a_f_AggroRange = 1320, $a_f_MaxDistanceToXY = 3500, _
-        $a_i_FightMode = $g_i_FinisherMode, $a_b_SwitchWeaponSets = False, _
-        $a_v_PlayerNumber = 0, $a_b_KillOnly = False, _
-        $a_s_ExitCallback = "", $a_i_CallTargetMode = $GC_UAI_TARGET_MODE_CALL)
+    $a_i_FightMode = $g_i_FinisherMode, $a_b_SwitchWeaponSets = False, _
+    $a_v_PlayerNumber = 0, $a_b_KillOnly = False, _
+    $a_s_ExitCallback = "", $a_i_CallTargetMode = $GC_UAI_TARGET_MODE_CALL)
 
-        $g_i_BestTarget = 0
-        $g_i_ForceTarget = 0
-        $g_i_AttackTarget = 0
-        $g_i_LastCalledTarget = 0
-        $g_i_FightMode = $a_i_FightMode
-        $g_b_CacheWeaponSet = $a_b_SwitchWeaponSets
-        $g_i_TargetMode = $a_i_CallTargetMode
-        $g_v_AvoidPlayerNumbers = -1
+$g_i_BestTarget = 0
+$g_i_ForceTarget = 0
+$g_i_AttackTarget = 0
+$g_i_LastCalledTarget = 0
+$g_i_FightMode = $a_i_FightMode
+$g_b_CacheWeaponSet = $a_b_SwitchWeaponSets
+$g_i_TargetMode = $a_i_CallTargetMode
+$g_v_AvoidPlayerNumbers = -1
 
-        Local $l_i_MyOldMap = Map_GetMapID(), $l_i_MapLoadingOld = Map_GetInstanceInfo("Type")
-        Local $l_v_PriorityTargets = 0
+Local $l_i_MyOldMap = Map_GetMapID(), $l_i_MapLoadingOld = Map_GetInstanceInfo("Type")
+Local $l_v_PriorityTargets = 0
 
-        If IsArray($a_v_PlayerNumber) Then
-                Local $l_a_Prio[UBound($a_v_PlayerNumber)]
-                Local $l_a_Avoid[UBound($a_v_PlayerNumber)]
-                Local $l_i_PC = 0, $l_i_AC = 0
-                For $j = 0 To UBound($a_v_PlayerNumber) - 1
-                        If $a_v_PlayerNumber[$j] > 0 Then
-                                $l_a_Prio[$l_i_PC] = $a_v_PlayerNumber[$j]
-                                $l_i_PC += 1
-                        ElseIf $a_v_PlayerNumber[$j] < 0 Then
-                                $l_a_Avoid[$l_i_AC] = Abs($a_v_PlayerNumber[$j])
-                                $l_i_AC += 1
-                        EndIf
-                Next
-                If $l_i_PC > 0 Then
-                        ReDim $l_a_Prio[$l_i_PC]
-                        $l_v_PriorityTargets = $l_a_Prio
-                EndIf
-                If $l_i_AC > 0 Then
-                        ReDim $l_a_Avoid[$l_i_AC]
-                        $g_v_AvoidPlayerNumbers = $l_a_Avoid
-                EndIf
-        ElseIf $a_v_PlayerNumber > 0 Then
-                $l_v_PriorityTargets = $a_v_PlayerNumber
-        ElseIf $a_v_PlayerNumber < 0 Then
-                $g_v_AvoidPlayerNumbers = Abs($a_v_PlayerNumber)
+If IsArray($a_v_PlayerNumber) Then
+    Local $l_a_Prio[UBound($a_v_PlayerNumber)]
+    Local $l_a_Avoid[UBound($a_v_PlayerNumber)]
+    Local $l_i_PC = 0, $l_i_AC = 0
+    For $j = 0 To UBound($a_v_PlayerNumber) - 1
+        If $a_v_PlayerNumber[$j] > 0 Then
+            $l_a_Prio[$l_i_PC] = $a_v_PlayerNumber[$j]
+            $l_i_PC += 1
+        ElseIf $a_v_PlayerNumber[$j] < 0 Then
+            $l_a_Avoid[$l_i_AC] = Abs($a_v_PlayerNumber[$j])
+            $l_i_AC += 1
         EndIf
+    Next
+    If $l_i_PC > 0 Then
+        ReDim $l_a_Prio[$l_i_PC]
+        $l_v_PriorityTargets = $l_a_Prio
+    EndIf
+    If $l_i_AC > 0 Then
+        ReDim $l_a_Avoid[$l_i_AC]
+        $g_v_AvoidPlayerNumbers = $l_a_Avoid
+    EndIf
+ElseIf $a_v_PlayerNumber > 0 Then
+    $l_v_PriorityTargets = $a_v_PlayerNumber
+ElseIf $a_v_PlayerNumber < 0 Then
+    $g_v_AvoidPlayerNumbers = Abs($a_v_PlayerNumber)
+EndIf
 
-        Local $l_b_HasPriority = IsArray($l_v_PriorityTargets) Or $l_v_PriorityTargets <> 0
+Local $l_b_HasPriority = IsArray($l_v_PriorityTargets) Or $l_v_PriorityTargets <> 0
 
-        If $l_b_HasPriority Then
-                UAI_UpdateAgentCache($a_f_AggroRange)
-                $g_i_ForceTarget = UAI_FindAgentByPlayerNumber($l_v_PriorityTargets, -2, $a_f_AggroRange, "UAI_Filter_IsLivingEnemy")
-                If $g_i_ForceTarget = 0 And $a_b_KillOnly Then Return True
-        EndIf
+If $l_b_HasPriority Then
+    UAI_UpdateAgentCache($a_f_AggroRange)
+    $g_i_ForceTarget = UAI_FindAgentByPlayerNumber($l_v_PriorityTargets, -2, $a_f_AggroRange, "UAI_Filter_IsLivingEnemy")
+    If $g_i_ForceTarget = 0 And $a_b_KillOnly Then Return True
+EndIf
 
-        If $g_b_CacheWeaponSet Then UAI_DetermineWeaponSets()
+If $g_b_CacheWeaponSet Then UAI_DetermineWeaponSets()
 
-        Do
-                If SurvivorMode() Then Return
-                If Agent_GetDistanceToXY($a_f_x, $a_f_y) > $a_f_AggroRange Then ExitLoop
-                If $g_i_ForceTarget <> 0 And UAI_GetAgentInfoByID($g_i_ForceTarget, $GC_UAI_AGENT_IsDead) Then
-                        $g_i_ForceTarget = UAI_FindAgentByPlayerNumber($l_v_PriorityTargets, -2, $a_f_AggroRange, "UAI_Filter_IsLivingEnemy")
-                        If $g_i_ForceTarget = 0 And $a_b_KillOnly Then ExitLoop
-                EndIf
-                If $g_i_TargetMode = $GC_UAI_TARGET_MODE_FOLLOW Then
-                        Local $l_i_FollowTarget = UAI_GetPartyCalledTarget()
-                        If $l_i_FollowTarget <> 0 Then $g_i_ForceTarget = $l_i_FollowTarget
-                EndIf
-                _UAI_UseSkills($a_f_x, $a_f_y, $a_f_AggroRange, $a_f_MaxDistanceToXY)
-        Until UAI_CountEnemyInPartyAggroRange($a_f_AggroRange) = 0 Or Agent_GetAgentInfo(-2, "IsDead") Or Party_IsWiped() Or Map_GetMapID() <> $l_i_MyOldMap Or Map_GetInstanceInfo("Type") <> $l_i_MapLoadingOld Or ($a_s_ExitCallback <> "" And Call($a_s_ExitCallback))
+Do
+    If SurvivorMode() Then Return
+    If Agent_GetDistanceToXY($a_f_x, $a_f_y) > $a_f_AggroRange Then ExitLoop
+    If $g_i_ForceTarget <> 0 And UAI_GetAgentInfoByID($g_i_ForceTarget, $GC_UAI_AGENT_IsDead) Then
+        $g_i_ForceTarget = UAI_FindAgentByPlayerNumber($l_v_PriorityTargets, -2, $a_f_AggroRange, "UAI_Filter_IsLivingEnemy")
+        If $g_i_ForceTarget = 0 And $a_b_KillOnly Then ExitLoop
+    EndIf
+    If $g_i_TargetMode = $GC_UAI_TARGET_MODE_FOLLOW Then
+        Local $l_i_FollowTarget = UAI_GetPartyCalledTarget()
+        If $l_i_FollowTarget <> 0 Then $g_i_ForceTarget = $l_i_FollowTarget
+    EndIf
+    _UAI_UseSkills($a_f_x, $a_f_y, $a_f_AggroRange, $a_f_MaxDistanceToXY)
+Until UAI_CountEnemyInPartyAggroRange($a_f_AggroRange) = 0 Or Agent_GetAgentInfo(-2, "IsDead") Or Party_IsWiped() Or Map_GetMapID() <> $l_i_MyOldMap Or Map_GetInstanceInfo("Type") <> $l_i_MapLoadingOld Or ($a_s_ExitCallback <> "" And Call($a_s_ExitCallback))
 EndFunc   ;==>_UAI_Fight
 
 Func _UAI_UseSkills($a_f_x, $a_f_y, $a_f_AggroRange = 1320, $a_f_MaxDistanceToXY = 3500)
-        For $skillSlot = 1 To 8
-                If UAI_GetStaticSkillInfo($skillSlot, $GC_UAI_STATIC_SKILL_SkillID) = 0 Then ContinueLoop
-                If SurvivorMode() Then Return
+    For $skillSlot = 1 To 8
+        If UAI_GetStaticSkillInfo($skillSlot, $GC_UAI_STATIC_SKILL_SkillID) = 0 Then ContinueLoop
+        If SurvivorMode() Then Return
 
-                If $g_b_SkillChanged = True And Cache_EndFormChangeBuild($skillSlot) Then $g_b_SkillChanged = False
+        If $g_b_SkillChanged = True And Cache_EndFormChangeBuild($skillSlot) Then $g_b_SkillChanged = False
 
-;~         UPDATE CACHE FIRST
-                UAI_UpdateAgentCache($a_f_AggroRange)
+        ;~         UPDATE CACHE FIRST
+        UAI_UpdateAgentCache($a_f_AggroRange)
 
-                If Not UAI_IsEnemyInPartyAggroRange($a_f_AggroRange) Then ExitLoop
-                If UAI_GetPlayerInfo($GC_UAI_AGENT_IsDead) Or UAI_GetPlayerInfo($GC_UAI_AGENT_IsKnockedDown) Or Map_GetInstanceInfo("Type") <> $GC_I_MAP_TYPE_EXPLORABLE Then ExitLoop
-                If SurvivorMode() Then Return
+        If Not UAI_IsEnemyInPartyAggroRange($a_f_AggroRange) Then ExitLoop
+        If UAI_GetPlayerInfo($GC_UAI_AGENT_IsDead) Or UAI_GetPlayerInfo($GC_UAI_AGENT_IsKnockedDown) Or Map_GetInstanceInfo("Type") <> $GC_I_MAP_TYPE_EXPLORABLE Then ExitLoop
+        If SurvivorMode() Then Return
 
-;~ DISTANCE CHECKS
-                If $a_f_MaxDistanceToXY <> 0 And Agent_GetDistanceToXY($a_f_x, $a_f_y) > $a_f_MaxDistanceToXY Then ExitLoop
+        ;~ DISTANCE CHECKS
+        If $a_f_MaxDistanceToXY <> 0 And Agent_GetDistanceToXY($a_f_x, $a_f_y) > $a_f_MaxDistanceToXY Then ExitLoop
 
-                ; If no enemy is in the player's range but a hero has aggro on one, move toward it. Only chase while the player is still within aggro range of the fight origin.
-                If Not UAI_IsAgentInRange(-2, $a_f_AggroRange, "UAI_Filter_IsLivingEnemy|UAI_Filter_IsNotAvoided") _
-                                And Agent_GetDistanceToXY($a_f_x, $a_f_y) <= $a_f_AggroRange Then
-                        Local $l_i_PartyRangeEnemy = UAI_GetNearestEnemyInPartyRange($a_f_AggroRange)
-                        If $l_i_PartyRangeEnemy <> 0 Then
-                                Local $l_f_EnemyX = UAI_GetAgentInfoByID($l_i_PartyRangeEnemy, $GC_UAI_AGENT_X)
-                                Local $l_f_EnemyY = UAI_GetAgentInfoByID($l_i_PartyRangeEnemy, $GC_UAI_AGENT_Y)
-                                Map_Move($l_f_EnemyX, $l_f_EnemyY, 0)
-                                Sleep(500)
-                        EndIf
-                        ExitLoop ; Next call handles the remainder
-                EndIf
+        ; If no enemy is in the player's range but a hero has aggro on one, move toward it. Only chase while the player is still within aggro range of the fight origin.
+        If Not UAI_IsAgentInRange(-2, $a_f_AggroRange, "UAI_Filter_IsLivingEnemy|UAI_Filter_IsNotAvoided") _
+            And Agent_GetDistanceToXY($a_f_x, $a_f_y) <= $a_f_AggroRange Then
+            Local $l_i_PartyRangeEnemy = UAI_GetNearestEnemyInPartyRange($a_f_AggroRange)
+            If $l_i_PartyRangeEnemy <> 0 Then
+                Local $l_f_EnemyX = UAI_GetAgentInfoByID($l_i_PartyRangeEnemy, $GC_UAI_AGENT_X)
+                Local $l_f_EnemyY = UAI_GetAgentInfoByID($l_i_PartyRangeEnemy, $GC_UAI_AGENT_Y)
+                Map_Move($l_f_EnemyX, $l_f_EnemyY, 0)
+                Sleep(500)
+            EndIf
+            ExitLoop ; Next call handles the remainder
+        EndIf
 
-;~ WEAPON CHECK
-                If $g_b_CacheWeaponSet Then UAI_ShouldSwitchWeaponSet()
+        ;~ WEAPON CHECK
+        If $g_b_CacheWeaponSet Then UAI_ShouldSwitchWeaponSet()
 
-;~         AUTO ATTACK
-                If UAI_CanAutoAttack() Then
-                        UAI_AutoAttack($a_f_AggroRange)
-                Else
-                        If UAI_GetPlayerInfo($GC_UAI_AGENT_IsAttacking) Then Core_ControlAction($GC_I_CONTROL_ACTION_CANCEL_ACTION)
-                EndIf
-                If SurvivorMode() Then Return
+        ;~         AUTO ATTACK
+        If UAI_CanAutoAttack() Then
+            UAI_AutoAttack($a_f_AggroRange)
+        Else
+            If UAI_GetPlayerInfo($GC_UAI_AGENT_IsAttacking) Then Core_ControlAction($GC_I_CONTROL_ACTION_CANCEL_ACTION)
+        EndIf
+        If SurvivorMode() Then Return
 
-;~         PRIORITY SKILLS
-                If UAI_PrioritySkills($a_f_AggroRange) Then
-                        Local $l_i_UsedSlot = @extended
-                        If $l_i_UsedSlot = $skillSlot Then
-                                Sleep(128)
-                                ContinueLoop
-                        EndIf
-                        UAI_UpdateAgentCache($a_f_AggroRange)
-                EndIf
-                If SurvivorMode() Then Return
-
-;~         BUNDLE TO DROP
-                UAI_DropBundle($a_f_AggroRange)
-                If SurvivorMode() Then Return
-
-;~         NORMAL SKILLS
-                UAI_TryUseSkill($skillSlot, $a_f_AggroRange)
-                If SurvivorMode() Then Return
-
+        ;~         PRIORITY SKILLS
+        If UAI_PrioritySkills($a_f_AggroRange) Then
+            Local $l_i_UsedSlot = @extended
+            If $l_i_UsedSlot = $skillSlot Then
                 Sleep(128)
-        Next
+                ContinueLoop
+            EndIf
+            UAI_UpdateAgentCache($a_f_AggroRange)
+        EndIf
+        If SurvivorMode() Then Return
 
-        Return True
+        ;~         BUNDLE TO DROP
+        UAI_DropBundle($a_f_AggroRange)
+        If SurvivorMode() Then Return
+
+        ;~         NORMAL SKILLS
+        UAI_TryUseSkill($skillSlot, $a_f_AggroRange)
+        If SurvivorMode() Then Return
+
+        Sleep(128)
+    Next
+
+    Return True
 EndFunc   ;==>_UAI_UseSkills
 
 Func AggroMoveToExFilter($aX, $aY, $range = 1700, $filterFunc = "EnemyFilter")
@@ -512,7 +512,7 @@ Func AggroMoveToExFilter($aX, $aY, $range = 1700, $filterFunc = "EnemyFilter")
 
         ; Check for healing in case some grawl lobbed a brick
         If NeedHeal(70) Then UseHeal()
-        
+
         If GetNumberOfFoesInRangeOfAgent(-2, 1700, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc) > 0 Then
             If GetPartyDead() Then ExitLoop
             $enemy = GetNearestEnemyToAgent(-2, 1700, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc)
@@ -525,7 +525,7 @@ Func AggroMoveToExFilter($aX, $aY, $range = 1700, $filterFunc = "EnemyFilter")
         EndIf
 
         Other_RndSleep(250)
-        
+
         ; Check for healing after combat
         If NeedHeal(50) Then UseHeal()
 
@@ -548,164 +548,164 @@ EndFunc   ;==>AggroMoveToExFilter
 Func FightExFilter($AggroRange, $filterFunc = "EnemyFilter")
     If GetPartyDead() Then Return
     If SurvivorMode() Then Return
-    
+
     Local $target
     Local $distance
     Local $useSkill
     Local $energy
     Local $lastId = 99999, $coordinate[2], $timer
 
-        Do
-            If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
+    Do
+        If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
+        If TimerDiff($TimerToKill) > 180000 Then Exitloop
+        If GetPartyDead() Then Exitloop
+        If SurvivorMode() Then Return
+
+        ; Check for healing before engaging target
+        If NeedHeal(70) Then UseHeal()
+
+        $target = GetNearestEnemyToAgent(-2, 1700, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc)
+        If GetPartyDead() Then Exitloop
+        If SurvivorMode() Then Return
+        $distance = ComputeDistance(Agent_GetAgentInfo($target, 'X'), Agent_GetAgentInfo($target, 'Y'), Agent_GetAgentInfo(-2, 'X'), Agent_GetAgentInfo(-2, 'Y'))
+
+        If $target <> 0 AND $distance < $AggroRange And Not GetPartyDead() Then
             If TimerDiff($TimerToKill) > 180000 Then Exitloop
-            If GetPartyDead() Then Exitloop
-            If SurvivorMode() Then Return
 
-            ; Check for healing before engaging target
-            If NeedHeal(70) Then UseHeal()
-
-            $target = GetNearestEnemyToAgent(-2, 1700, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc)
-            If GetPartyDead() Then Exitloop
-            If SurvivorMode() Then Return
-            $distance = ComputeDistance(Agent_GetAgentInfo($target, 'X'), Agent_GetAgentInfo($target, 'Y'), Agent_GetAgentInfo(-2, 'X'), Agent_GetAgentInfo(-2, 'Y'))
-            
-            If $target <> 0 AND $distance < $AggroRange And Not GetPartyDead() Then
-                If TimerDiff($TimerToKill) > 180000 Then Exitloop
-                
-                If Agent_GetAgentInfo($target, 'ID') <> $lastId Then
-                    If GetPartyDead() Then Exitloop
-                    If SurvivorMode() Then Return
-                    
-                    Agent_ChangeTarget($target)
-                    Other_RndSleep(150)
-                    Agent_CallTarget($target)
-                    Other_RndSleep(150)
-                    
-                    ; Check for healing after we've called them stupid
-                    If NeedHeal(70) Then UseHeal()
-
-                    If GetPartyDead() Then Exitloop
-                    If SurvivorMode() Then Return
-                    Agent_Attack($target)
-                    $lastId = Agent_GetAgentInfo($target, 'ID')
-                    $coordinate[0] = Agent_GetAgentInfo($target, 'X')
-                    $coordinate[1] = Agent_GetAgentInfo($target, 'Y')
-                    $timer = TimerInit()
-                    $distance = ComputeDistance($coordinate[0], $coordinate[1], Agent_GetAgentInfo(-2, 'X'), Agent_GetAgentInfo(-2, 'Y'))
-                    If GetPartyDead() Then Exitloop
-                    If SurvivorMode() Then Return
-                    If $distance > 1100 Then
-
-                        Do
-                            If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
-                            If TimerDiff($TimerToKill) > 180000 Then Exitloop
-                            If GetPartyDead() Then Exitloop
-                            If SurvivorMode() Then Return
-                            
-                            ; I didn't mean it, I'm sorry..
-                            If NeedHeal(70) Then UseHeal()
-                            
-                            Map_Move($coordinate[0], $coordinate[1])
-                            Other_RndSleep(50)
-                            If GetPartyDead() Then Exitloop
-                            If SurvivorMode() Then Return
-                            $distance = ComputeDistance($coordinate[0], $coordinate[1], Agent_GetAgentInfo(-2, 'X'), Agent_GetAgentInfo(-2, 'Y'))
-                        Until $distance < 1100 Or TimerDiff($timer) > 10000 Or GetPartyDead() Or TimerDiff($TimerToKill) > 180000
-                    
-                    EndIf
-                EndIf
-
-                If TimerDiff($TimerToKill) > 180000 Then Exitloop
-                Other_RndSleep(150)
-                $timer = TimerInit()
+            If Agent_GetAgentInfo($target, 'ID') <> $lastId Then
                 If GetPartyDead() Then Exitloop
                 If SurvivorMode() Then Return
-                    
+
+                Agent_ChangeTarget($target)
+                Other_RndSleep(150)
+                Agent_CallTarget($target)
+                Other_RndSleep(150)
+
+                ; Check for healing after we've called them stupid
+                If NeedHeal(70) Then UseHeal()
+
+                If GetPartyDead() Then Exitloop
+                If SurvivorMode() Then Return
+                Agent_Attack($target)
+                $lastId = Agent_GetAgentInfo($target, 'ID')
+                $coordinate[0] = Agent_GetAgentInfo($target, 'X')
+                $coordinate[1] = Agent_GetAgentInfo($target, 'Y')
+                $timer = TimerInit()
+                $distance = ComputeDistance($coordinate[0], $coordinate[1], Agent_GetAgentInfo(-2, 'X'), Agent_GetAgentInfo(-2, 'Y'))
+                If GetPartyDead() Then Exitloop
+                If SurvivorMode() Then Return
+                If $distance > 1100 Then
+
                     Do
                         If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
                         If TimerDiff($TimerToKill) > 180000 Then Exitloop
                         If GetPartyDead() Then Exitloop
                         If SurvivorMode() Then Return
-                        
-                        ; Check for healing before engaging
+
+                        ; I didn't mean it, I'm sorry..
                         If NeedHeal(70) Then UseHeal()
 
-                        $target = GetNearestEnemyToAgent(-2, 1700, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc)
+                        Map_Move($coordinate[0], $coordinate[1])
+                        Other_RndSleep(50)
                         If GetPartyDead() Then Exitloop
                         If SurvivorMode() Then Return
-                        $distance = GetDistance($target, -2)
+                        $distance = ComputeDistance($coordinate[0], $coordinate[1], Agent_GetAgentInfo(-2, 'X'), Agent_GetAgentInfo(-2, 'Y'))
+                    Until $distance < 1100 Or TimerDiff($timer) > 10000 Or GetPartyDead() Or TimerDiff($TimerToKill) > 180000
 
-                        If $distance < 1250 And Not GetPartyDead() Then
-                            If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
-                            If TimerDiff($TimerToKill) > 180000 Then Exitloop
-                            
-                            For $i = 1 To 8
-                                If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
-                                If TimerDiff($TimerToKill) > 180000 Then Exitloop
-                                If GetPartyDead() Then Exitloop
-                                If SurvivorMode() Then Return
-                                If Agent_GetAgentInfo($target, 'IsDead') Then ExitLoop
-                                
-                                ; Get skill ID for current slot
-                                Local $currentSkillID = Skill_GetSkillbarInfo($i, "SkillID")
+                EndIf
+            EndIf
 
-                                ; Skip healing skills - they're handled separately
-                                If IsHealingSkill($currentSkillID) Then ContinueLoop
-                                                                
-                                $distance = GetDistance($target, -2)
-                                If $distance > $AggroRange Then ExitLoop
+            If TimerDiff($TimerToKill) > 180000 Then Exitloop
+            Other_RndSleep(150)
+            $timer = TimerInit()
+            If GetPartyDead() Then Exitloop
+            If SurvivorMode() Then Return
 
-                                $energy = GetEnergy(-2)
-                                
-                                ; Deal with adrenaline skills
-                                If IsAdrenal($currentSkillID) Then
-                                    If Skill_GetSkillbarInfo($i, "Adrenaline") < Skill_GetSkillInfo($currentSkillID, "Adrenaline") Then ContinueLoop
-                                EndIf
-                                
-                                If IsRecharged($i) And $energy >= Skill_GetSkillInfo(Skill_GetSkillbarInfo($i, "SkillID"), "EnergyCost") And Not GetPartyDead() Then
-                                    If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
-                                    If TimerDiff($TimerToKill) > 180000 Then Exitloop
-                                    $useSkill = $i
-                                    
-                                    UseSkillEx($useSkill, $target)
-                                    Other_RndSleep(150)
-                                    If GetPartyDead() Then Exitloop
-                                    If SurvivorMode() Then Return
-                                    Agent_Attack($target)
-                                    Other_RndSleep(150)
-                                EndIf
+            Do
+                If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
+                If TimerDiff($TimerToKill) > 180000 Then Exitloop
+                If GetPartyDead() Then Exitloop
+                If SurvivorMode() Then Return
 
-                                If NeedHeal(95) Then UseHeal()
+                ; Check for healing before engaging
+                If NeedHeal(70) Then UseHeal()
 
-                                If TimerDiff($TimerToKill) > 180000 Then Exitloop
-                                If $i = 8 Then $i = 0
-                                If GetPartyDead() Then Exitloop
-                                If SurvivorMode() Then Return
-                            Next
-                        EndIf
-                        
+                $target = GetNearestEnemyToAgent(-2, 1700, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc)
+                If GetPartyDead() Then Exitloop
+                If SurvivorMode() Then Return
+                $distance = GetDistance($target, -2)
+
+                If $distance < 1250 And Not GetPartyDead() Then
+                    If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
+                    If TimerDiff($TimerToKill) > 180000 Then Exitloop
+
+                    For $i = 1 To 8
+                        If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
                         If TimerDiff($TimerToKill) > 180000 Then Exitloop
                         If GetPartyDead() Then Exitloop
                         If SurvivorMode() Then Return
-                        Agent_Attack($target)
+                        If Agent_GetAgentInfo($target, 'IsDead') Then ExitLoop
+
+                        ; Get skill ID for current slot
+                        Local $currentSkillID = Skill_GetSkillbarInfo($i, "SkillID")
+
+                        ; Skip healing skills - they're handled separately
+                        If IsHealingSkill($currentSkillID) Then ContinueLoop
+
                         $distance = GetDistance($target, -2)
-                    Until Agent_GetAgentInfo($target, 'HP') < 0.005 Or $distance > $AggroRange Or TimerDiff($timer) > 20000 Or GetPartyDead() Or TimerDiff($TimerToKill) > 180000
-            EndIf
+                        If $distance > $AggroRange Then ExitLoop
 
-            If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
-            If TimerDiff($TimerToKill) > 180000 Then Exitloop
-            If GetPartyDead() Then Exitloop
-            If SurvivorMode() Then Return
-            $target = GetNearestEnemyToAgent(-2, 1700, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc)
-            If GetPartyDead() Then Exitloop
-            If SurvivorMode() Then Return
-            $distance = GetDistance($target, -2)
-        Until Agent_GetAgentInfo($target, 'ID') = 0 Or $distance > $AggroRange Or GetPartyDead() Or TimerDiff($TimerToKill) > 180000
+                        $energy = GetEnergy(-2)
 
-        If CountSlots() <> 0 And Not GetPartyDead() Then
-            If TimerDiff($TimerToKill) > 180000 Then Return
-            PickUpLoot()
+                        ; Deal with adrenaline skills
+                        If IsAdrenal($currentSkillID) Then
+                            If Skill_GetSkillbarInfo($i, "Adrenaline") < Skill_GetSkillInfo($currentSkillID, "Adrenaline") Then ContinueLoop
+                        EndIf
+
+                        If IsRecharged($i) And $energy >= Skill_GetSkillInfo(Skill_GetSkillbarInfo($i, "SkillID"), "EnergyCost") And Not GetPartyDead() Then
+                            If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
+                            If TimerDiff($TimerToKill) > 180000 Then Exitloop
+                            $useSkill = $i
+
+                            UseSkillEx($useSkill, $target)
+                            Other_RndSleep(150)
+                            If GetPartyDead() Then Exitloop
+                            If SurvivorMode() Then Return
+                            Agent_Attack($target)
+                            Other_RndSleep(150)
+                        EndIf
+
+                        If NeedHeal(95) Then UseHeal()
+
+                        If TimerDiff($TimerToKill) > 180000 Then Exitloop
+                        If $i = 8 Then $i = 0
+                        If GetPartyDead() Then Exitloop
+                        If SurvivorMode() Then Return
+                    Next
+                EndIf
+
+                If TimerDiff($TimerToKill) > 180000 Then Exitloop
+                If GetPartyDead() Then Exitloop
+                If SurvivorMode() Then Return
+                Agent_Attack($target)
+                $distance = GetDistance($target, -2)
+            Until Agent_GetAgentInfo($target, 'HP') < 0.005 Or $distance > $AggroRange Or TimerDiff($timer) > 20000 Or GetPartyDead() Or TimerDiff($TimerToKill) > 180000
         EndIf
+
+        If GetNumberOfFoesInRangeOfAgent(-2, 1700) = 0 Then Exitloop
+        If TimerDiff($TimerToKill) > 180000 Then Exitloop
+        If GetPartyDead() Then Exitloop
+        If SurvivorMode() Then Return
+        $target = GetNearestEnemyToAgent(-2, 1700, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc)
+        If GetPartyDead() Then Exitloop
+        If SurvivorMode() Then Return
+        $distance = GetDistance($target, -2)
+    Until Agent_GetAgentInfo($target, 'ID') = 0 Or $distance > $AggroRange Or GetPartyDead() Or TimerDiff($TimerToKill) > 180000
+
+    If CountSlots() <> 0 And Not GetPartyDead() Then
+        If TimerDiff($TimerToKill) > 180000 Then Return
+        PickUpLoot()
+    EndIf
 EndFunc   ;==>FightExFilter
 
 Func GetPartyDead()
@@ -787,7 +787,7 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
 
     Local $timer = TimerInit()
     Local $maxKillTime = 180000
-    
+
     Local $target, $targetCaster, $currentDistance, $targetX, $targetY
     Local $myX, $myY, $angle, $newX, $newY
 
@@ -856,7 +856,7 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
         If GetNumberOfCharrInRangeOfXY($refX, $refY, $range) = 0 Then Return True
 
         $targetCaster = GetNearestEnemyToAgent(-2, $range, $GC_I_AGENT_TYPE_LIVING, 1, "CharrCasterFilter")
-        
+
         $target = GetNearestEnemyToAgent(-2, $range, $GC_I_AGENT_TYPE_LIVING, 1, $filterFunc)
 
         If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
@@ -877,12 +877,12 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
         $myY = Agent_GetAgentInfo(-2, "Y")
 
         $currentDistance = GetDistance($target, -2)
-        
+
         If Abs($currentDistance - $desiredDistance) > $tolerance Then
-            
+
             $targetX = Agent_GetAgentInfo($target, "X")
             $targetY = Agent_GetAgentInfo($target, "Y")
-            
+
             $angle = ATan2($targetY - $myY, $targetX - $myX)
 
 
@@ -892,7 +892,7 @@ Func StayAlive_Kill($refX, $refY, $filterFunc = "EnemyFilter", $range = 2500)
 
             $newX = $myX + ($newX - $myX) * $adjustFactor
             $newY = $myY + ($newY - $myY) * $adjustFactor
-            
+
             Map_Move($newX, $newY)
 
             $myX = Agent_GetAgentInfo(-2, "X")
@@ -1002,7 +1002,7 @@ Func NecroKill($targC, $targ)
         EndIf
     EndIf
 
- EndFunc   ;==>NecroKill
+EndFunc   ;==>NecroKill
 #EndRegion
 
 #Region AgentFilters
@@ -1039,7 +1039,7 @@ Func CorpseFilter($aAgentPtr)
     If $aAgentPtr = 0 Then Return False
     If Agent_GetAgentInfo($aAgentPtr, "Allegiance") <> 3 Then Return False
     If Agent_GetAgentInfo($aAgentPtr, "HP") > 0 Then Return False
-    
+
     Return True
 EndFunc   ;==>CorpseFilter
 
@@ -1343,7 +1343,7 @@ Func PickUpLootInRange($range = 1500, $refx = "", $refy = "")
 
     Local $lAgentArray = Item_GetItemArray()
     Local $maxitems = IsArray($lAgentArray) ? $lAgentArray[0] : 0
-    
+
     If $refx = "" Or $refy = "" Then
         $refx = Agent_GetAgentInfo(-2, "X")
         $refy = Agent_GetAgentInfo(-2, "Y")
@@ -1383,14 +1383,14 @@ Func CanPickUp($aItemPtr)
     Local $aExtraID = Item_GetItemInfoByPtr($aItemPtr, "ExtraID")
     Local $lRarity = Item_GetItemInfoByPtr($aItemPtr, "Rarity")
     If (($lModelID == 2511) And (GetGoldCharacter() < 99000)) Then
-        Return True	; gold coins (only pick if character has less than 99k in inventory)
-    ElseIf ($lModelID == $GC_I_MODELID_DYE) Then	; Dye items
+        Return True    ; gold coins (only pick if character has less than 99k in inventory)
+    ElseIf ($lModelID == $GC_I_MODELID_DYE) Then    ; Dye items
         If $aExtraID == $GC_I_EXTRAID_DYE_BLACK Then Return $isBlackPickup
         If $aExtraID == $GC_I_EXTRAID_DYE_WHITE Then Return $isWhitePickup ; Only pick White and Black ones
         Return $isOtherPickup ; Pick all dyes
     ElseIf $lModelID == $ITEM_ID_Lockpicks Then
         Return True
-    ElseIf $lModelID == 22269 Then	; Cupcakes
+    ElseIf $lModelID == 22269 Then    ; Cupcakes
         Return True
     ElseIf $lModelID == $GC_I_MODELID_LUNAR_TOKEN Then ; Lunar Tokens
         Return True
@@ -1410,7 +1410,7 @@ Func CanPickUp($aItemPtr)
         Return True
     ElseIf IsPcon($aItemPtr) Then ; ==== Pcons ==== or all event items
         Return $isPconsPickup
-    ElseIf IsRareMaterial($aItemPtr) Then	; Rare Mats
+    ElseIf IsRareMaterial($aItemPtr) Then    ; Rare Mats
         Return False
     ElseIf $lModelID == $CharrSalvKit Then
         Return $isCSalvPickup
@@ -1466,7 +1466,7 @@ Func GetItemMaxDmg($aItem)
     If $lPos = 0 Then $lPos = StringInStr($lModString, "B8A7") ; Armor (shield)
     If $lPos = 0 Then Return 0
     Return Int("0x" & StringMid($lModString, $lPos - 2, 2))
- EndFunc   ;==>GetItemMaxDmg
+EndFunc   ;==>GetItemMaxDmg
 
 Func GetGoldCharacter()
     Return Item_GetInventoryInfo("GoldCharacter")
@@ -1479,13 +1479,13 @@ EndFunc   ;==>GetGoldStorage
 Func InventoryPre()
     LogInfo("Travelling to Ascalon City (Pre-Searing)")
     RndTravel($GC_I_MAP_ID_ASCALON_CITY_OUTPOST)
-    
+
     Sleep(3000)
-    
+
     LogInfo("Moving to Merchant..")
     MerchantAscalonPre()
     Sleep(2000)
-    
+
     If GetGoldCharacter() < 100 Or CountSlots() < 1 Then
         LogWarn("Selling common items to get 100 gold minimum, and free inventory space.")
         For $i = 1 To 4
@@ -1493,13 +1493,13 @@ Func InventoryPre()
             If GetGoldCharacter() >= 100 And CountSlots() >= 1 Then ExitLoop
         Next
     EndIf
-    
+
     If GetGoldCharacter() >= 100 And CountSlots() >= 1 Then
         LogInfo("Identifying items..")
         For $i = 1 To 4
             Ident($i)
         Next
-        
+
         LogInfo("Selling items..")
         For $i = 1 To 4
             Sell($i)
@@ -1520,7 +1520,7 @@ Func InventoryPre()
     EndIf
 
     UpdateStats()
-    
+
     LogWarn("Inventory management complete!")
 
     Sleep(500)
@@ -1536,7 +1536,7 @@ Func DanceParty()
     Sleep(1000)
     Chat_SendChat("dance", "/")
     Sleep(250)
-    
+
     $BotRunning = False
 EndFunc
 
@@ -1546,9 +1546,9 @@ Func MerchantAscalonPre()
     Local $sp1 = ComputeDistance(8436, 4819, $spX, $spY)
 
     If $sp1 > 3000 Then MoveTo(8339.99, 6202.35)
-    
+
     MoveTo(8488.07, 4870.26)
-    
+
     LogInfo("Talking to Merchant..")
     Local $guy = GetNearestNPCToAgent(-2, 1320, $GC_I_AGENT_TYPE_LIVING, 1, "NPCFilter")
     Agent_GoNPC($guy)
@@ -1627,7 +1627,7 @@ Func UseSummoningStone()
     Local $lItemPtr
     Local $lItemID
     Local $myLevel = Agent_GetAgentInfo(-2, "Level")
-    
+
     If GetEffectTimeRemainingEx(-2, 2886) <> 0 Then Return False  ; Summoning Sickness
     For $i = 1 To 4
         For $j = 1 To Item_GetBagInfo(Item_GetBagPtr($i), 'Slots')
@@ -1644,11 +1644,11 @@ Func UseSummoningStone()
         Next
     Next
     Return False
-EndFunc	   ;==>UseSummoningStone
+EndFunc       ;==>UseSummoningStone
 
 Func GetBonus()
     RndTravel($GC_I_MAP_ID_ASCALON_CITY_OUTPOST)
- 
+
     If FindSummoningStone() Then
         LogInfo("Summoning stone found!")
         Sleep(1000)
@@ -1688,7 +1688,7 @@ Func DeleteBonusItems()
 EndFunc   ;==>DeleteBonusItems
 
 Func QuestActive($questID)
-    
+
     Local $bHasQuest = InQuestLog($questID)
 
     If $bHasQuest = True Then
@@ -1772,7 +1772,7 @@ Func CanPreSell($aItemPtr)
     Local $lRarity = Item_GetItemInfoByPtr($aItemPtr, "Rarity")
     Local $lIsIdentified = Item_GetItemInfoByPtr($aItemPtr, "IsIdentified")
     Local $IsPreCollectable = IsPreCollectable($aItemPtr)
-    
+
     ; Only sell white and blue items to get enough money or free slots, we don't want to sell pre-collectable items however.
     If $IsPreCollectable Then Return False
     If $lRarity <> $RARITY_White And $lRarity <> $RARITY_Blue Then Return False
@@ -1797,24 +1797,24 @@ Func CanSell($aItem)
     Local $IsEliteTome = IsEliteTome($aItem)
 
     Local $type = Item_GetItemInfoByPtr($aItem, "ItemType")
-    
+
     Switch $IsBlue
         Case True
             If $IsRareMod Or $IsRareRunePre Or $IsInsignia  Or $IsSpecial Then Return False
             Return $isBlueSell ; Is blue
-        EndSwitch
-    
+    EndSwitch
+
     Switch $IsPurple
         Case True
             If $IsRareMod Or $IsRareRunePre Or $IsInsignia  Or $IsSpecial Then Return False
             Return $isPurpleSell ; Is purple
-        EndSwitch
-    
+    EndSwitch
+
     Switch $IsGold
         Case True
             If $IsRareMod Or $IsRareRunePre Or $IsInsignia Or $IsSpecial Then Return False
             Return $isGoldSell ; Is gold
-        EndSwitch
+    EndSwitch
 
     Switch $IsDye
         Case $GC_I_EXTRAID_DYE_BLACK
@@ -1826,68 +1826,68 @@ Func CanSell($aItem)
     EndSwitch
 
     Switch $IsCharrRelated
-    Case True   
-        Switch $ModelID
-            Case 18721
-                Return $isCSalvSell
-            Case 16453
-                Return $isCBagSell
-        EndSwitch
+        Case True
+            Switch $ModelID
+                Case 18721
+                    Return $isCSalvSell
+                Case 16453
+                    Return $isCBagSell
+            EndSwitch
     EndSwitch
 
     Switch $IsPreCollectable
-    Case True
-       Return $isCollSell ; Is pre-collectable
+        Case True
+            Return $isCollSell ; Is pre-collectable
     EndSwitch
 
     Switch $IsSpecial
-    Case True
-       Return False ; Is special item (Ecto, TOT, etc)
+        Case True
+            Return False ; Is special item (Ecto, TOT, etc)
     EndSwitch
- 
+
     Switch $Pcon
-    Case True
-       Return $isPconsSell ; Is a Pcon
+        Case True
+            Return $isPconsSell ; Is a Pcon
     EndSwitch
- 
+
     Switch $Material
-    Case True
-       Return False ; Is rare material
+        Case True
+            Return False ; Is rare material
     EndSwitch
 
     Switch $IsInsignia
-    Case True
-       Return False
+        Case True
+            Return False
     EndSwitch
-    
+
     Switch $IsRareRunePre
-    Case True
-       Return False
+        Case True
+            Return False
     EndSwitch
 
     Switch $IsRareMod
-    Case True
-       Return False
+        Case True
+            Return False
     EndSwitch
 
     Switch $IsTome
-    Case True
-       Return False
+        Case True
+            Return False
     EndSwitch
- 
+
     Switch $IsEliteTome
-    Case True
-       Return False
+        Case True
+            Return False
     EndSwitch
- 
+
     Return True
-  EndFunc   ;==> CanSell
+EndFunc   ;==> CanSell
 #EndRegion
 
 #Region Items
 Func IsBlue($aItem)
     Local $lRarity = Item_GetItemInfoByPtr($aItem, "Rarity")
-    
+
     If $lRarity = $RARITY_Blue Then
         Return True
     EndIf
@@ -1896,7 +1896,7 @@ EndFunc   ;==> IsBlue
 
 Func IsPurple($aItem)
     Local $lRarity = Item_GetItemInfoByPtr($aItem, "Rarity")
-    
+
     If $lRarity = $RARITY_Purple Then
         Return True
     EndIf
@@ -1905,7 +1905,7 @@ EndFunc   ;==> IsPurple
 
 Func IsGold($aItem)
     Local $lRarity = Item_GetItemInfoByPtr($aItem, "Rarity")
-    
+
     If $lRarity = $RARITY_Gold Then
         Return True
     EndIf
@@ -1934,8 +1934,8 @@ Func IsCharrRelated($aItem)
     Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
 
     Switch $ModelID
-    Case 18721, 16453
-       Return $ModelID ; Charr Salv Kit, Charr Bag
+        Case 18721, 16453
+            Return $ModelID ; Charr Salv Kit, Charr Bag
     EndSwitch
     Return False
 EndFunc   ;==> IsCharrRelated
@@ -1944,10 +1944,10 @@ Func IsPreCollectable($aItem)
     Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
 
     Switch $ModelID
-    Case 2994
-       Return True ; Red iris,
-    Case 422, 423, 424, 425, 426, 427, 428, 429, 430, 431, 432, 433 ; Spider Leg, Charr Carving, Icy Lodes, Dull Carap, Garg Skull, Worn Belt, Unnatural Seed, Skale Fin (Pre), Skele Limb, Ench Lodes, Grawl Neck, Baked Husk.
-        Return True
+        Case 2994
+            Return True ; Red iris,
+        Case 422, 423, 424, 425, 426, 427, 428, 429, 430, 431, 432, 433 ; Spider Leg, Charr Carving, Icy Lodes, Dull Carap, Garg Skull, Worn Belt, Unnatural Seed, Skale Fin (Pre), Skele Limb, Ench Lodes, Grawl Neck, Baked Husk.
+            Return True
     EndSwitch
     Return False
 EndFunc   ;==> IsPreCollectable
@@ -1966,177 +1966,177 @@ Func IsRareSkin($aItem)
     Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
 
     Switch $ModelID
-    Case 399
-       Return True ; Crystallines
-    Case 344
-       Return True ; Magmas Shield
-    Case 603
-       Return True ; Orrian Earth Staff
-    Case 391
-       Return True ; Raven Staff
-    Case 926
-       Return True ; Cele Scepter All Attribs
-    Case 942, 943
-       Return True ; Cele Shields (Str + Tact)
-    Case 858, 776, 789
-       Return True ; Paper Fans (Divine, Soul, Energy)
-    Case 905
-       Return True ; Divine Scroll (Canthan)
-    Case 785
-       Return True ; Celestial Staff all attribs.
-    Case 1022, 874, 875
-       Return True ; Jug - DF, SF, ES
-    Case 952, 953
-       Return True ; Kappa Shields (Str + Tact)
-    Case 736, 735, 778, 777, 871, 872, 741, 870, 873, 871, 872, 869, 744, 1101
-       Return True ; All rare skins from Cantha Mainland
-    Case 945, 944, 940, 941, 950, 951, 1320, 1321, 789, 896, 875, 954, 955, 956, 958
-       Return True ; All rare skins from Dragon Moss
-    Case 959, 960
-       Return True ; Plagueborn Shields
-;~     Case 1026, 1027
-;~ 	   Return True ; Plagueborn Focus (ES, DF)
-    Case 341
-       Return True ; Stone Summit Shield
-    Case 342
-       Return True ; Summit Warlord Shield
-    Case 1985
-       Return True ; Eaglecrest Axe
-    Case 2048
-       Return True ; Wingcrest Maul
-    Case 2071
-       Return True ; Voltaic Spear
-    Case 1953, 1954, 1955, 1956, 1957, 1958, 1959, 1960, 1961, 1962, 1963, 1964, 1965, 1966, 1967, 1968, 1969, 1970, 1971, 1972, 1973
-       Return True ; Froggy Scepters
-;~     Case 1197, 1556, 1569, 1439, 1563, 1557
-    Case 1197, 1556, 1569, 1439, 1563
-       Return True ; Elonian Swords (Colossal, Ornate, Tattooed, Dead, etc)
-    Case 1589
-        Return True ; Sea Purse Shield
-    Case 1469, 1488, 1266
-        Return True ; Diamong Aegis mot,com,tac
-    Case 1497, 1498, 1268
-        Return True ; Iridescent Aegis mot,com,tac
-    Case 21439
-       Return True ; Polar Bear
-    Case 1896
-       Return True ; Draconic Aegis - Str
-    Case 36674
-       Return True ; Envoy Staff (Divine?)
-    Case 1976
-       Return True ; Emerald Blade
-    Case 1978
-       Return True ; Draconic Scythe
-    Case 32823
-       Return True ; Dhuums Soul Reaper
-    Case 208
-       Return True ; Ascalon War Hammer
-    Case 1315
-       Return True ; Gloom Shield (Str)
-    Case 1039
-       Return True ; Zodiac Shield (Str)
-    Case 1037
-       Return True ; Exalted Aegis (Str)
-    Case 1320
-       Return True ; Guardian Of The Hunt (Str)
-    Case 956, 958
-       Return True ; Outcast Shield (Str) / (Tac)
-    Case 336
-       Return True ; Shadow Shield (OS - Str)
-    Case 120
-       Return True ; Sephis Axe (OS)
-    Case 114
-       Return True ; Dwarven Axe (OS)
-    Case 118
-       Return True ; Serpent Axe (OS)
-    Case 1052
-       Return True ; Darkwing Defender (Str)
-    Case 2236
-       Return True ; Enamaled Shield (Tact)
-    Case 985
-       Return True ; Dragon Kamas
-    Case 396
-        Return True ; Brute Sword
-    Case 397
-        Return True ; Butterfly Sword
-    Case 405
-        Return True ; Falchion
-    Case 400
-        Return True ; Fellblade
-    Case 402
-        Return True ; Fiery Dragon Sword
-    Case 406
-        Return True ; Flamberge
-    Case 407
-        Return True ; Forked Sword
-    Case 408
-        Return True ; Gladius
-    Case 412
-        Return True ; Long Sword
-    Case 416
-        Return True ; Scimitar
-    Case 417
-        Return True ; Shadow Blade
-    Case 418
-        Return True ; Short Sword
-    Case 419
-        Return True ; Spatha
-    Case 421
-        Return True ; Wingblade
-    Case 737
-        Return True ; Broadsword
-    Case 790
-        Return True ; Celestial Sword
-    Case 791
-        Return True ; Crenellated Sword
-    Case 739
-        Return True ; Dadao Sword
-    Case 740
-        Return True ; Dusk Blade
-    Case 795
-        Return True ; Golden Phoenix Blade
-    Case 793
-        Return True ; Gothic Sword
-    Case 1322
-        Return True ; Jade Sword
-    Case 741
-        Return True ; Jitte
-    Case 742
-        Return True ; Katana
-    Case 794
-        Return True ; Oni Blade
-    Case 796
-        Return True ; Plagueborn Sword
-    Case 743
-        Return True ; Platinum Blade
-    Case 744
-        Return True ; Shinobi Blade
-    Case 797
-        Return True ; Sunqua Blade
-    Case 792
-        Return True ; Wicked Blade
-    Case 1042
-        Return True ; Vertebreaker
-    Case 1043
-        Return True ; Zodiac Sword
+        Case 399
+            Return True ; Crystallines
+        Case 344
+            Return True ; Magmas Shield
+        Case 603
+            Return True ; Orrian Earth Staff
+        Case 391
+            Return True ; Raven Staff
+        Case 926
+            Return True ; Cele Scepter All Attribs
+        Case 942, 943
+            Return True ; Cele Shields (Str + Tact)
+        Case 858, 776, 789
+            Return True ; Paper Fans (Divine, Soul, Energy)
+        Case 905
+            Return True ; Divine Scroll (Canthan)
+        Case 785
+            Return True ; Celestial Staff all attribs.
+        Case 1022, 874, 875
+            Return True ; Jug - DF, SF, ES
+        Case 952, 953
+            Return True ; Kappa Shields (Str + Tact)
+        Case 736, 735, 778, 777, 871, 872, 741, 870, 873, 871, 872, 869, 744, 1101
+            Return True ; All rare skins from Cantha Mainland
+        Case 945, 944, 940, 941, 950, 951, 1320, 1321, 789, 896, 875, 954, 955, 956, 958
+            Return True ; All rare skins from Dragon Moss
+        Case 959, 960
+            Return True ; Plagueborn Shields
+            ;~     Case 1026, 1027
+            ;~        Return True ; Plagueborn Focus (ES, DF)
+        Case 341
+            Return True ; Stone Summit Shield
+        Case 342
+            Return True ; Summit Warlord Shield
+        Case 1985
+            Return True ; Eaglecrest Axe
+        Case 2048
+            Return True ; Wingcrest Maul
+        Case 2071
+            Return True ; Voltaic Spear
+        Case 1953, 1954, 1955, 1956, 1957, 1958, 1959, 1960, 1961, 1962, 1963, 1964, 1965, 1966, 1967, 1968, 1969, 1970, 1971, 1972, 1973
+            Return True ; Froggy Scepters
+            ;~     Case 1197, 1556, 1569, 1439, 1563, 1557
+        Case 1197, 1556, 1569, 1439, 1563
+            Return True ; Elonian Swords (Colossal, Ornate, Tattooed, Dead, etc)
+        Case 1589
+            Return True ; Sea Purse Shield
+        Case 1469, 1488, 1266
+            Return True ; Diamong Aegis mot,com,tac
+        Case 1497, 1498, 1268
+            Return True ; Iridescent Aegis mot,com,tac
+        Case 21439
+            Return True ; Polar Bear
+        Case 1896
+            Return True ; Draconic Aegis - Str
+        Case 36674
+            Return True ; Envoy Staff (Divine?)
+        Case 1976
+            Return True ; Emerald Blade
+        Case 1978
+            Return True ; Draconic Scythe
+        Case 32823
+            Return True ; Dhuums Soul Reaper
+        Case 208
+            Return True ; Ascalon War Hammer
+        Case 1315
+            Return True ; Gloom Shield (Str)
+        Case 1039
+            Return True ; Zodiac Shield (Str)
+        Case 1037
+            Return True ; Exalted Aegis (Str)
+        Case 1320
+            Return True ; Guardian Of The Hunt (Str)
+        Case 956, 958
+            Return True ; Outcast Shield (Str) / (Tac)
+        Case 336
+            Return True ; Shadow Shield (OS - Str)
+        Case 120
+            Return True ; Sephis Axe (OS)
+        Case 114
+            Return True ; Dwarven Axe (OS)
+        Case 118
+            Return True ; Serpent Axe (OS)
+        Case 1052
+            Return True ; Darkwing Defender (Str)
+        Case 2236
+            Return True ; Enamaled Shield (Tact)
+        Case 985
+            Return True ; Dragon Kamas
+        Case 396
+            Return True ; Brute Sword
+        Case 397
+            Return True ; Butterfly Sword
+        Case 405
+            Return True ; Falchion
+        Case 400
+            Return True ; Fellblade
+        Case 402
+            Return True ; Fiery Dragon Sword
+        Case 406
+            Return True ; Flamberge
+        Case 407
+            Return True ; Forked Sword
+        Case 408
+            Return True ; Gladius
+        Case 412
+            Return True ; Long Sword
+        Case 416
+            Return True ; Scimitar
+        Case 417
+            Return True ; Shadow Blade
+        Case 418
+            Return True ; Short Sword
+        Case 419
+            Return True ; Spatha
+        Case 421
+            Return True ; Wingblade
+        Case 737
+            Return True ; Broadsword
+        Case 790
+            Return True ; Celestial Sword
+        Case 791
+            Return True ; Crenellated Sword
+        Case 739
+            Return True ; Dadao Sword
+        Case 740
+            Return True ; Dusk Blade
+        Case 795
+            Return True ; Golden Phoenix Blade
+        Case 793
+            Return True ; Gothic Sword
+        Case 1322
+            Return True ; Jade Sword
+        Case 741
+            Return True ; Jitte
+        Case 742
+            Return True ; Katana
+        Case 794
+            Return True ; Oni Blade
+        Case 796
+            Return True ; Plagueborn Sword
+        Case 743
+            Return True ; Platinum Blade
+        Case 744
+            Return True ; Shinobi Blade
+        Case 797
+            Return True ; Sunqua Blade
+        Case 792
+            Return True ; Wicked Blade
+        Case 1042
+            Return True ; Vertebreaker
+        Case 1043
+            Return True ; Zodiac Sword
     EndSwitch
     Return False
-EndFunc   ;==> IsRareSkin 
+EndFunc   ;==> IsRareSkin
 
 Func IsTyriaAnniSkin($aItem)
     Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
 
     Switch $ModelID
-    Case 2017, 2018, 2019, 2020
-       Return True ; Bone Idols
-    Case 2444
-        Return True ; Canthan Targe
-    Case 2100, 2101
-        Return True ; Censor Icon
-    Case 2012, 2013, 2014, 2015, 2016
-        Return True ; Chirmeric Prism
-    Case 2011
-        Return True ; Ithas Bow
+        Case 2017, 2018, 2019, 2020
+            Return True ; Bone Idols
+        Case 2444
+            Return True ; Canthan Targe
+        Case 2100, 2101
+            Return True ; Censor Icon
+        Case 2012, 2013, 2014, 2015, 2016
+            Return True ; Chirmeric Prism
+        Case 2011
+            Return True ; Ithas Bow
     EndSwitch
     Return False
 EndFunc   ;==> IsTyriaAnniSkin
@@ -2145,12 +2145,12 @@ Func IsCanthaAnniSkin($aItem)
     Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
 
     Switch $ModelID
-    Case 2460
-       Return True ; Dragon Fangs
-    Case 2464, 2465, 2466, 2467
-        Return True ; Spirit Binder
-    Case 2469, 2470
-        Return True ; Japan 1st Anniversary Shield
+        Case 2460
+            Return True ; Dragon Fangs
+        Case 2464, 2465, 2466, 2467
+            Return True ; Spirit Binder
+        Case 2469, 2470
+            Return True ; Japan 1st Anniversary Shield
     EndSwitch
     Return False
 EndFunc   ;==> IsCanthaAnniSkin
@@ -2159,8 +2159,8 @@ Func IsElonaAnniSkin($aItem)
     Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
 
     Switch $ModelID
-    Case 2471
-       Return True ; Sunspear
+        Case 2471
+            Return True ; Sunspear
     EndSwitch
     Return False
 EndFunc   ;==> IsElonaAnniSkin
@@ -2169,22 +2169,22 @@ Func IsEotnAnniSkin($aItem)
     Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
 
     Switch $ModelID
-    Case 2472
-       Return True ; Darksteel Longbow
-    Case 2473
-        Return True ; Glacial Blade
-    Case 2474
-        Return True ; Glacial Blades
-    Case 2475, 2476, 2477, 2478, 2479, 2480, 2481, 2482, 2483, 2484, 2485, 2486, 2487, 2488, 2489, 2490, 2491, 2492, 2493, 2494, 2495
-        Return True ; Hourglass Staff
-    Case 2102, 2134, 2103
-        Return True ; Etched Sword
-    Case 2105, 2106
-        Return True ; Arced Blade
-    Case 2116, 2117
-        Return True ; Granite Edge
-    Case 1955, 2125, 1956
-        Return True ; Stoneblade
+        Case 2472
+            Return True ; Darksteel Longbow
+        Case 2473
+            Return True ; Glacial Blade
+        Case 2474
+            Return True ; Glacial Blades
+        Case 2475, 2476, 2477, 2478, 2479, 2480, 2481, 2482, 2483, 2484, 2485, 2486, 2487, 2488, 2489, 2490, 2491, 2492, 2493, 2494, 2495
+            Return True ; Hourglass Staff
+        Case 2102, 2134, 2103
+            Return True ; Etched Sword
+        Case 2105, 2106
+            Return True ; Arced Blade
+        Case 2116, 2117
+            Return True ; Granite Edge
+        Case 1955, 2125, 1956
+            Return True ; Stoneblade
     EndSwitch
     Return False
 EndFunc   ;==> IsEotnAnniSkin
@@ -2193,48 +2193,48 @@ Func IsAnyCampAnniSkin($aItem)
     Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
 
     Switch $ModelID
-    Case 2239
-       Return True ; Bears Sloth
-    Case 2070, 2081, 2082, 2084
-        Return True ; Foxs Greed
-    Case 2440, 2439, 2438
-        Return True ; Hogs Gluttony
-    Case 2020, 2026, 2027, 2028, 2029, 2030, 2492
-        Return True ; Lions Pride
-    Case 2009, 2008
-        Return True ; Scorpions Lust, Scorpions Bow
-    Case 2451, 2452, 2453, 2454
-        Return True ; Snakes Envy
-    Case 2246, 2424, 2427, 2428, 2429, 2430
-        Return True ; Unicorns Wrath
-    Case 2010
-        Return True ; Black Hawks Lust
-    Case 2456, 2457, 2458, 2459
-        Return True ; Dragons Envy
-    Case 2431, 2432, 2433, 2434
-        Return True ; Peacocks Wrath
-    Case 2240
-        Return True ; Rhinos Sloth
-    Case 2442, 2443, 2441
-        Return True ; Spiders Gluttony
-    Case 2031, 2045, 2047, 2054, 2055
-        Return True ; Tigers Pride
-    Case 2087, 2088, 2090, 2091, 2092, 2094, 2095
-        Return True ; Wolfs Greed
-    Case 2133
-        Return True ; Furious Bonecrusher
-    Case 2435, 2436, 2437
-        Return True ; Bronze Guardian
-    Case 2447, 2450, 2448
-        Return True ; Deaths Head
-    Case 2056, 2057, 2066, 2067
-        Return True ; Heavens Arch
-    Case 2242, 2243, 2244, 2445
-        Return True ; Quicksilver
-    Case 2021, 2022, 2023, 2024, 2025
-        Return True ; Storm Ember
-    Case 2461
-        Return True ; Omnious Aegis
+        Case 2239
+            Return True ; Bears Sloth
+        Case 2070, 2081, 2082, 2084
+            Return True ; Foxs Greed
+        Case 2440, 2439, 2438
+            Return True ; Hogs Gluttony
+        Case 2020, 2026, 2027, 2028, 2029, 2030, 2492
+            Return True ; Lions Pride
+        Case 2009, 2008
+            Return True ; Scorpions Lust, Scorpions Bow
+        Case 2451, 2452, 2453, 2454
+            Return True ; Snakes Envy
+        Case 2246, 2424, 2427, 2428, 2429, 2430
+            Return True ; Unicorns Wrath
+        Case 2010
+            Return True ; Black Hawks Lust
+        Case 2456, 2457, 2458, 2459
+            Return True ; Dragons Envy
+        Case 2431, 2432, 2433, 2434
+            Return True ; Peacocks Wrath
+        Case 2240
+            Return True ; Rhinos Sloth
+        Case 2442, 2443, 2441
+            Return True ; Spiders Gluttony
+        Case 2031, 2045, 2047, 2054, 2055
+            Return True ; Tigers Pride
+        Case 2087, 2088, 2090, 2091, 2092, 2094, 2095
+            Return True ; Wolfs Greed
+        Case 2133
+            Return True ; Furious Bonecrusher
+        Case 2435, 2436, 2437
+            Return True ; Bronze Guardian
+        Case 2447, 2450, 2448
+            Return True ; Deaths Head
+        Case 2056, 2057, 2066, 2067
+            Return True ; Heavens Arch
+        Case 2242, 2243, 2244, 2445
+            Return True ; Quicksilver
+        Case 2021, 2022, 2023, 2024, 2025
+            Return True ; Storm Ember
+        Case 2461
+            Return True ; Omnious Aegis
     EndSwitch
     Return False
 EndFunc   ;==> IsAnyCampAnniSkin
@@ -2243,16 +2243,16 @@ Func IsPcon($aItem)
     Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
 
     Switch $ModelID
-    Case 910, 2513, 5585, 6049, 6366, 6367, 6375, 15477, 19171, 19172, 19173, 22190, 24593, 28435, 30855, 31145, 31146, 35124, 36682
-       Return True ; Alcohol
-    Case 6376, 21809, 21810, 21813, 36683
-       Return True ; Party
-    Case 18345, 21492, 21812, 22269, 22644, 22752, 28436, 36681
-       Return True ; Sweets
-    Case 6370, 21488, 21489, 22191, 26784, 28433
-       Return True ; DP Removal
-    Case 15837, 21490, 30648, 31020
-       Return True ; Tonic
+        Case 910, 2513, 5585, 6049, 6366, 6367, 6375, 15477, 19171, 19172, 19173, 22190, 24593, 28435, 30855, 31145, 31146, 35124, 36682
+            Return True ; Alcohol
+        Case 6376, 21809, 21810, 21813, 36683
+            Return True ; Party
+        Case 18345, 21492, 21812, 22269, 22644, 22752, 28436, 36681
+            Return True ; Sweets
+        Case 6370, 21488, 21489, 22191, 26784, 28433
+            Return True ; DP Removal
+        Case 15837, 21490, 30648, 31020
+            Return True ; Tonic
     EndSwitch
     Return False
 EndFunc   ;==> IsPcon
@@ -2260,11 +2260,11 @@ EndFunc   ;==> IsPcon
 Func IsRareMaterial($aItem)
     Local $M = Item_GetItemInfoByPtr($aItem, "ModelID")
     Local $Type = Item_GetItemInfoByPtr($aItem, "ItemType")
- 
-    If $Type <> 11 Then Return False	; Some items have the same model ID, so the type of rare mats is 11
+
+    If $Type <> 11 Then Return False    ; Some items have the same model ID, so the type of rare mats is 11
     Switch $M
-    Case 922, 923, 926, 927, 928, 930, 931, 932, 935, 936, 937, 938, 939, 941, 942, 943, 944, 945, 949, 950, 951, 952, 956, 6532, 6533
-       Return True ; Rare Mats
+        Case 922, 923, 926, 927, 928, 930, 931, 932, 935, 936, 937, 938, 939, 941, 942, 943, 944, 945, 949, 950, 951, 952, 956, 6532, 6533
+            Return True ; Rare Mats
     EndSwitch
     Return False
 EndFunc   ;==> IsRareMaterial
@@ -2273,26 +2273,26 @@ Func IsSpecialItem($aItem)
     Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
 
     Switch $ModelID
-    Case 5656, 18345, 21491, 37765, 21833, 28433, 28434
-       Return True ; Special - ToT etc
-    Case 22751
-       Return True ; Lockpicks
-    Case 24353, 24354
-       Return True ; Chalice & Rin Relics
-    Case 522
-       Return True ; Dark Remains
-    Case 3746, 22280
-       Return True ; Underworld & FOW Scroll
-    Case 35121
-       Return True ; War supplies
-    Case 36985
-       Return True ; Commendations
-    Case 19186, 19187, 19188, 19189
-        Return True ; Djinn Essences
-    Case 31149
-        Return True ;Gifts of the Huntsman
-    Case 38614, 38613
-        Return True ; Compass & Rations
+        Case 5656, 18345, 21491, 37765, 21833, 28433, 28434
+            Return True ; Special - ToT etc
+        Case 22751
+            Return True ; Lockpicks
+        Case 24353, 24354
+            Return True ; Chalice & Rin Relics
+        Case 522
+            Return True ; Dark Remains
+        Case 3746, 22280
+            Return True ; Underworld & FOW Scroll
+        Case 35121
+            Return True ; War supplies
+        Case 36985
+            Return True ; Commendations
+        Case 19186, 19187, 19188, 19189
+            Return True ; Djinn Essences
+        Case 31149
+            Return True ;Gifts of the Huntsman
+        Case 38614, 38613
+            Return True ; Compass & Rations
     EndSwitch
     Return False
 EndFunc   ;==> IsSpecialItem
@@ -2352,356 +2352,356 @@ Func IsPerfectCaster($aItem)
     Local $Curses20Casting = StringInStr($ModStruct, "07141822", 0, 1)
 
     Switch $A
-    Case 1 ; Illusion
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Illusion20Casting > 0 Or $Illusion20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Illusion20Recharge > 0 Or $Illusion20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Illusion20Recharge > 0 Then
-          If $Illusion20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 2 ; Domination
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Domination20Casting > 0 Or $Domination20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Domination20Recharge > 0 Or $Domination20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Domination20Recharge > 0 Then
-          If $Domination20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 3 ; Inspiration
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Inspiration20Casting > 0 Or $Inspiration20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Inspiration20Recharge > 0 Or $Inspiration20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Inspiration20Recharge > 0 Then
-          If $Inspiration20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 4 ; Blood
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Blood20Casting > 0 Or $Blood20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Blood20Recharge > 0 Or $Blood20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Blood20Recharge > 0 Then
-          If $Blood20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 5 ; Death
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Death20Casting > 0 Or $Death20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Death20Recharge > 0 Or $Death20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Death20Recharge > 0 Then
-          If $Death20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 6 ; SoulReap - Doesnt drop?
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $SoulReap20Casting > 0 Or $SoulReap20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $SoulReap20Recharge > 0 Or $SoulReap20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $SoulReap20Recharge > 0 Then
-          If $SoulReap20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 7 ; Curses
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Curses20Casting > 0 Or $Curses20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Curses20Recharge > 0 Or $Curses20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Curses20Recharge > 0 Then
-          If $Curses20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 8 ; Air
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Air20Casting > 0 Or $Air20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Air20Recharge > 0 Or $Air20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Air20Recharge > 0 Then
-          If $Air20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 9 ; Earth
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Earth20Casting > 0 Or $Earth20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Earth20Recharge > 0 Or $Earth20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Earth20Recharge > 0 Then
-          If $Earth20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 10 ; Fire
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Fire20Casting > 0 Or $Fire20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Fire20Recharge > 0 Or $Fire20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Fire20Recharge > 0 Then
-          If $Fire20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 11 ; Water
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Water20Casting > 0 Or $Water20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Water20Recharge > 0 Or $Water20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Water20Recharge > 0 Then
-          If $Water20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 12 ; Energy Storage
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Energy20Casting > 0 Or $Energy20Recharge > 0 Or $Water20Casting > 0 Or $Water20Recharge > 0 Or $Fire20Casting > 0 Or $Fire20Recharge > 0 Or $Earth20Casting > 0 Or $Earth20Recharge > 0 Or $Air20Casting > 0 Or $Air20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Energy20Recharge > 0 Or $Energy20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Or $Water20Casting > 0 Or $Water20Recharge > 0 Or $Fire20Casting > 0 Or $Fire20Recharge > 0 Or $Earth20Casting > 0 Or $Earth20Recharge > 0 Or $Air20Casting > 0 Or $Air20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Energy20Recharge > 0 Then
-          If $Energy20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $is10Cast > 0 Or $is10Recharge > 0 Then
-          If $Water20Casting > 0 Or $Water20Recharge > 0 Or $Fire20Casting > 0 Or $Fire20Recharge > 0 Or $Earth20Casting > 0 Or $Earth20Recharge > 0 Or $Air20Casting > 0 Or $Air20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 13 ; Healing
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Healing20Casting > 0 Or $Healing20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Healing20Recharge > 0 Or $Healing20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Healing20Recharge > 0 Then
-          If $Healing20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 14 ; Smiting
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Smiting20Casting > 0 Or $Smiting20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Smiting20Recharge > 0 Or $Smiting20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Smiting20Recharge > 0 Then
-          If $Smiting20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 15 ; Protection
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Protection20Casting > 0 Or $Protection20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Protection20Recharge > 0 Or $Protection20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Protection20Recharge > 0 Then
-          If $Protection20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 16 ; Divine
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Divine20Casting > 0 Or $Divine20Recharge > 0 Or $Healing20Casting > 0 Or $Healing20Recharge > 0 Or $Smiting20Casting > 0 Or $Smiting20Recharge > 0 Or $Protection20Casting > 0 Or $Protection20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Divine20Recharge > 0 Or $Divine20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Or $Healing20Casting > 0 Or $Healing20Recharge > 0 Or $Smiting20Casting > 0 Or $Smiting20Recharge > 0 Or $Protection20Casting > 0 Or $Protection20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Divine20Recharge > 0 Then
-          If $Divine20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $is10Cast > 0 Or $is10Recharge > 0 Then
-          If $Healing20Casting > 0 Or $Healing20Recharge > 0 Or $Smiting20Casting > 0 Or $Smiting20Recharge > 0 Or $Protection20Casting > 0 Or $Protection20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 32 ; Communing
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Communing20Casting > 0 Or $Communing20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Communing20Recharge > 0 Or $Communing20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Communing20Recharge > 0 Then
-          If $Communing20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 33 ; Restoration
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Restoration20Casting > 0 Or $Restoration20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Restoration20Recharge > 0 Or $Restoration20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Restoration20Recharge > 0 Then
-          If $Restoration20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 34 ; Channeling
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Channeling20Casting > 0 Or $Channeling20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Channeling20Recharge > 0 Or $Channeling20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Channeling20Recharge > 0 Then
-          If $Channeling20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
-    Case 36 ; Spawning - Unconfirmed
-       If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
-          If $Spawning20Casting > 0 Or $Spawning20Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Spawning20Recharge > 0 Or $Spawning20Casting > 0 Then
-          If $is10Cast > 0 Or $is10Recharge > 0 Then
-             Return True
-          EndIf
-       EndIf
-       If $Spawning20Recharge > 0 Then
-          If $Spawning20Casting > 0 Then
-             Return True
-          EndIf
-       EndIf
-       Return False
+        Case 1 ; Illusion
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Illusion20Casting > 0 Or $Illusion20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Illusion20Recharge > 0 Or $Illusion20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Illusion20Recharge > 0 Then
+                If $Illusion20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 2 ; Domination
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Domination20Casting > 0 Or $Domination20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Domination20Recharge > 0 Or $Domination20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Domination20Recharge > 0 Then
+                If $Domination20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 3 ; Inspiration
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Inspiration20Casting > 0 Or $Inspiration20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Inspiration20Recharge > 0 Or $Inspiration20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Inspiration20Recharge > 0 Then
+                If $Inspiration20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 4 ; Blood
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Blood20Casting > 0 Or $Blood20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Blood20Recharge > 0 Or $Blood20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Blood20Recharge > 0 Then
+                If $Blood20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 5 ; Death
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Death20Casting > 0 Or $Death20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Death20Recharge > 0 Or $Death20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Death20Recharge > 0 Then
+                If $Death20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 6 ; SoulReap - Doesnt drop?
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $SoulReap20Casting > 0 Or $SoulReap20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $SoulReap20Recharge > 0 Or $SoulReap20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $SoulReap20Recharge > 0 Then
+                If $SoulReap20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 7 ; Curses
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Curses20Casting > 0 Or $Curses20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Curses20Recharge > 0 Or $Curses20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Curses20Recharge > 0 Then
+                If $Curses20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 8 ; Air
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Air20Casting > 0 Or $Air20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Air20Recharge > 0 Or $Air20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Air20Recharge > 0 Then
+                If $Air20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 9 ; Earth
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Earth20Casting > 0 Or $Earth20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Earth20Recharge > 0 Or $Earth20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Earth20Recharge > 0 Then
+                If $Earth20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 10 ; Fire
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Fire20Casting > 0 Or $Fire20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Fire20Recharge > 0 Or $Fire20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Fire20Recharge > 0 Then
+                If $Fire20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 11 ; Water
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Water20Casting > 0 Or $Water20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Water20Recharge > 0 Or $Water20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Water20Recharge > 0 Then
+                If $Water20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 12 ; Energy Storage
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Energy20Casting > 0 Or $Energy20Recharge > 0 Or $Water20Casting > 0 Or $Water20Recharge > 0 Or $Fire20Casting > 0 Or $Fire20Recharge > 0 Or $Earth20Casting > 0 Or $Earth20Recharge > 0 Or $Air20Casting > 0 Or $Air20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Energy20Recharge > 0 Or $Energy20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Or $Water20Casting > 0 Or $Water20Recharge > 0 Or $Fire20Casting > 0 Or $Fire20Recharge > 0 Or $Earth20Casting > 0 Or $Earth20Recharge > 0 Or $Air20Casting > 0 Or $Air20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Energy20Recharge > 0 Then
+                If $Energy20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $is10Cast > 0 Or $is10Recharge > 0 Then
+                If $Water20Casting > 0 Or $Water20Recharge > 0 Or $Fire20Casting > 0 Or $Fire20Recharge > 0 Or $Earth20Casting > 0 Or $Earth20Recharge > 0 Or $Air20Casting > 0 Or $Air20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 13 ; Healing
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Healing20Casting > 0 Or $Healing20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Healing20Recharge > 0 Or $Healing20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Healing20Recharge > 0 Then
+                If $Healing20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 14 ; Smiting
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Smiting20Casting > 0 Or $Smiting20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Smiting20Recharge > 0 Or $Smiting20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Smiting20Recharge > 0 Then
+                If $Smiting20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 15 ; Protection
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Protection20Casting > 0 Or $Protection20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Protection20Recharge > 0 Or $Protection20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Protection20Recharge > 0 Then
+                If $Protection20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 16 ; Divine
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Divine20Casting > 0 Or $Divine20Recharge > 0 Or $Healing20Casting > 0 Or $Healing20Recharge > 0 Or $Smiting20Casting > 0 Or $Smiting20Recharge > 0 Or $Protection20Casting > 0 Or $Protection20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Divine20Recharge > 0 Or $Divine20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Or $Healing20Casting > 0 Or $Healing20Recharge > 0 Or $Smiting20Casting > 0 Or $Smiting20Recharge > 0 Or $Protection20Casting > 0 Or $Protection20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Divine20Recharge > 0 Then
+                If $Divine20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $is10Cast > 0 Or $is10Recharge > 0 Then
+                If $Healing20Casting > 0 Or $Healing20Recharge > 0 Or $Smiting20Casting > 0 Or $Smiting20Recharge > 0 Or $Protection20Casting > 0 Or $Protection20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 32 ; Communing
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Communing20Casting > 0 Or $Communing20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Communing20Recharge > 0 Or $Communing20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Communing20Recharge > 0 Then
+                If $Communing20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 33 ; Restoration
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Restoration20Casting > 0 Or $Restoration20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Restoration20Recharge > 0 Or $Restoration20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Restoration20Recharge > 0 Then
+                If $Restoration20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 34 ; Channeling
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Channeling20Casting > 0 Or $Channeling20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Channeling20Recharge > 0 Or $Channeling20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Channeling20Recharge > 0 Then
+                If $Channeling20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
+        Case 36 ; Spawning - Unconfirmed
+            If $PlusFive > 0 Or $PlusFiveEnch > 0 Then
+                If $Spawning20Casting > 0 Or $Spawning20Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Spawning20Recharge > 0 Or $Spawning20Casting > 0 Then
+                If $is10Cast > 0 Or $is10Recharge > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            If $Spawning20Recharge > 0 Then
+                If $Spawning20Casting > 0 Then
+                    Return True
+                EndIf
+            EndIf
+            Return False
     EndSwitch
     Return False
 EndFunc   ;==> IsPerfectCaster
@@ -2736,126 +2736,126 @@ Func IsPerfectStaff($aItem)
     Local $Curses20Casting = StringInStr($ModStruct, "07141822", 0, 1) ; Mod Struct for 20% Curses
 
     Switch $A
-    Case 1 ; Illusion
-       If $Illusion20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 2 ; Domination
-       If $Domination20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 3 ; Inspiration - Doesnt Drop
-       If $Inspiration20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 4 ; Blood
-       If $Blood20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 5 ; Death
-       If $Death20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 6 ; SoulReap - Doesnt Drop
-       If $SoulReap20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 7 ; Curses
-       If $Curses20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 8 ; Air
-       If $Air20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 9 ; Earth
-       If $Earth20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 10 ; Fire
-       If $Fire20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 11 ; Water
-       If $Water20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 12 ; Energy Storage
-       If $Air20Casting > 0 Or $Earth20Casting > 0 Or $Fire20Casting > 0 Or $Water20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 13 ; Healing
-       If $Healing20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 14 ; Smiting
-       If $Smite20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 15 ; Protection
-       If $Protection20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 16 ; Divine
-       If $Healing20Casting > 0 Or $Protection20Casting > 0 Or $Divine20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 32 ; Communing
-       If $Communing20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 33 ; Restoration
-       If $Restoration20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 34 ; Channeling
-       If $Channeling20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 36 ; Spawning - Unconfirmed
-       If $Spawning20Casting > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
+        Case 1 ; Illusion
+            If $Illusion20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 2 ; Domination
+            If $Domination20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 3 ; Inspiration - Doesnt Drop
+            If $Inspiration20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 4 ; Blood
+            If $Blood20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 5 ; Death
+            If $Death20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 6 ; SoulReap - Doesnt Drop
+            If $SoulReap20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 7 ; Curses
+            If $Curses20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 8 ; Air
+            If $Air20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 9 ; Earth
+            If $Earth20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 10 ; Fire
+            If $Fire20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 11 ; Water
+            If $Water20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 12 ; Energy Storage
+            If $Air20Casting > 0 Or $Earth20Casting > 0 Or $Fire20Casting > 0 Or $Water20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 13 ; Healing
+            If $Healing20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 14 ; Smiting
+            If $Smite20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 15 ; Protection
+            If $Protection20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 16 ; Divine
+            If $Healing20Casting > 0 Or $Protection20Casting > 0 Or $Divine20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 32 ; Communing
+            If $Communing20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 33 ; Restoration
+            If $Restoration20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 34 ; Channeling
+            If $Channeling20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 36 ; Spawning - Unconfirmed
+            If $Spawning20Casting > 0 Then
+                Return True
+            Else
+                Return False
+            EndIf
     EndSwitch
     Return False
 EndFunc   ;==> IsPerfectStaff
@@ -2912,260 +2912,64 @@ Func IsPerfectShield($aItem)
     Local $PlusBlunt = StringInStr($ModStruct, "A0018210", 0, 1) ; +10vs Blunt
 
     If $Plus30 > 0 Then
-       If $PlusDemons > 0 Or $PlusPiercing > 0 Or $PlusDragons > 0 Or $PlusLightning > 0 Or $PlusVsEarth > 0 Or $PlusPlants > 0 Or $PlusCold > 0 Or $PlusUndead > 0 Or $PlusSlashing > 0 Or $PlusTengu > 0 Or $PlusVsFire > 0 Then
-          Return True
-       ElseIf $PlusCharr > 0 Or $PlusTrolls > 0 Or $PlusSkeletons > 0 Or $PlusGiants > 0 Or $PlusDwarves > 0 Or $PlusDragons > 0 Or $PlusOgres > 0 Or $PlusBlunt > 0 Then
-          Return True
-       ElseIf $PlusDomination > 0 Or $PlusDivine > 0 Or $PlusSmite > 0 Or $PlusHealing > 0 Or $PlusProt > 0 Or $PlusFire > 0 Or $PlusWater > 0 Or $PlusAir > 0 Or $PlusEarth > 0 Or $PlusDeath > 0 Or $PlusBlood > 0 Or $PlusIllusion > 0 Or $PlusInspiration > 0 Or $PlusSoulReap > 0 Or $PlusCurses > 0 Then
-          Return True
-       ElseIf $Minus2Stance > 0 Or $Minus2Ench > 0 Or $Minus520 > 0 Or $Minus3Hex > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
+        If $PlusDemons > 0 Or $PlusPiercing > 0 Or $PlusDragons > 0 Or $PlusLightning > 0 Or $PlusVsEarth > 0 Or $PlusPlants > 0 Or $PlusCold > 0 Or $PlusUndead > 0 Or $PlusSlashing > 0 Or $PlusTengu > 0 Or $PlusVsFire > 0 Then
+            Return True
+        ElseIf $PlusCharr > 0 Or $PlusTrolls > 0 Or $PlusSkeletons > 0 Or $PlusGiants > 0 Or $PlusDwarves > 0 Or $PlusDragons > 0 Or $PlusOgres > 0 Or $PlusBlunt > 0 Then
+            Return True
+        ElseIf $PlusDomination > 0 Or $PlusDivine > 0 Or $PlusSmite > 0 Or $PlusHealing > 0 Or $PlusProt > 0 Or $PlusFire > 0 Or $PlusWater > 0 Or $PlusAir > 0 Or $PlusEarth > 0 Or $PlusDeath > 0 Or $PlusBlood > 0 Or $PlusIllusion > 0 Or $PlusInspiration > 0 Or $PlusSoulReap > 0 Or $PlusCurses > 0 Then
+            Return True
+        ElseIf $Minus2Stance > 0 Or $Minus2Ench > 0 Or $Minus520 > 0 Or $Minus3Hex > 0 Then
+            Return True
+        Else
+            Return False
+        EndIf
     EndIf
     If $Plus45Ench > 0 Then
-       If $PlusDemons > 0 Or $PlusPiercing > 0 Or $PlusDragons > 0 Or $PlusLightning > 0 Or $PlusVsEarth > 0 Or $PlusPlants > 0 Or $PlusCold > 0 Or $PlusUndead > 0 Or $PlusSlashing > 0 Or $PlusTengu > 0 Or $PlusVsFire > 0 Then
-          Return True
-       ElseIf $PlusCharr > 0 Or $PlusTrolls > 0 Or $PlusSkeletons > 0 Or $PlusGiants > 0 Or $PlusDwarves > 0 Or $PlusDragons > 0 Or $PlusOgres > 0 Or $PlusBlunt > 0 Then
-          Return True
-       ElseIf $Minus2Ench > 0 Then
-          Return True
-       ElseIf $PlusDomination > 0 Or $PlusDivine > 0 Or $PlusSmite > 0 Or $PlusHealing > 0 Or $PlusProt > 0 Or $PlusFire > 0 Or $PlusWater > 0 Or $PlusAir > 0 Or $PlusEarth > 0 Or $PlusDeath > 0 Or $PlusBlood > 0 Or $PlusIllusion > 0 Or $PlusInspiration > 0 Or $PlusSoulReap > 0 Or $PlusCurses > 0 Then
-          Return True
-       Else
-          Return False
-       EndIf
+        If $PlusDemons > 0 Or $PlusPiercing > 0 Or $PlusDragons > 0 Or $PlusLightning > 0 Or $PlusVsEarth > 0 Or $PlusPlants > 0 Or $PlusCold > 0 Or $PlusUndead > 0 Or $PlusSlashing > 0 Or $PlusTengu > 0 Or $PlusVsFire > 0 Then
+            Return True
+        ElseIf $PlusCharr > 0 Or $PlusTrolls > 0 Or $PlusSkeletons > 0 Or $PlusGiants > 0 Or $PlusDwarves > 0 Or $PlusDragons > 0 Or $PlusOgres > 0 Or $PlusBlunt > 0 Then
+            Return True
+        ElseIf $Minus2Ench > 0 Then
+            Return True
+        ElseIf $PlusDomination > 0 Or $PlusDivine > 0 Or $PlusSmite > 0 Or $PlusHealing > 0 Or $PlusProt > 0 Or $PlusFire > 0 Or $PlusWater > 0 Or $PlusAir > 0 Or $PlusEarth > 0 Or $PlusDeath > 0 Or $PlusBlood > 0 Or $PlusIllusion > 0 Or $PlusInspiration > 0 Or $PlusSoulReap > 0 Or $PlusCurses > 0 Then
+            Return True
+        Else
+            Return False
+        EndIf
     EndIf
     If $Minus2Ench > 0 Then
-       If $PlusDemons > 0 Or $PlusPiercing > 0 Or $PlusDragons > 0 Or $PlusLightning > 0 Or $PlusVsEarth > 0 Or $PlusPlants > 0 Or $PlusCold > 0 Or $PlusUndead > 0 Or $PlusSlashing > 0 Or $PlusTengu > 0 Or $PlusVsFire > 0 Then
-          Return True
-       ElseIf $PlusCharr > 0 Or $PlusTrolls > 0 Or $PlusSkeletons > 0 Or $PlusGiants > 0 Or $PlusDwarves > 0 Or $PlusDragons > 0 Or $PlusOgres > 0 Or $PlusBlunt > 0 Then
-          Return True
-       EndIf
+        If $PlusDemons > 0 Or $PlusPiercing > 0 Or $PlusDragons > 0 Or $PlusLightning > 0 Or $PlusVsEarth > 0 Or $PlusPlants > 0 Or $PlusCold > 0 Or $PlusUndead > 0 Or $PlusSlashing > 0 Or $PlusTengu > 0 Or $PlusVsFire > 0 Then
+            Return True
+        ElseIf $PlusCharr > 0 Or $PlusTrolls > 0 Or $PlusSkeletons > 0 Or $PlusGiants > 0 Or $PlusDwarves > 0 Or $PlusDragons > 0 Or $PlusOgres > 0 Or $PlusBlunt > 0 Then
+            Return True
+        EndIf
     EndIf
     If $Plus44Ench > 0 Then
-       If $PlusDemons > 0 Then
-          Return True
-       EndIf
+        If $PlusDemons > 0 Then
+            Return True
+        EndIf
     EndIf
     If $Plus45Stance > 0 Then
-       If $Minus2Stance > 0 Then
-          Return True
-       EndIf
+        If $Minus2Stance > 0 Then
+            Return True
+        EndIf
     EndIf
     Return False
 EndFunc   ;==> IsPerfectShield
 
 Func IsRareMod($aItem)
     Local $ModStruct = Item_GetModStruct($aItem)
-
-    ; =========================
-    ; MARTIAL – % Stance
-    ; =========================
-    Local $Stance10 = StringInStr($ModStruct, "0A00A822", 0, 1)
-    Local $Stance11 = StringInStr($ModStruct, "0B00A822", 0, 1)
-    Local $Stance12 = StringInStr($ModStruct, "0C00A822", 0, 1)
-    Local $Stance13 = StringInStr($ModStruct, "0D00A822", 0, 1)
-    Local $Stance14 = StringInStr($ModStruct, "0E00A822", 0, 1)
-    Local $Stance15 = StringInStr($ModStruct, "0F00A822", 0, 1)
-
-    ; =========================
-    ; MARTIAL – % HP > 50%
-    ; =========================
-    Local $HP5010 = StringInStr($ModStruct, "0A327822", 0, 1)
-    Local $HP5011 = StringInStr($ModStruct, "0B327822", 0, 1)
-    Local $HP5012 = StringInStr($ModStruct, "0C327822", 0, 1)
-    Local $HP5013 = StringInStr($ModStruct, "0D327822", 0, 1)
-    Local $HP5014 = StringInStr($ModStruct, "0E327822", 0, 1)
-    Local $HP5015 = StringInStr($ModStruct, "0F327822", 0, 1)
-
-    ; =========================
-    ; CASTER – Fire +1
-    ; =========================
-    Local $Fire15 = StringInStr($ModStruct, "0F0A1824", 0, 1)
-    Local $Fire16 = StringInStr($ModStruct, "100A1824", 0, 1)
-    Local $Fire17 = StringInStr($ModStruct, "110A1824", 0, 1)
-    Local $Fire18 = StringInStr($ModStruct, "120A1824", 0, 1)
-    Local $Fire19 = StringInStr($ModStruct, "130A1824", 0, 1)
-    Local $Fire20 = StringInStr($ModStruct, "140A1824", 0, 1)
-
-    ; =========================
-    ; CASTER – Death +1
-    ; =========================
-    Local $Death15 = StringInStr($ModStruct, "0F051824", 0, 1)
-    Local $Death16 = StringInStr($ModStruct, "10051824", 0, 1)
-    Local $Death17 = StringInStr($ModStruct, "11051824", 0, 1)
-    Local $Death18 = StringInStr($ModStruct, "12051824", 0, 1)
-    Local $Death19 = StringInStr($ModStruct, "13051824", 0, 1)
-    Local $Death20 = StringInStr($ModStruct, "14051824", 0, 1)
-
-    ; =========================
-    ; CASTER – Domination +1
-    ; =========================
-    Local $Dom15 = StringInStr($ModStruct, "0F021824", 0, 1)
-    Local $Dom16 = StringInStr($ModStruct, "10021824", 0, 1)
-    Local $Dom17 = StringInStr($ModStruct, "11021824", 0, 1)
-    Local $Dom18 = StringInStr($ModStruct, "12021824", 0, 1)
-    Local $Dom19 = StringInStr($ModStruct, "13021824", 0, 1)
-    Local $Dom20 = StringInStr($ModStruct, "14021824", 0, 1)
-
-    ; =========================
-    ; vs Charr
-    ; =========================
-    Local $SCharr = StringInStr($ModStruct, "00018080", 0, 1)
-
-
-
-    If $Stance10 > 0 Or $Stance11 > 0 Or $Stance12 > 0 Or $Stance13 > 0 Or $Stance14 > 0 Or $Stance15 > 0 Then
-        Return True
-    ElseIf $HP5010 > 0 Or $HP5011 > 0 Or $HP5012 > 0 Or $HP5013 > 0 Or $HP5014 > 0 Or $HP5015 > 0 Then
-        Return True
-    ElseIf $Fire15 > 0 Or $Fire16 > 0 Or $Fire17 > 0 Or $Fire18 > 0 Or $Fire19 > 0 Or $Fire20 > 0 Then
-        Return True
-    ElseIf $Death15 > 0 Or $Death16 > 0 Or $Death17 > 0 Or $Death18 > 0 Or $Death19 > 0 Or $Death20 > 0 Then
-        Return True
-    ElseIf $Dom15 > 0 Or $Dom16 > 0 Or $Dom17 > 0 Or $Dom18 > 0 Or $Dom19 > 0 Or $Dom20 > 0 Then
-        Return True
-    ElseIf $SCharr > 0 Then
-        Return True
-    Else
-        Return False
-    EndIf
-
+    Return RareMods_AnyEnabledInSection("IsRareMod", $ModStruct)
 EndFunc   ;==> IsRareMod
 
 Func IsRareRunePre($aItem)
     Local $ModStruct = Item_GetModStruct($aItem)
-
-    Local $SupVigor = StringInStr($ModStruct, "C202EA27", 0, 1) ; Sup vigor rune
-
-    Local $minorStrength = StringInStr($ModStruct, "0111E821", 0, 1) ; minor Strength
-    Local $minorTactics = StringInStr($ModStruct, "0115E821", 0, 1) ; minor Tactics
-    Local $minorExpertise = StringInStr($ModStruct, "0117E821", 0, 1) ; minor Expertise
-    Local $minorMarksman = StringInStr($ModStruct, "0119E821", 0, 1) ; minor Marksman
-    Local $minorHealing = StringInStr($ModStruct, "010DE821", 0, 1) ; minor Healing
-    Local $minorProt = StringInStr($ModStruct, "010FE821", 0, 1) ; minor Prot
-    Local $minorDivine = StringInStr($ModStruct, "0110E821", 0, 1) ; minor Divine
-    Local $minorSoul = StringInStr($ModStruct, "0106E821", 0, 1) ; minor Soul
-    Local $minorFastcast = StringInStr($ModStruct, "0100E821", 0, 1) ; minor Fastcast
-    Local $minorInsp = StringInStr($ModStruct, "0103E821", 0, 1) ; minor Insp
-    Local $minorEnergy = StringInStr($ModStruct, "010CE821", 0, 1) ; minor Energy
-    Local $minorSpawn = StringInStr($ModStruct, "0124E821", 0, 1) ; minor Spawn
-    Local $minorScythe = StringInStr($ModStruct, "0129E821", 0, 1) ; minor Scythe
-    Local $minorMystic = StringInStr($ModStruct, "012CE821", 0, 1) ; minor Mystic
-    Local $minorVigor = StringInStr($ModStruct, "C202E827", 0, 1) ; minor Vigor
-    Local $minorVitae = StringInStr($ModStruct, "12020824", 0, 1) ; minor Vitae
-    Local $minorIllusion = StringInStr($ModStruct, "0101E821", 0, 1) ; minor Illusion
-    Local $minorDomination = StringInStr($ModStruct, "0102E821", 0, 1) ; minor Domination
-    Local $minorBlood = StringInStr($ModStruct, "0104E821", 0, 1) ; minor Blood
-    Local $minorDeath = StringInStr($ModStruct, "0105E821", 0, 1) ; minor Death
-    Local $minorCurses = StringInStr($ModStruct, "0107E821", 0, 1) ; minor Curses
-    Local $minorAir = StringInStr($ModStruct, "0108E821", 0, 1) ; minor Air
-    Local $minorEarth = StringInStr($ModStruct, "0109E821", 0, 1) ; minor Earth
-    Local $minorFire = StringInStr($ModStruct, "010AE821", 0, 1) ; minor Fire
-    Local $minorWater = StringInStr($ModStruct, "010BE821", 0, 1) ; minor Water
-    Local $minorSmiting = StringInStr($ModStruct, "010EE821", 0, 1) ; minor Smiting
-    Local $minorAxe = StringInStr($ModStruct, "0112E821", 0, 1) ; minor Axe
-    Local $minorHammer = StringInStr($ModStruct, "0113E821", 0, 1) ; minor Hammer
-    Local $minorSword = StringInStr($ModStruct, "0114E821", 0, 1) ; minor Sword
-    Local $minorAbsorption = StringInStr($ModStruct, "FC000824", 0, 1) ; minor Absorption
-    Local $minorBeast = StringInStr($ModStruct, "0116E821", 0, 1) ; minor Beast
-    Local $minorWilderness = StringInStr($ModStruct, "0118E821", 0, 1) ; minor Wilderness
-
-    Local $runeAttunement = StringInStr($ModStruct, "11020824", 0, 1) ; Attunement
-    Local $runeRecovery = StringInStr($ModStruct, "13020824", 0, 1) ; Recovery
-    Local $runeRestoration = StringInStr($ModStruct, "14020824", 0, 1) ; Restoration
-    Local $runeClarity = StringInStr($ModStruct, "15020824", 0, 1) ; Clarity
-    Local $runePurity = StringInStr($ModStruct, "16020824", 0, 1) ; Purity
-
-    Local $majorFast = StringInStr($ModStruct, "0200E821", 0, 1) ; major Fastcast
-    Local $majorVigor = StringInStr($ModStruct, "C202E927", 0, 1) ; major Vigor
-
-    If $minorStrength > 0 Or $minorTactics > 0 Or $minorExpertise > 0 Or $minorMarksman > 0 Or $minorHealing > 0 Or $minorProt > 0 Or $minorDivine > 0 Then
-        Return True
-    ElseIf $minorSoul > 0 Or $minorFastcast > 0 Or $minorInsp > 0 Or $minorEnergy > 0 Or $minorSpawn > 0 Or $minorScythe > 0 Or $minorMystic > 0 Then
-        Return True
-    ElseIf $minorVigor > 0 Or $minorVitae > 0 Or $majorFast > 0 Or $majorVigor > 0 Then
-        Return True
-    ElseIf $SupVigor > 0 Then
-        Return True
-    ElseIf $minorIllusion > 0 Or $minorDomination > 0 Or $minorBlood > 0 Or $minorDeath > 0 Or $minorCurses > 0 Then
-        Return True
-    ElseIf $minorAir > 0 Or $minorEarth > 0 Or $minorFire > 0 Or $minorWater > 0 Or $minorSmiting > 0 Then
-        Return True
-    ElseIf $minorAxe > 0 Or $minorHammer > 0 Or $minorSword > 0 Or $minorAbsorption > 0 Then
-        Return True
-    ElseIf $minorBeast > 0 Or $minorWilderness > 0 Then
-        Return True
-    ElseIf $runeAttunement > 0 Or $runeRecovery > 0 Or $runeRestoration > 0 Or $runeClarity > 0 Or $runePurity > 0 Then
-        Return True
-    Else
-        Return False
-    EndIf
+    Return RareMods_AnyEnabledInSection("IsRareRunePre", $ModStruct)
 EndFunc   ;==> IsRareRunePre
 
 Func IsRareInsigniaPre($aItem)
     Local $ModStruct = Item_GetModStruct($aItem)
-    Local $Sentinel = StringInStr($ModStruct, "FB010824", 0, 1) ; Sentinel insig
-    Local $Tormentor = StringInStr($ModStruct, "EC010824", 0, 1) ; Tormentor insig
-    Local $WindWalker = StringInStr($ModStruct, "02020824", 0, 1) ; Windwalker insig
-    Local $Prodigy = StringInStr($ModStruct, "E3010824", 0, 1) ; Prodigy insig
-    Local $Shamans = StringInStr($ModStruct, "04020824", 0, 1) ; Shamans insig
-    Local $Nightstalker = StringInStr($ModStruct, "E1010824", 0, 1) ; Nightstalker insig
-    Local $Centurions = StringInStr($ModStruct, "07020824", 0, 1) ; Centurions insig
-    Local $Blessed = StringInStr($ModStruct, "E9010824", 0, 1) ; Blessed insig
-    Local $Radiant = StringInStr($ModStruct, "E5010824", 0, 1) ; Radiant insig
-    Local $Survivor = StringInStr($ModStruct, "E6010824", 0, 1) ; Survivor insig
-    Local $Stalwart = StringInStr($ModStruct, "E7010824", 0, 1) ; Stalwart insig
-    Local $Brawler = StringInStr($ModStruct, "E8010824", 0, 1) ; Brawler insig
-    Local $Herald = StringInStr($ModStruct, "EA010824", 0, 1) ; Herald insig
-    Local $Sentry = StringInStr($ModStruct, "EB010824", 0, 1) ; Sentry insig
-    Local $Frostbound = StringInStr($ModStruct, "FC010824", 0, 1) ; Frostbound insig
-    Local $Earthbound = StringInStr($ModStruct, "FD010824", 0, 1) ; Earthbound insig
-    Local $Pyrebound = StringInStr($ModStruct, "FE010824", 0, 1) ; Pyrebound insig
-    Local $Stormbound = StringInStr($ModStruct, "FF010824", 0, 1) ; Stormbound insig
-    Local $Beastmaster = StringInStr($ModStruct, "00020824", 0, 1) ; Beastmaster insig
-    Local $Scout = StringInStr($ModStruct, "01020824", 0, 1) ; Scout insig
-    Local $Knight = StringInStr($ModStruct, "F9010824", 0, 1) ; Knight insig
-    Local $Dreadnought = StringInStr($ModStruct, "FA010824", 0, 1) ; Dreadnought insig
-    Local $Lieutenant = StringInStr($ModStruct, "08020824", 0, 1) ; Lieutenant insig
-    Local $Stonefist = StringInStr($ModStruct, "09020824", 0, 1) ; Stonefist insig
-    Local $Wanderer = StringInStr($ModStruct, "F6010824", 0, 1) ; Wanderer insig
-    Local $Disciple = StringInStr($ModStruct, "F7010824", 0, 1) ; Disciple insig
-    Local $Anchorite = StringInStr($ModStruct, "F8010824", 0, 1) ; Anchorite insig
-    Local $Prismatic = StringInStr($ModStruct, "F1010824", 0, 1) ; Prismatic insig
-    Local $Hydromancer = StringInStr($ModStruct, "F2010824", 0, 1) ; Hydromancer insig
-    Local $Geomancer = StringInStr($ModStruct, "F3010824", 0, 1) ; Geomancer insig
-    Local $Pyromancer = StringInStr($ModStruct, "F4010824", 0, 1) ; Pyromancer insig
-    Local $Aeromancer = StringInStr($ModStruct, "F5010824", 0, 1) ; Aeromancer insig
-    Local $Undertaker = StringInStr($ModStruct, "ED010824", 0, 1) ; Undertaker insig
-    Local $Bonelace = StringInStr($ModStruct, "EE010824", 0, 1) ; Bonelace insig
-    Local $MinionMaster = StringInStr($ModStruct, "EF010824", 0, 1) ; MinionMaster insig
-    Local $Blighter = StringInStr($ModStruct, "F0010824", 0, 1) ; Blighter insig
-    Local $Bloodstained = StringInStr($ModStruct, "0A020824", 0, 1) ; Bloodstained insig
-    Local $Artificer = StringInStr($ModStruct, "E2010824", 0, 1) ; Artificer insig
-    Local $Virtuoso = StringInStr($ModStruct, "E4010824", 0, 1) ; Virtuoso insig
-
-    If $Sentinel > 0 Or $Tormentor > 0 Or $WindWalker > 0 Or $Prodigy > 0 Or $Shamans > 0 Or $Nightstalker > 0 Or $Centurions > 0 Or $Blessed > 0 Then
-        Return True
-    ElseIf $Radiant > 0 Or $Survivor > 0 Or $Stalwart > 0 Or $Brawler > 0 Or $Herald > 0 Or $Sentry > 0 Then
-        Return True
-    ElseIf $Frostbound > 0 Or $Earthbound > 0 Or $Pyrebound > 0 Or $Stormbound > 0 Or $Beastmaster > 0 Or $Scout > 0 Then
-        Return True
-    ElseIf $Knight > 0 Or $Dreadnought > 0 Or $Lieutenant > 0 Or $Stonefist > 0 Then
-        Return True
-    ElseIf $Wanderer > 0 Or $Disciple > 0 Or $Anchorite > 0 Then
-        Return True
-    ElseIf $Prismatic > 0 Or $Hydromancer > 0 Or $Geomancer > 0 Or $Pyromancer > 0 Or $Aeromancer > 0 Then
-        Return True
-    ElseIf $Undertaker > 0 Or $Bonelace > 0 Or $MinionMaster > 0 Or $Blighter > 0 Or $Bloodstained > 0 Then
-        Return True
-    ElseIf $Artificer > 0 Or $Virtuoso > 0 Then
-        Return True
-    Else
-        Return False
-    EndIf
+    Return RareMods_AnyEnabledInSection("IsRareInsigniaPre", $ModStruct)
 EndFunc   ;==> IsRareInsigniaPre
 
 Func IsSellableInsigniaPre($aItem)
@@ -3180,9 +2984,9 @@ Func IsSellableInsigniaPre($aItem)
     Local $Blessed = StringInStr($ModStruct, "E9010824", 0, 1) ; Blessed insig
 
     If $Sentinel > 0 Or $Tormentor > 0 Or $WindWalker > 0 Or $Prodigy > 0 Or $Shamans > 0 Or $Nightstalker > 0 Or $Centurions > 0 Or $Blessed > 0 Then
-       Return True
+        Return True
     Else
-       Return False
+        Return False
     EndIf
 EndFunc   ;==> IsSellableInsignia
 
@@ -3194,69 +2998,69 @@ Func IsReq8Max($aItem)
     Local $MaxDmgSword = GetItemMaxReq8($aItem)
 
     Switch $Rarity
-    Case 2624 ;~ Gold
-       Switch $Type
-       Case 12 ;~ Offhand
-          If $MaxDmgOffHand = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       Case 24 ;~ Shield
-          If $MaxDmgShield = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       Case 27 ;~ Sword
-          If $MaxDmgSword = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       EndSwitch
-    Case 2623 ;~ Purple?
-       Switch $Type
-       Case 12 ;~ Offhand
-          If $MaxDmgOffHand = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       Case 24 ;~ Shield
-          If $MaxDmgShield = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       Case 27 ;~ Sword
-          If $MaxDmgSword = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       EndSwitch
-    Case 2626 ;~ Blue?
-       Switch $Type
-       Case 12 ;~ Offhand
-          If $MaxDmgOffHand = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       Case 24 ;~ Shield
-          If $MaxDmgShield = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       Case 27 ;~ Sword
-          If $MaxDmgSword = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       EndSwitch
+        Case 2624 ;~ Gold
+            Switch $Type
+                Case 12 ;~ Offhand
+                    If $MaxDmgOffHand = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+                Case 24 ;~ Shield
+                    If $MaxDmgShield = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+                Case 27 ;~ Sword
+                    If $MaxDmgSword = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+            EndSwitch
+        Case 2623 ;~ Purple?
+            Switch $Type
+                Case 12 ;~ Offhand
+                    If $MaxDmgOffHand = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+                Case 24 ;~ Shield
+                    If $MaxDmgShield = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+                Case 27 ;~ Sword
+                    If $MaxDmgSword = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+            EndSwitch
+        Case 2626 ;~ Blue?
+            Switch $Type
+                Case 12 ;~ Offhand
+                    If $MaxDmgOffHand = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+                Case 24 ;~ Shield
+                    If $MaxDmgShield = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+                Case 27 ;~ Sword
+                    If $MaxDmgSword = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+            EndSwitch
     EndSwitch
     Return False
 EndFunc   ;==> IsReq8Max
@@ -3269,69 +3073,69 @@ Func IsReq7Max($aItem)
     Local $MaxDmgSword = GetItemMaxReq7($aItem)
 
     Switch $Rarity
-    Case 2624 ;~ Gold
-       Switch $Type
-       Case 12 ;~ Offhand
-          If $MaxDmgOffHand = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       Case 24 ;~ Shield
-          If $MaxDmgShield = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       Case 27 ;~ Sword
-          If $MaxDmgSword = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       EndSwitch
-    Case 2623 ;~ Purple?
-       Switch $Type
-       Case 12 ;~ Offhand
-          If $MaxDmgOffHand = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       Case 24 ;~ Shield
-          If $MaxDmgShield = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       Case 27 ;~ Sword
-          If $MaxDmgSword = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       EndSwitch
-    Case 2626 ;~ Blue?
-       Switch $Type
-       Case 12 ;~ Offhand
-          If $MaxDmgOffHand = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       Case 24 ;~ Shield
-          If $MaxDmgShield = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       Case 27 ;~ Sword
-          If $MaxDmgSword = True Then
-             Return True
-          Else
-             Return False
-          EndIf
-       EndSwitch
+        Case 2624 ;~ Gold
+            Switch $Type
+                Case 12 ;~ Offhand
+                    If $MaxDmgOffHand = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+                Case 24 ;~ Shield
+                    If $MaxDmgShield = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+                Case 27 ;~ Sword
+                    If $MaxDmgSword = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+            EndSwitch
+        Case 2623 ;~ Purple?
+            Switch $Type
+                Case 12 ;~ Offhand
+                    If $MaxDmgOffHand = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+                Case 24 ;~ Shield
+                    If $MaxDmgShield = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+                Case 27 ;~ Sword
+                    If $MaxDmgSword = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+            EndSwitch
+        Case 2626 ;~ Blue?
+            Switch $Type
+                Case 12 ;~ Offhand
+                    If $MaxDmgOffHand = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+                Case 24 ;~ Shield
+                    If $MaxDmgShield = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+                Case 27 ;~ Sword
+                    If $MaxDmgSword = True Then
+                        Return True
+                    Else
+                        Return False
+                    EndIf
+            EndSwitch
     EndSwitch
     Return False
 EndFunc   ;==> IsReq7Max
@@ -3342,24 +3146,24 @@ Func GetItemMaxReq8($aItem)
     Local $Req = GetItemReq($aItem)
 
     Switch $Type
-    Case 12 ;~ Offhand
-       If $Dmg == 12 And $Req == 8 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 24 ;~ Shield
-       If $Dmg == 16 And $Req == 8 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 27 ;~ Sword
-       If $Dmg == 22 And $Req == 8 Then
-          Return True
-       Else
-          Return False
-       EndIf
+        Case 12 ;~ Offhand
+            If $Dmg == 12 And $Req == 8 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 24 ;~ Shield
+            If $Dmg == 16 And $Req == 8 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 27 ;~ Sword
+            If $Dmg == 22 And $Req == 8 Then
+                Return True
+            Else
+                Return False
+            EndIf
     EndSwitch
 EndFunc   ;==> GetItemMaxReq8
 
@@ -3369,24 +3173,24 @@ Func GetItemMaxReq7($aItem)
     Local $Req = GetItemReq($aItem)
 
     Switch $Type
-    Case 12 ;~ Offhand
-       If $Dmg == 11 And $Req == 7 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 24 ;~ Shield
-       If $Dmg == 15 And $Req == 7 Then
-          Return True
-       Else
-          Return False
-       EndIf
-    Case 27 ;~ Sword
-       If $Dmg == 21 And $Req == 7 Then
-          Return True
-       Else
-          Return False
-       EndIf
+        Case 12 ;~ Offhand
+            If $Dmg == 11 And $Req == 7 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 24 ;~ Shield
+            If $Dmg == 15 And $Req == 7 Then
+                Return True
+            Else
+                Return False
+            EndIf
+        Case 27 ;~ Sword
+            If $Dmg == 21 And $Req == 7 Then
+                Return True
+            Else
+                Return False
+            EndIf
     EndSwitch
 EndFunc   ;==> GetItemMaxReq7
 
@@ -3394,8 +3198,8 @@ Func IsRegularTome($aItem)
     Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
 
     Switch $ModelID
-    Case 21796, 21797, 21798, 21799, 21800, 21801, 21802, 21803, 21804, 21805
-       Return True
+        Case 21796, 21797, 21798, 21799, 21800, 21801, 21802, 21803, 21804, 21805
+            Return True
     EndSwitch
     Return False
 EndFunc   ;==> IsRegularTome
@@ -3404,8 +3208,8 @@ Func IsEliteTome($aItem)
     Local $ModelID = Item_GetItemInfoByPtr($aItem, "ModelID")
 
     Switch $ModelID
-    Case 21786, 21787, 21788, 21789, 21790, 21791, 21792, 21793, 21794, 21795
-       Return True ; All Elite Tomes
+        Case 21786, 21787, 21788, 21789, 21790, 21791, 21792, 21793, 21794, 21795
+            Return True ; All Elite Tomes
     EndSwitch
     Return False
 EndFunc   ;==> IsEliteTome
@@ -3413,7 +3217,7 @@ EndFunc   ;==> IsEliteTome
 Func IsFiveE($aItem)
     Local $ModStruct = Item_GetModStruct($aItem)
     Local $t = Item_GetItemInfoByPtr($aItem, "ItemType")
-    If (IsIHaveThePower($ModStruct) And $t = 2) Then Return True	; (Nur für Äxte)
+    If (IsIHaveThePower($ModStruct) And $t = 2) Then Return True    ; (Nur für Äxte)
 EndFunc   ;==> IsFiveE
 
 Func IsIHaveThePower($ModStruct)
@@ -3457,48 +3261,48 @@ Global Enum $PROF_NONE, $PROF_WARRIOR, $PROF_RANGER, $PROF_MONK, $PROF_NECROMANC
 
 ;~ Summoning Stones
 Global $SummoningStone[20]
-$SummoningStone[0] = 37810	; Legionnaire 
-$SummoningStone[1] = 30209	; Tengu
-$SummoningStone[2] = 30210	; Imperial Guard
-$SummoningStone[3] = 35126	; Shining Blade
-$SummoningStone[4] = 31156	; Zaishen 
-$SummoningStone[5] = 32557	; Ghastly
-$SummoningStone[6] = 31155	; Mysterious
-$SummoningStone[7] = 30960	; Mystical
-$SummoningStone[8] = 30963	; Demonic
-$SummoningStone[9] = 34176	; Celestial
-$SummoningStone[10] = 30961	; Amber
-$SummoningStone[11] = 30966	; Jadeite
-$SummoningStone[12] = 30846	; Automaton
-$SummoningStone[13] = 30965	; Fossilized
-$SummoningStone[14] = 30959	; Chitinous
-$SummoningStone[15] = 30964	; Gelatinous
-$SummoningStone[16] = 30962	; Arctic
-$SummoningStone[17] = 31022	; Mischievous
-$SummoningStone[18] = 31023	; Frosty
-$SummoningStone[19] = 30847	; Igneous
+$SummoningStone[0] = 37810    ; Legionnaire
+$SummoningStone[1] = 30209    ; Tengu
+$SummoningStone[2] = 30210    ; Imperial Guard
+$SummoningStone[3] = 35126    ; Shining Blade
+$SummoningStone[4] = 31156    ; Zaishen
+$SummoningStone[5] = 32557    ; Ghastly
+$SummoningStone[6] = 31155    ; Mysterious
+$SummoningStone[7] = 30960    ; Mystical
+$SummoningStone[8] = 30963    ; Demonic
+$SummoningStone[9] = 34176    ; Celestial
+$SummoningStone[10] = 30961    ; Amber
+$SummoningStone[11] = 30966    ; Jadeite
+$SummoningStone[12] = 30846    ; Automaton
+$SummoningStone[13] = 30965    ; Fossilized
+$SummoningStone[14] = 30959    ; Chitinous
+$SummoningStone[15] = 30964    ; Gelatinous
+$SummoningStone[16] = 30962    ; Arctic
+$SummoningStone[17] = 31022    ; Mischievous
+$SummoningStone[18] = 31023    ; Frosty
+$SummoningStone[19] = 30847    ; Igneous
 
 ;~ Pcons
 Global $Pcon[19]
-$Pcon[0] = 17060	; Drake Kabob
-$Pcon[1] = 17061	; Skalefin Soup
-$Pcon[2] = 17062	; Pahnai Salad
-$Pcon[3] = 22269	; Birthday Cupcake
-$Pcon[4] = 22752	; Golden Egg
-$Pcon[5] = 28431	; Candy Apple
-$Pcon[6] = 28432	; Candy Corn
-$Pcon[7] = 28436	; Slice of Pumpkin Pie
-$Pcon[8] = 29425	; Lunar Fortune 2008
-$Pcon[9] = 29426	; Lunar Fortune 2009
-$Pcon[10] = 29427	; Lunar Fortune 2010
-$Pcon[11] = 29428	; Lunar Fortune 2011
-$Pcon[12] = 29429	; Lunar Fortune 2012
-$Pcon[13] = 29430	; Lunar Fortune 2013
-$Pcon[14] = 29431	; Lunar Fortune 2014
-$Pcon[15] = 31151	; Blue Rock Candy
-$Pcon[16] = 31152	; Green Rock Candy
-$Pcon[17] = 31153	; Red Rock Candy
-$Pcon[18] = 35121	; War Supplies
+$Pcon[0] = 17060    ; Drake Kabob
+$Pcon[1] = 17061    ; Skalefin Soup
+$Pcon[2] = 17062    ; Pahnai Salad
+$Pcon[3] = 22269    ; Birthday Cupcake
+$Pcon[4] = 22752    ; Golden Egg
+$Pcon[5] = 28431    ; Candy Apple
+$Pcon[6] = 28432    ; Candy Corn
+$Pcon[7] = 28436    ; Slice of Pumpkin Pie
+$Pcon[8] = 29425    ; Lunar Fortune 2008
+$Pcon[9] = 29426    ; Lunar Fortune 2009
+$Pcon[10] = 29427    ; Lunar Fortune 2010
+$Pcon[11] = 29428    ; Lunar Fortune 2011
+$Pcon[12] = 29429    ; Lunar Fortune 2012
+$Pcon[13] = 29430    ; Lunar Fortune 2013
+$Pcon[14] = 29431    ; Lunar Fortune 2014
+$Pcon[15] = 31151    ; Blue Rock Candy
+$Pcon[16] = 31152    ; Green Rock Candy
+$Pcon[17] = 31153    ; Red Rock Candy
+$Pcon[18] = 35121    ; War Supplies
 
 Global Const $RARITY_Gold = 2624
 Global Const $RARITY_Purple = 2626
@@ -3535,7 +3339,7 @@ Global Const $GC_BonusWeapons[12] = [ _
     $GC_I_MODELID_SUNDERING_DARKSTEEL_LONGBOW, _
     $GC_I_MODELID_HOURGLASS_STAFF, _
     $GC_I_MODELID_GLACIAL_BLADE _
-]
+    ]
 
 ; Build upkeeps
 Global $gProf
@@ -3591,11 +3395,11 @@ Global $Array_pscon[39] = [910, 5585, 6366, 6375, 22190, 24593, 28435, 30855, 31
 Global $PIC_MATS[26][2] = [["Fur Square", 941],["Bolt of Linen", 926],["Bolt of Damask", 927],["Bolt of Silk", 928],["Glob of Ectoplasm", 930],["Steel of Ignot", 949],["Deldrimor Steel Ingot", 950],["Monstrous Claws", 923],["Monstrous Eye", 931],["Monstrous Fangs", 932],["Rubies", 937],["Sapphires", 938],["Diamonds", 935],["Onyx Gemstones", 936],["Lumps of Charcoal", 922],["Obsidian Shard", 945],["Tempered Glass Vial", 939],["Leather Squares", 942],["Elonian Leather Square", 943],["Vial of Ink", 944],["Rolls of Parchment", 951],["Rolls of Vellum", 952],["Spiritwood Planks", 956],["Amber Chunk", 6532],["Jadeite Shard", 6533]]
 
 Global $Array_Store_ModelIDs460[147] = [474, 476, 486, 522, 525, 811, 819, 822, 835, 610, 2994, 19185, 22751, 4629, 24630, 4631, 24632, 27033, 27035, 27044, 27046, 27047, 7052, 5123 _
-        , 1796, 21797, 21798, 21799, 21800, 21801, 21802, 21803, 21804, 1805, 910, 2513, 5585, 6049, 6366, 6367, 6375, 15477, 19171, 22190, 24593, 28435, 30855, 31145, 31146, 35124, 36682 _
-        , 6376 , 6368 , 6369 , 21809 , 21810, 21813, 29436, 29543, 36683, 4730, 15837, 21490, 22192, 30626, 30630, 30638, 30642, 30646, 30648, 31020, 31141, 31142, 31144, 1172, 15528 _
-        , 15479, 19170, 21492, 21812, 22269, 22644, 22752, 28431, 28432, 28436, 1150, 35125, 36681, 3256, 3746, 5594, 5595, 5611, 5853, 5975, 5976, 21233, 22279, 22280, 6370, 21488 _
-        , 21489, 22191, 35127, 26784, 28433, 18345, 21491, 28434, 35121, 921, 922, 923, 925, 926, 927, 928, 929, 930, 931, 932, 933, 934, 935, 936, 937, 938, 939, 940, 941, 942, 943 _
-        , 944, 945, 946, 948, 949, 950, 951, 952, 953, 954, 955, 956, 6532, 6533]
+    , 1796, 21797, 21798, 21799, 21800, 21801, 21802, 21803, 21804, 1805, 910, 2513, 5585, 6049, 6366, 6367, 6375, 15477, 19171, 22190, 24593, 28435, 30855, 31145, 31146, 35124, 36682 _
+    , 6376 , 6368 , 6369 , 21809 , 21810, 21813, 29436, 29543, 36683, 4730, 15837, 21490, 22192, 30626, 30630, 30638, 30642, 30646, 30648, 31020, 31141, 31142, 31144, 1172, 15528 _
+    , 15479, 19170, 21492, 21812, 22269, 22644, 22752, 28431, 28432, 28436, 1150, 35125, 36681, 3256, 3746, 5594, 5595, 5611, 5853, 5975, 5976, 21233, 22279, 22280, 6370, 21488 _
+    , 21489, 22191, 35127, 26784, 28433, 18345, 21491, 28434, 35121, 921, 922, 923, 925, 926, 927, 928, 929, 930, 931, 932, 933, 934, 935, 936, 937, 938, 939, 940, 941, 942, 943 _
+    , 944, 945, 946, 948, 949, 950, 951, 952, 953, 954, 955, 956, 6532, 6533]
 
 ;~ Identification and Salvaging Stuff
 Global Const $SupIDKit = 5899

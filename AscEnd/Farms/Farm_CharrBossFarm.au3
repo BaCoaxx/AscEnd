@@ -2,11 +2,11 @@
 
 #cs ----------------------------------------------------------------------------
 
-     AutoIt Version: 3.3.18.0
-     Author:         Incognito/Coaxx
+    AutoIt Version: 3.3.18.0
+    Author:         Incognito/Coaxx
 
-     Script Function:
-        Charr Boss Farm Loop - Pre Searing
+    Script Function:
+    Charr Boss Farm Loop - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
@@ -15,7 +15,7 @@ Global $NormalGatePathLoop[3][2] = [ _
     [-12398, -13343], _
     [-12996, -11276], _
     [-11087, -8753] _
-]
+    ]
 
 ; Pathing from (Ascalon -> gate lever)
 Global $CharrGatePathLoop[5][2] = [ _
@@ -24,7 +24,7 @@ Global $CharrGatePathLoop[5][2] = [ _
     [-3215, 12159], _
     [-4820, 12844], _
     [-5386, 12815] _
-]
+    ]
 
 ; If gate lever pull failed, path back up
 Global $retrypathLoop[6][2] = [ _
@@ -34,7 +34,7 @@ Global $retrypathLoop[6][2] = [ _
     [-3663, 12426], _
     [-4820, 12844], _
     [-5386, 12815] _
-]
+    ]
 
 ; From gate lever -> through portal
 Global $CharrPortalPathLoop[5][2] = [ _
@@ -43,7 +43,7 @@ Global $CharrPortalPathLoop[5][2] = [ _
     [-5409, 11872], _
     [-5497, 13166], _
     [-5572.39, 14130.93] _
-]
+    ]
 
 ; After charr farming, run back to the portal.
 Global $RunBackPath[5][2] = [ _
@@ -52,11 +52,11 @@ Global $RunBackPath[5][2] = [ _
     [-11811, -9887], _
     [-13022, -11138], _
     [-12626, -12638] _
-]
+    ]
 
 Func Farm_CharrBossFarm()
-    Local $CharrCarvings[1][2] = [[423, "Charr Carvings"]] 
-    
+    Local $CharrCarvings[1][2] = [[423, "Charr Carvings"]]
+
     $CharrBossFarm = True ; Set this to 'True' if you only want to farm charr bosses, if 'False' will pickup all collectibles.
     InitialSetup()
 
@@ -66,17 +66,17 @@ Func Farm_CharrBossFarm()
             ResetStart()
             Return
         EndIf
-        
+
         If Not $hasBonus Then GetBonus()
- 
+
         While CountSlots() >= $minCharrSlots
             If Not $BotRunning Then
-              If Not $NickRun And Not $TwoFiddy Then
-                ResetStart()
-              EndIf
-              Return
+                If Not $NickRun And Not $TwoFiddy Then
+                    ResetStart()
+                EndIf
+                Return
             EndIf
-            
+
             If Map_GetMapID() <> 148 Then
                 RndTravel(148)
             EndIf
@@ -85,21 +85,21 @@ Func Farm_CharrBossFarm()
 
             While CountSlots() >= $minCharrSlots
                 If $NickRun Or $TwoFiddy Then
-                  Local $currentCount = GetItemCountByModelID($CharrCarvings[0][0])
-                  Local $targetCount, $msg
-    
-                  If $NickRun Then
-                    $targetCount = 25
-                    $msg = "Nicholas farm goal reached! "
-                  ElseIf $TwoFiddy Then
-                    $targetCount = 250
-                    $msg = "You got that mad stack brother! "
-                  EndIf
-    
-                  If $currentCount >= $targetCount Then
-                    LogInfo($msg & "Collected " & $currentCount & " " & $CharrCarvings[0][1])
-                    Return
-                  EndIf
+                    Local $currentCount = GetItemCountByModelID($CharrCarvings[0][0])
+                    Local $targetCount, $msg
+
+                    If $NickRun Then
+                        $targetCount = 25
+                        $msg = "Nicholas farm goal reached! "
+                    ElseIf $TwoFiddy Then
+                        $targetCount = 250
+                        $msg = "You got that mad stack brother! "
+                    EndIf
+
+                    If $currentCount >= $targetCount Then
+                        LogInfo($msg & "Collected " & $currentCount & " " & $CharrCarvings[0][1])
+                        Return
+                    EndIf
                 EndIf
 
                 If Not CharrCombatLoop() Then ExitLoop
@@ -116,7 +116,7 @@ Func RunToGate() ; Exit and run to the charr gate
 EndFunc
 
 Func OpenGate() ; Pull lever until we get to the Northlands
-    
+
     If Map_GetMapID() <> 146 Then Return ; Keep track of where we are - Failsafe(Should be in Lakeside Country)
 
     Do
@@ -147,13 +147,13 @@ EndFunc
 
 Func CharrCombatLoop() ; Combat loop for charr bosses
     If Not $BotRunning Then Return False
-    
+
     OpenGate()
-    
+
     If Map_GetMapID() <> 147 Then Return False ; Keep track of where we are - Failsafe(Should be in the Northlands)
 
     LogInfo("Arrived in the Northlands, time to burn some furr.")
-    
+
     $RunTime = TimerInit()
 
     UseSummoningStone()
@@ -186,7 +186,7 @@ Func CharrCombatLoop() ; Combat loop for charr bosses
         UpdateStats()
         Return False
     EndIf
-    
+
     LogInfo("Run complete. Running back to portal...")
     UpdateStats()
 
@@ -271,13 +271,13 @@ Func InitialSetup()
     EndSwitch
 EndFunc
 
-Func FirstGroupEmo()    
+Func FirstGroupEmo()
     LogInfo("Clearing first group of charr...")
-    
+
     MoveUpkeepEx(-10469.5, -7268.5, $gUpkeepSkills)
 
     Local $target = GetNearestCharrToAgent(-2)
-    
+
     If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
         Agent_Attack($target)
     EndIf
@@ -319,7 +319,7 @@ Func GrawlEmo()
 
     $timer = TimerInit()
 
-    Do 
+    Do
         StayAlive()
     Until GetNumberOfFoesInRangeOfAgent(-2, 1800) > 0 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime - 105000
 
@@ -376,11 +376,11 @@ Func SecondGroupEmo()
 
     MoveUpkeepEx(-4128.60, -3726.73, $gUpkeepSkills)
     MoveUpkeepEx(-3020.96, -3535.49, $gUpkeepSkills)
-    
+
     If GetPartyDead() Then Return False
-    
+
     LogInfo("Waiting for second group of charr...")
-    
+
     $timer = TimerInit()
 
     Do
@@ -409,7 +409,7 @@ Func SecondGroupNecro()
     EndIf
 
     If GetPartyDead() Then Return False
-    
+
     Return True
 EndFunc
 
@@ -422,9 +422,9 @@ Func LeftCornerEmo()
     Do
         StayAlive()
     Until GetNumberOfCharrInRangeOfAgent(-2, 1500) > 2 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime
-    
+
     If GetPartyDead() Then Return False
-    
+
     Local $target = GetNearestCharrToAgent(-2)
 
     If Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_WAND Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_STAFF Or Agent_GetAgentInfo(-2, "WeaponItemType") == $GC_I_TYPE_BOW Then
@@ -448,7 +448,7 @@ Func LeftCornerNecro()
     $timer = TimerInit()
 
     LogInfo("Waiting for left corner group...")
-    
+
     Do
         StayAlive()
     Until GetNumberOfCharrInRangeOfAgent(-2, 1500) > 2 Or GetPartyDead() Or TimerDiff($timer) > $enemyKillTime
@@ -472,7 +472,7 @@ Func BossesEmo()
     Local $SmokeSkin = 1452
 
     MoveUpkeepEx(-891.72, -3335.87, $gUpkeepSkills)
-    
+
     $timer = TimerInit()
 
     Do
@@ -496,12 +496,12 @@ Func BossesEmo()
         Sleep(250)
         PickUpLootInRange(1800, -1283.85, -3241.65)
     EndIf
-    
+
     If GetPartyDead() Then Return False
 EndFunc
 
 Func BossesNecro()
-Local $SmokeSkin = 1452
+    Local $SmokeSkin = 1452
     Local $timer
 
     MoveUpkeepEx(-891.72, -3335.87, $gUpkeepSkills)

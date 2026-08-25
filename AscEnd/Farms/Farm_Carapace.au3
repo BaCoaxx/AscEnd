@@ -2,11 +2,11 @@
 
 #cs ----------------------------------------------------------------------------
 
-     AutoIt Version: 3.3.18.0
-     Author:         Coaxx
+    AutoIt Version: 3.3.18.0
+    Author:         Coaxx
 
-     Script Function:
-        Dull Carapace Farm - Pre Searing
+    Script Function:
+    Dull Carapace Farm - Pre Searing
 
 #ce ----------------------------------------------------------------------------
 
@@ -21,12 +21,12 @@ Global $CarapaceSetup[10][2] = [ _
     [1956, -18115], _
     [3914, -19674], _
     [4143, -19758] _
-]
+    ]
 
 Global $CarapacePath1[2][2] = [ _
     [-14918, 15433], _
     [-15188, 14815] _
-]
+    ]
 
 Global $CarapaceFarm[11][2] = [ _
     [-15358, 14551], _
@@ -40,7 +40,7 @@ Global $CarapaceFarm[11][2] = [ _
     [-17312, 1740], _
     [-15768, 69], _
     [-15382, 646] _
-]
+    ]
 
 Global $CarapacePath2[16][2] = [ _
     [-16339, 671], _
@@ -59,46 +59,46 @@ Global $CarapacePath2[16][2] = [ _
     [-15536, 14213], _
     [-15003, 15083], _
     [-14748, 15998] _
-]
+    ]
 
 Func Farm_Carapace()
-    Local $Carapace[1][2] = [[425, "Dull Carapaces"]] 
-    
+    Local $Carapace[1][2] = [[425, "Dull Carapaces"]]
+
     While 1
         If CountSlots() < $invCheck Then InventoryPre()
         If Not $BotRunning Then
             ResetStart()
             Return
         EndIf
-        
+
         If Not $hasBonus Then GetBonus()
-        
+
         CarapaceSetup()
 
         While CountSlotS() >= $minRegSlots
             If Not $BotRunning Then
-              If Not $NickRun And Not $TwoFiddy Then
-                ResetStart()
-              EndIf
-              Return
+                If Not $NickRun And Not $TwoFiddy Then
+                    ResetStart()
+                EndIf
+                Return
             EndIf
 
             If $NickRun Or $TwoFiddy Then
-              Local $currentCount = GetItemCountByModelID($Carapace[0][0])
-              Local $targetCount, $msg
+                Local $currentCount = GetItemCountByModelID($Carapace[0][0])
+                Local $targetCount, $msg
 
-              If $NickRun Then
-                $targetCount = 25
-                $msg = "Nicholas farm goal reached! "
-              ElseIf $TwoFiddy Then
-                $targetCount = 250
-                $msg = "You got that mad stack brother! "
-              EndIf
+                If $NickRun Then
+                    $targetCount = 25
+                    $msg = "Nicholas farm goal reached! "
+                ElseIf $TwoFiddy Then
+                    $targetCount = 250
+                    $msg = "You got that mad stack brother! "
+                EndIf
 
-              If $currentCount >= $targetCount Then
-                LogInfo($msg & "Collected " & $currentCount & " " & $Carapace[0][1])
-                Return
-              EndIf
+                If $currentCount >= $targetCount Then
+                    LogInfo($msg & "Collected " & $currentCount & " " & $Carapace[0][1])
+                    Return
+                EndIf
             EndIf
 
             Carapace()
@@ -127,13 +127,13 @@ Func CarapaceSetup()
     EndIf
 
     ExitAshford()
-    
+
     Sleep(1000)
 
     LogInfo("Rumour has it, Sarah is out looking for Myrtle Weed again. Fifth time this week!")
     RunTo($CarapaceSetup)
     LogInfo("Oh Mr Twindle, if only she knew...")
-    
+
     Sleep(500)
 EndFunc
 
@@ -148,27 +148,27 @@ Func Carapace()
     $RunTime = TimerInit()
 
     LogInfo("I wish I could hold onto this moment, like a leaf clinging to a branch.")
-    
+
     UseSummoningStone()
     Cache_SkillBar()
-    
+
     RunTo($CarapacePath1)
     LogInfo("Crunchy underfoot. I should probably tread lighter.")
 
     If GetPartyDead() Or SurvivorMode() Then Return
-    
+
     RunToCarapace($CarapaceFarm)
     LogInfo("They fall so easily. Guess everything does, eventually...")
-    
+
     If GetPartyDead() Or SurvivorMode() Then Return
 
     RunTo($CarapacePath2)
     LogInfo("Autumn is nature's way of reminding us that letting go can be beautiful.")
 
     If GetPartyDead() Or SurvivorMode() Then Return
-    
+
     Other_RndSleep(250)
-    
+
     LogInfo("Run complete. Restarting...")
     UpdateStats()
     Sleep(1000)
