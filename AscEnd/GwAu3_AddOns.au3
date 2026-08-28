@@ -1588,13 +1588,15 @@ Func FindIdentificationKit()
         For $j = 1 To Item_GetBagInfo(Item_GetBagPtr($i), 'Slots')
             $lItemPtr = Item_GetItemBySlot($i, $j)
             Switch Item_GetItemInfoByPtr($lItemPtr, 'ModelID')
-                Case 2989
+                Case $InfIDKit
+                    Return $lItemPtr
+                Case $NormalIDKit
                     If Item_GetItemInfoByPtr($lItemPtr, 'Value') / 2 < $lUses Then
                         $lKit = Item_GetItemInfoByPtr($lItemPtr, 'ItemID')
                         $lUses = Item_GetItemInfoByPtr($lItemPtr, 'Value') / 2
                         $lKitPtr = $lItemPtr
                     EndIf
-                Case 5899
+                Case $SupIDKit
                     If Item_GetItemInfoByPtr($lItemPtr, 'Value') / 2.5 < $lUses Then
                         $lKit = Item_GetItemInfoByPtr($lItemPtr, 'ItemID')
                         $lUses = Item_GetItemInfoByPtr($lItemPtr, 'Value') / 2.5
@@ -2293,6 +2295,7 @@ Func IsSpecialItem($aItem)
             Return True ;Gifts of the Huntsman
         Case 38614, 38613
             Return True ; Compass & Rations
+        Case $NormalIDKit, $InfIDKit
     EndSwitch
     Return False
 EndFunc   ;==> IsSpecialItem
@@ -3407,6 +3410,7 @@ Global Const $ExpertSalvKit = 2991
 Global Const $Ectoplasm_ID = 930
 Global Const $CharrSalvKit = 18721
 Global Const $NormalIDKit = 2989
+Global Const $InfIDKit = 38620
 
 ;~ Coordinates
 Global $coords[2]
