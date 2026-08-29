@@ -1146,7 +1146,7 @@ Func NickFilter($aAgentPtr)
     If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 6 Then Return False
     If Agent_GetAgentInfo($aAgentPtr, 'HP') <= 0 Then Return False
     If Agent_GetAgentInfo($aAgentPtr, 'IsDead') > 0 Then Return False
-    If Agent_GetAgentInfo($aAgentPtr, 'PlayerNumber') <> 7710 Then Return False
+    If Agent_GetAgentInfo($aAgentPtr, 'PlayerNumber') <> 7711 Then Return False
 
     Return True
 EndFunc   ;==>NickFilter
