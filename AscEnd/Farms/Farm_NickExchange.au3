@@ -123,6 +123,8 @@ Func NickExchange()
 
     Local $GiftCountBefore = GetItemCountByModelID($GC_I_MODELID_GIFT_OF_THE_HUNTSMAN)
     Local $Exchanged = False
+    Local $RetryLimit = 5
+    Local $Retry = 0
     
     Do
         Sleep(500)
@@ -146,9 +148,10 @@ Func NickExchange()
             $Exchanged = True
         Else
             LogWarn("Stop yakking!")
+            $Retry += 1
         EndIf
 
-    Until $Exchanged = True
+    Until $Exchanged = True Or $Retry >= $RetryLimit
 
     LogInfo("Nicholas Sandford exchange completed!")
     LogStatus("Bot will now pause...")
