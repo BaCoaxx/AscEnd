@@ -121,21 +121,36 @@ Func NickExchange()
         Return
     EndIf
 
-    Sleep(500)
-    Agent_GoNPC(GetNick())
-    Sleep(500)
-    Ui_Dialog(0x85)
-    Sleep(500)
+    Local $GiftCountBefore = GetItemCountByModelID($GC_I_MODELID_GIFT_OF_THE_HUNTSMAN)
+    Local $Exchanged = False
+    
+    Do
+        Sleep(500)
+        Agent_GoNPC(GetNick())
+        Sleep(500)
+        Ui_Dialog(0x85)
+        Sleep(500)
+    
+        If $ExchangeCount = 1 Then
+            Ui_Dialog(0x84)
+        Else
+            Ui_Dialog(0x86)
+        EndIf
+    
+        Sleep(1000)
 
-    If $ExchangeCount = 1 Then
-        Ui_Dialog(0x84)
-    Else
-        Ui_Dialog(0x86)
-    EndIf
+        Local $GiftCountAfter = GetItemCountByModelID($GC_I_MODELID_GIFT_OF_THE_HUNTSMAN)
 
-    Sleep(1000)
+        If $GiftCountAfter > $GiftCountBefore Then
+            LogInfo("Gifts received!")
+            $Exchanged = True
+        Else
+            LogWarn("Stop yakking!")
+        EndIf
 
-    LogInfo("Nichalos Sandford exchange completed!")
+    Until $Exchanged = True
+
+    LogInfo("Nicholas Sandford exchange completed!")
     LogStatus("Bot will now pause...")
     $BotRunning = False
     Return
