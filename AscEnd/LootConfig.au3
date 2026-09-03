@@ -256,7 +256,7 @@ Func LootSettings_Apply()
     IniWrite($sIniFile, "Pickup", "Coll", $isCollPickup ? "1" : "0")
     IniWrite($sIniFile, "Sell",   "Coll", $isCollSell ? "1" : "0")
 
-    LogStatus("Loot configuration applied and saved.")
+    LogStatus("Loot configuration applied and saved." & @CRLF)
 
     GUISetState(@SW_HIDE, $LootGui)
 EndFunc
