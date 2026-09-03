@@ -311,7 +311,7 @@ Func ModSelector_Apply()
         EndIf
     Next
     RareMods_SaveToIni()
-    LogStatus("Mods configuration applied and saved.")
+    LogStatus("Mods configuration applied and saved." & @CRLF)
     GUISetState(@SW_HIDE, $g_hModSelectorGui)
 EndFunc
 
