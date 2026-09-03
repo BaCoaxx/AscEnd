@@ -58,7 +58,10 @@ Func Farm_CharrBossFarm()
     Local $CharrCarvings[1][2] = [[423, "Charr Carvings"]]
 
     $CharrBossFarm = True ; Set this to 'True' if you only want to farm charr bosses, if 'False' will pickup all collectibles.
-    InitialSetup()
+    If Not InitialSetup() Then
+        ResetStart()
+        Return
+    EndIf
 
     While 1
         If CountSlots() < $invCheck Then InventoryPre()
@@ -251,6 +254,7 @@ Func InitialSetup()
             Sleep(250)
             $gUpkeepSkills = $EmoUpkeep
             Sleep(1500)
+            Return True
         Case 42
             LogInfo("Loading N/R upkeep skills and build...")
             Sleep(500)
@@ -258,12 +262,12 @@ Func InitialSetup()
             Sleep(250)
             $gUpkeepSkills = $NecroUpKeep
             Sleep(1500)
+            Return True
         Case Else
             LogWarn("We do not have a viable build setup for your profession.")
             LogStatus("Bot will now pause.")
             $BotRunning = False
-            ResetStart()
-            Return
+            Return False
     EndSwitch
 EndFunc
 
