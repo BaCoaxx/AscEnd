@@ -362,68 +362,68 @@ Func _UAI_Fight($a_f_x, $a_f_y, $a_f_AggroRange = 1320, $a_f_MaxDistanceToXY = 3
     $a_v_PlayerNumber = 0, $a_b_KillOnly = False, _
     $a_s_ExitCallback = "", $a_i_CallTargetMode = $GC_UAI_TARGET_MODE_CALL)
 
-$g_i_BestTarget = 0
-$g_i_ForceTarget = 0
-$g_i_AttackTarget = 0
-$g_i_LastCalledTarget = 0
-$g_i_FightMode = $a_i_FightMode
-$g_b_CacheWeaponSet = $a_b_SwitchWeaponSets
-$g_i_TargetMode = $a_i_CallTargetMode
-$g_v_AvoidPlayerNumbers = -1
-
-Local $l_i_MyOldMap = Map_GetMapID(), $l_i_MapLoadingOld = Map_GetInstanceInfo("Type")
-Local $l_v_PriorityTargets = 0
-
-If IsArray($a_v_PlayerNumber) Then
-    Local $l_a_Prio[UBound($a_v_PlayerNumber)]
-    Local $l_a_Avoid[UBound($a_v_PlayerNumber)]
-    Local $l_i_PC = 0, $l_i_AC = 0
-    For $j = 0 To UBound($a_v_PlayerNumber) - 1
-        If $a_v_PlayerNumber[$j] > 0 Then
-            $l_a_Prio[$l_i_PC] = $a_v_PlayerNumber[$j]
-            $l_i_PC += 1
-        ElseIf $a_v_PlayerNumber[$j] < 0 Then
-            $l_a_Avoid[$l_i_AC] = Abs($a_v_PlayerNumber[$j])
-            $l_i_AC += 1
+    $g_i_BestTarget = 0
+    $g_i_ForceTarget = 0
+    $g_i_AttackTarget = 0
+    $g_i_LastCalledTarget = 0
+    $g_i_FightMode = $a_i_FightMode
+    $g_b_CacheWeaponSet = $a_b_SwitchWeaponSets
+    $g_i_TargetMode = $a_i_CallTargetMode
+    $g_v_AvoidPlayerNumbers = -1
+    
+    Local $l_i_MyOldMap = Map_GetMapID(), $l_i_MapLoadingOld = Map_GetInstanceInfo("Type")
+    Local $l_v_PriorityTargets = 0
+    
+    If IsArray($a_v_PlayerNumber) Then
+        Local $l_a_Prio[UBound($a_v_PlayerNumber)]
+        Local $l_a_Avoid[UBound($a_v_PlayerNumber)]
+        Local $l_i_PC = 0, $l_i_AC = 0
+        For $j = 0 To UBound($a_v_PlayerNumber) - 1
+            If $a_v_PlayerNumber[$j] > 0 Then
+                $l_a_Prio[$l_i_PC] = $a_v_PlayerNumber[$j]
+                $l_i_PC += 1
+            ElseIf $a_v_PlayerNumber[$j] < 0 Then
+                $l_a_Avoid[$l_i_AC] = Abs($a_v_PlayerNumber[$j])
+                $l_i_AC += 1
+            EndIf
+        Next
+        If $l_i_PC > 0 Then
+            ReDim $l_a_Prio[$l_i_PC]
+            $l_v_PriorityTargets = $l_a_Prio
         EndIf
-    Next
-    If $l_i_PC > 0 Then
-        ReDim $l_a_Prio[$l_i_PC]
-        $l_v_PriorityTargets = $l_a_Prio
+        If $l_i_AC > 0 Then
+            ReDim $l_a_Avoid[$l_i_AC]
+            $g_v_AvoidPlayerNumbers = $l_a_Avoid
+        EndIf
+    ElseIf $a_v_PlayerNumber > 0 Then
+        $l_v_PriorityTargets = $a_v_PlayerNumber
+    ElseIf $a_v_PlayerNumber < 0 Then
+        $g_v_AvoidPlayerNumbers = Abs($a_v_PlayerNumber)
     EndIf
-    If $l_i_AC > 0 Then
-        ReDim $l_a_Avoid[$l_i_AC]
-        $g_v_AvoidPlayerNumbers = $l_a_Avoid
-    EndIf
-ElseIf $a_v_PlayerNumber > 0 Then
-    $l_v_PriorityTargets = $a_v_PlayerNumber
-ElseIf $a_v_PlayerNumber < 0 Then
-    $g_v_AvoidPlayerNumbers = Abs($a_v_PlayerNumber)
-EndIf
-
-Local $l_b_HasPriority = IsArray($l_v_PriorityTargets) Or $l_v_PriorityTargets <> 0
-
-If $l_b_HasPriority Then
-    UAI_UpdateAgentCache($a_f_AggroRange)
-    $g_i_ForceTarget = UAI_FindAgentByPlayerNumber($l_v_PriorityTargets, -2, $a_f_AggroRange, "UAI_Filter_IsLivingEnemy")
-    If $g_i_ForceTarget = 0 And $a_b_KillOnly Then Return True
-EndIf
-
-If $g_b_CacheWeaponSet Then UAI_DetermineWeaponSets()
-
-Do
-    If SurvivorMode() Then Return
-    If Agent_GetDistanceToXY($a_f_x, $a_f_y) > $a_f_AggroRange Then ExitLoop
-    If $g_i_ForceTarget <> 0 And UAI_GetAgentInfoByID($g_i_ForceTarget, $GC_UAI_AGENT_IsDead) Then
+    
+    Local $l_b_HasPriority = IsArray($l_v_PriorityTargets) Or $l_v_PriorityTargets <> 0
+    
+    If $l_b_HasPriority Then
+        UAI_UpdateAgentCache($a_f_AggroRange)
         $g_i_ForceTarget = UAI_FindAgentByPlayerNumber($l_v_PriorityTargets, -2, $a_f_AggroRange, "UAI_Filter_IsLivingEnemy")
-        If $g_i_ForceTarget = 0 And $a_b_KillOnly Then ExitLoop
+        If $g_i_ForceTarget = 0 And $a_b_KillOnly Then Return True
     EndIf
-    If $g_i_TargetMode = $GC_UAI_TARGET_MODE_FOLLOW Then
-        Local $l_i_FollowTarget = UAI_GetPartyCalledTarget()
-        If $l_i_FollowTarget <> 0 Then $g_i_ForceTarget = $l_i_FollowTarget
-    EndIf
-    _UAI_UseSkills($a_f_x, $a_f_y, $a_f_AggroRange, $a_f_MaxDistanceToXY)
-Until UAI_CountEnemyInPartyAggroRange($a_f_AggroRange) = 0 Or Agent_GetAgentInfo(-2, "IsDead") Or Party_IsWiped() Or Map_GetMapID() <> $l_i_MyOldMap Or Map_GetInstanceInfo("Type") <> $l_i_MapLoadingOld Or ($a_s_ExitCallback <> "" And Call($a_s_ExitCallback))
+    
+    If $g_b_CacheWeaponSet Then UAI_DetermineWeaponSets()
+
+    Do
+        If SurvivorMode() Then Return
+        If Agent_GetDistanceToXY($a_f_x, $a_f_y) > $a_f_AggroRange Then ExitLoop
+        If $g_i_ForceTarget <> 0 And UAI_GetAgentInfoByID($g_i_ForceTarget, $GC_UAI_AGENT_IsDead) Then
+            $g_i_ForceTarget = UAI_FindAgentByPlayerNumber($l_v_PriorityTargets, -2, $a_f_AggroRange, "UAI_Filter_IsLivingEnemy")
+            If $g_i_ForceTarget = 0 And $a_b_KillOnly Then ExitLoop
+        EndIf
+        If $g_i_TargetMode = $GC_UAI_TARGET_MODE_FOLLOW Then
+            Local $l_i_FollowTarget = UAI_GetPartyCalledTarget()
+            If $l_i_FollowTarget <> 0 Then $g_i_ForceTarget = $l_i_FollowTarget
+        EndIf
+        _UAI_UseSkills($a_f_x, $a_f_y, $a_f_AggroRange, $a_f_MaxDistanceToXY)
+    Until UAI_CountEnemyInPartyAggroRange($a_f_AggroRange) = 0 Or Agent_GetAgentInfo(-2, "IsDead") Or Party_IsWiped() Or Map_GetMapID() <> $l_i_MyOldMap Or Map_GetInstanceInfo("Type") <> $l_i_MapLoadingOld Or ($a_s_ExitCallback <> "" And Call($a_s_ExitCallback))
 EndFunc   ;==>_UAI_Fight
 
 Func _UAI_UseSkills($a_f_x, $a_f_y, $a_f_AggroRange = 1320, $a_f_MaxDistanceToXY = 3500)
