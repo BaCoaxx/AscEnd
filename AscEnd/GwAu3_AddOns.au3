@@ -1486,12 +1486,14 @@ Func InventoryPre()
     MerchantAscalonPre()
     Sleep(2000)
 
-    If GetGoldCharacter() < 100 Or CountSlots() < 1 Then
-        LogWarn("Selling common items to get 100 gold minimum, and free inventory space.")
-        For $i = 1 To 4
-            PreSell($i)
-            If GetGoldCharacter() >= 100 And CountSlots() >= 1 Then ExitLoop
-        Next
+    If FindIdentificationKit() = 0 Then
+        If GetGoldCharacter() < 100 Or CountSlots() < 1 Then
+            LogWarn("Selling common items to get 100 gold minimum, and free inventory space.")
+            For $i = 1 To 4
+                PreSell($i)
+                If GetGoldCharacter() >= 100 And CountSlots() >= 1 Then ExitLoop
+            Next
+        EndIf
     EndIf
 
     If GetGoldCharacter() >= 100 And CountSlots() >= 1 Then
