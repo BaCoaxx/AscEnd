@@ -1509,6 +1509,9 @@ Func InventoryPre()
     ElseIf GetGoldCharacter() < 100 Then
         LogError("Not enough gold to buy ID kit, returning...")
         Return
+    ElseIf CountSlots() < 1 Then
+        LogError("No free slot to buy ID kit, returning...")
+        Return
     EndIf
 
     If CountSlots() < $minCharrSlots And $CharrBossFarm Then
