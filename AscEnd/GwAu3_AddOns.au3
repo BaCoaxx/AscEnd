@@ -1496,7 +1496,7 @@ Func InventoryPre()
         EndIf
     EndIf
 
-    If GetGoldCharacter() >= 100 And CountSlots() >= 1 Then
+    If FindIdentificationKit() <> 0 Or (GetGoldCharacter() >= 100 And CountSlots() >= 1) Then
         LogInfo("Identifying items..")
         For $i = 1 To 4
             Ident($i)
