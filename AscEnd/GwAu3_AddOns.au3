@@ -1753,7 +1753,7 @@ Func PreSell($BagIndex)
             Merchant_SellItem($aItemPtr)
         EndIf
         Sleep(250)
-        If GetGoldCharacter() >= 100 Then Return
+        If GetGoldCharacter() >= 100 And CountSlots() >= 1 Then Return
     Next
 EndFunc   ;==> PreSell
 
