@@ -119,6 +119,8 @@ Func Hamnet()
 
     If SurvivorMode() Or GetPartyDead() Then
         LogError("Run failed. Restarting...")
+        UpdateStats()
+        Return
     EndIf
 
     LogInfo("Run complete. Restarting...")
