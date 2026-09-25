@@ -55,7 +55,6 @@ Global $RunBackPath[5][2] = [ _
     ]
 
 Func Farm_CharrBossFarm()
-
     $CharrBossFarm = True ; Set this to 'True' if you only want to farm charr bosses, if 'False' will pickup all collectibles.
     If Not InitialSetup() Then
         ResetStart()
