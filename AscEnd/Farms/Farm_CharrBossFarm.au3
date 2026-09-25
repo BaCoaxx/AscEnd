@@ -87,24 +87,6 @@ Func Farm_CharrBossFarm()
             RunToGate()
 
             While CountSlots() >= $minCharrSlots
-                If $NickRun Or $TwoFiddy Then
-                    Local $currentCount = GetItemCountByModelID($CharrCarvings[0][0])
-                    Local $targetCount, $msg
-
-                    If $NickRun Then
-                        $targetCount = 25
-                        $msg = "Nicholas farm goal reached! "
-                    ElseIf $TwoFiddy Then
-                        $targetCount = 250
-                        $msg = "You got that mad stack brother! "
-                    EndIf
-
-                    If $currentCount >= $targetCount Then
-                        LogInfo($msg & "Collected " & $currentCount & " " & $CharrCarvings[0][1])
-                        Return
-                    EndIf
-                EndIf
-
                 If Not CharrCombatLoop() Then ExitLoop
             WEnd
         WEnd
