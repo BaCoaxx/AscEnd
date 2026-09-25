@@ -74,7 +74,9 @@ Func Farm_CharrBossFarm()
 
         While CountSlots() >= $minCharrSlots
             If Not $BotRunning Then
-                ResetStart()
+                If Not $NickRun And Not $TwoFiddy Then
+                    ResetStart()
+                EndIf
                 Return
             EndIf
 
