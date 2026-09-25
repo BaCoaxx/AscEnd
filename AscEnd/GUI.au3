@@ -98,8 +98,8 @@ Global $g_aNicholasFarmMap[13][2] = [ _
     [425, "Farm_Carapace"], _
     [2994, "Farm_RedIris"], _
     [422, "Farm_SpiderLegs"], _
-    [427, "Farm_WornBelts"], _
-    [423, "Farm_CharrBossFarm"] _
+    [423, "Farm_CharrBossFarm"], _
+    [427, "Farm_WornBelts"] _
     ]
 
 Global Const $NICHOLAS_EPOCH = "2026/03/25 07:00:00"
