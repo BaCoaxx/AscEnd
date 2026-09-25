@@ -86,7 +86,7 @@ Global $aNicholasItems[52][2] = [ _
     [425, "Dull Carapaces"] _        ; Day 51
     ]
 
-Global $g_aNicholasFarmMap[13][2] = [ _
+Global $g_aNicholasFarmMap[12][2] = [ _
     [432, "Farm_GrawlNecklace"], _
     [433, "Farm_BakedHusk"], _
     [430, "Farm_SkeletonLimbs"], _
@@ -98,7 +98,6 @@ Global $g_aNicholasFarmMap[13][2] = [ _
     [425, "Farm_Carapace"], _
     [2994, "Farm_RedIris"], _
     [422, "Farm_SpiderLegs"], _
-    [423, "Farm_CharrBossFarm"], _
     [427, "Farm_WornBelts"] _
     ]
 
