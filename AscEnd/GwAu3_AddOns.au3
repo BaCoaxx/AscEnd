@@ -1009,7 +1009,7 @@ EndFunc   ;==>NecroKill
 
 Global $CharrFilter[12] = [1450, 1451, 1453, 1638, 1640, 1643, 1648, 1652, 1654, 1656, 1658, 1662]
 
-Global $BanditFilter[10] = [1420, 1421, 1422, 1423, 7824, 7825, 7839, 7840, 7857, 7858]
+Global $BanditFilter[10] = [1420, 1421, 1422, 1423, 8591, 8592, 8606, 8607, 8624, 8625]
 
 Global $SpiderAloeFilter[5] = [1401, 1403, 1426, 1428, 1429]
 
@@ -1099,7 +1099,7 @@ Func BanditFilter($aAgentPtr)
     If Agent_GetAgentInfo($aAgentPtr, 'IsDead') > 0 Then Return False
 
     Local $ModelID = Agent_GetAgentInfo($aAgentPtr, 'PlayerNumber')
-    Local $BanditModelIDs[10] = [1420, 1421, 1422, 1423, 7824, 7825, 7839, 7840, 7857, 7858] ; Array of bandit model IDs
+    Local $BanditModelIDs[10] = [1420, 1421, 1422, 1423, 8591, 8592, 8606, 8607, 8624, 8625] ; Array of bandit model IDs
     Local $IsBandit = False
     For $i = 0 To UBound($BanditModelIDs) - 1
         If $ModelID == $BanditModelIDs[$i] Then
@@ -1146,7 +1146,7 @@ Func NickFilter($aAgentPtr)
     If Agent_GetAgentInfo($aAgentPtr, 'Allegiance') <> 6 Then Return False
     If Agent_GetAgentInfo($aAgentPtr, 'HP') <= 0 Then Return False
     If Agent_GetAgentInfo($aAgentPtr, 'IsDead') > 0 Then Return False
-    If Agent_GetAgentInfo($aAgentPtr, 'PlayerNumber') <> 7711 Then Return False
+    If Agent_GetAgentInfo($aAgentPtr, 'PlayerNumber') <> 8478 Then Return False
 
     Return True
 EndFunc   ;==>NickFilter
