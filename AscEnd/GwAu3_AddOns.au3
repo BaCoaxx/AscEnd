@@ -1410,6 +1410,8 @@ Func CanPickUp($aItemPtr)
         Return True
     ElseIf IsPcon($aItemPtr) Then ; ==== Pcons ==== or all event items
         Return $isPconsPickup
+	ElseIf IsSpecialItem($aItemPtr) Then ; ==== Special Items ==== Tot bags etc..
+        Return True
     ElseIf IsRareMaterial($aItemPtr) Then    ; Rare Mats
         Return False
     ElseIf $lModelID == $CharrSalvKit Then
